@@ -1,0 +1,22 @@
+[book]
+title = "Руководство по ремонту Renault Symbol"
+authors = ["mi"]
+language = "ru"
+src = "src"
+
+[output.html]
+no-section-label = true
+git-repository-url = "https://github.com/ZDarow/K_I_L_O"
+default-theme = "light"
+preferred-dark-theme = "ayu"
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 15
+use-boolean-and = true
+
+[output.html.playground]
+runnable = false
+
+[preprocessor]
