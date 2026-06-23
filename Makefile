@@ -67,7 +67,7 @@ docker-run:
 ## Сборка PDF (требует mdbook-pdf + chromium)
 pdf:
 	$(MDBOOK) build $(BOOK_DIR)
-	@echo "📄 PDF собран: $(BUILD_DIR)/book.pdf"
+	@echo "PDF собран: $(PDF_DIR)/output.pdf"
 
 # GitHub Pages
 
