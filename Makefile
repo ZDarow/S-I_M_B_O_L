@@ -37,9 +37,14 @@ check-links:
 	@echo "Проверка ссылок..."
 	cargo install linkcheck 2>/dev/null; linkcheck $(BUILD_DIR) 2>/dev/null || true
 
-## Валидация: сборка + проверки
-validate: build spellcheck
-	@echo "✅ Валидация пройдена"
+## Линтинг Markdown (требует markdownlint-cli)
+lint:
+	@echo "Проверка Markdown-стиля..."
+	markdownlint '$(SRC_DIR)/**/*.md' -c .markdownlint.yaml || true
+
+## Валидация: сборка + линтинг + проверки
+validate: build lint spellcheck
+	@echo "Валидация пройдена"
 
 ## Установка зависимостей (Linux)
 install-deps:
@@ -92,7 +97,8 @@ help:
 	@echo "  build       — собрать книгу (по умолчанию)"
 	@echo "  serve       — локальный сервер с livereload"
 	@echo "  clean       — очистить сборку"
-	@echo "  validate    — сборка + проверка орфографии"
+	@echo "  validate    — сборка + линтинг + орфография"
+	@echo "  lint        — линтинг Markdown (markdownlint)"
 	@echo "  spellcheck  — проверка орфографии (hunspell)"
 	@echo "  check-links — проверка битых ссылок"
 	@echo "  dist        — упаковать архив"

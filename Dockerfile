@@ -26,8 +26,11 @@ RUN mdbook build
 
 # Финальный образ — HTML + PDF
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates && \
+    adduser -D -H -h /output nobody
 COPY --from=builder /book/book /output
+RUN chown -R nobody:nobody /output
 
+USER nobody
+VOLUME ["/output"]
 CMD ["cp", "-r", "/output/.", "/book-output"]
-VOLUME ["/book-output"]
