@@ -6,7 +6,7 @@ src = "src"
 
 [output.html]
 no-section-label = true
-git-repository-url = "https://github.com/ZDarow/K_I_L_O"
+git-repository-url = "https://github.com/mi/reno-symbol.ru"
 default-theme = "light"
 preferred-dark-theme = "ayu"
 
