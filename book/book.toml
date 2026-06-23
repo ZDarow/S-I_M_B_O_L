@@ -24,5 +24,6 @@ runnable = false
 [output.pdf]
 chrome = "chromium"
 no-sandbox = true
+additional-css = ["./theme/pdf.css"]
 
 [preprocessor]

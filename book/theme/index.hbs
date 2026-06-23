@@ -18,7 +18,8 @@
         <meta name="description" content="{{ description }}">
         <meta name="yandex-verification" content="60d8eef340d23018" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff">
+        <meta name="theme-color" content="#1565c0">
+        <link rel="manifest" href="{{ path_to_root }}theme/manifest.json">
 
         {{#if favicon_svg}}
         <link rel="icon" href="{{ resource "favicon.svg" }}">
@@ -364,5 +365,15 @@
         {{/if}}
 
     </div>
+
+    <!-- PWA: Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('{{ path_to_root }}theme/sw.js');
+            });
+        }
+    </script>
+
     </body>
 </html>
