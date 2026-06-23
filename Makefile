@@ -3,9 +3,11 @@
 MDBOOK := mdbook
 BOOK_DIR := book
 BUILD_DIR := $(BOOK_DIR)/book
+HTML_DIR := $(BUILD_DIR)/html
+PDF_DIR := $(BUILD_DIR)/pdf
 SRC_DIR := $(BOOK_DIR)/src
 
-.PHONY: all build serve clean validate docker-build docker-run pdf install-deps lint
+.PHONY: all build serve clean validate docker-build docker-run pdf epub install-deps lint
 
 all: build
 
@@ -49,8 +51,8 @@ install-deps:
 
 ## Упаковка архива для распространения
 dist: build
-	tar czf reno-symbol-book-$$(date +%Y%m%d).tar.gz -C $(BUILD_DIR) .
-	@echo "📦 Архив готов: reno-symbol-book-$$(date +%Y%m%d).tar.gz"
+	tar czf reno-symbol-book-$$(date +%Y%m%d).tar.gz -C $(HTML_DIR) .
+	@echo "Архив готов: reno-symbol-book-$$(date +%Y%m%d).tar.gz"
 
 # Docker-команды
 
@@ -62,22 +64,28 @@ docker-build:
 docker-run:
 	docker run --rm -v "$$(pwd)/book":/book reno-symbol-book
 
+## Сборка PDF (требует mdbook-pdf + chromium)
+pdf:
+	$(MDBOOK) build $(BOOK_DIR)
+	@echo "📄 PDF собран: $(BUILD_DIR)/book.pdf"
+
 # GitHub Pages
 
 ## Деплой в локальную папку для GitHub Pages
 gh-pages: build
 	mkdir -p gh-pages
-	cp -r $(BUILD_DIR)/* gh-pages/
-	cp -r $(BUILD_DIR)/.nojekyll gh-pages/ 2>/dev/null || true
-	@echo "✅ Страницы скопированы в gh-pages/"
+	cp -r $(HTML_DIR)/* gh-pages/
+	cp -r $(HTML_DIR)/.nojekyll gh-pages/ 2>/dev/null || true
+	@echo "Страницы скопированы в gh-pages/"
 
 ## Показать статистику
 stats:
 	@echo "=== Статистика ==="
 	@echo "Markdown-файлов: $$(find $(SRC_DIR) -name '*.md' | wc -l)"
 	@echo "Строк кода: $$(wc -l $(SRC_DIR)/**/*.md $(SRC_DIR)/*.md 2>/dev/null | tail -1 | awk '{print $$1}')"
-	@echo "Размер HTML: $$(du -sh $(BUILD_DIR) 2>/dev/null | awk '{print $$1}')"
-	@echo "Страниц HTML: $$(find $(BUILD_DIR) -name '*.html' | wc -l)"
+	@echo "Размер HTML: $$(du -sh $(HTML_DIR) 2>/dev/null | awk '{print $$1}')"
+	@echo "Страниц HTML: $$(find $(HTML_DIR) -name '*.html' | wc -l)"
+	@echo "Размер PDF: $$(du -sh $(PDF_DIR)/output.pdf 2>/dev/null | awk '{print $$1}')"
 
 help:
 	@echo "Доступные цели:"
@@ -90,6 +98,7 @@ help:
 	@echo "  dist        — упаковать архив"
 	@echo "  docker-build — собрать Docker-образ"
 	@echo "  docker-run  — сборка в Docker"
+	@echo "  pdf         — сборка PDF (mdbook-pdf)"
 	@echo "  gh-pages    — подготовить для GitHub Pages"
 	@echo "  stats       — статистика проекта"
 	@echo "  install-deps — установка mdBook"
