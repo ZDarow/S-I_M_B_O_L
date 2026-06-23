@@ -1,6 +1,7 @@
 [book]
 title = "Руководство по ремонту Renault Symbol"
 authors = ["mi"]
+description = "Технический справочник-руководство по ремонту и эксплуатации Renault Symbol (Thalia). Двигатели K7J, K4J, K7M, K4M, K9K — характеристики, диагностика, обслуживание."
 language = "ru"
 src = "src"
 
@@ -9,6 +10,7 @@ no-section-label = true
 git-repository-url = "https://github.com/mi/reno-symbol.ru"
 default-theme = "light"
 preferred-dark-theme = "ayu"
+site-url = "https://mi.github.io/reno-symbol.ru/"
 
 [output.html.search]
 enable = true

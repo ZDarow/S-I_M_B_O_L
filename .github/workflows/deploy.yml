@@ -44,6 +44,12 @@ jobs:
       - name: Build book (HTML + PDF)
         run: mdbook build book
 
+      - name: Check internal links (lychee)
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --include-fragments --no-progress --scheme=https --scheme=http './book/book/html/**/*.html'
+          fail: false
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
