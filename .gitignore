@@ -25,8 +25,7 @@ __pycache__/
 dist/
 build/
 
-# Bot
-bot/search_index.json
+# Env
 .env
 .env.local
 *.mermaid-backup.

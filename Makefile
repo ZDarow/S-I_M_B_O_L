@@ -9,7 +9,7 @@ PDF_DIR     := $(BUILD_DIR)/pdf
 SRC_DIR     := $(BOOK_DIR)/src
 SCRIPT_DIR  := scripts
 MERMAID_PRE := $(SCRIPT_DIR)/mermaid-preprocess.py
-BOT_DIR     := bot
+
 
 # ── Переменные окружения ─────────────────────────────────────────
 PUPPETEER ?= /usr/bin/chromium
@@ -23,7 +23,6 @@ PUPPETEER ?= /usr/bin/chromium
         mermaid mermaid-replace mermaid-restore \
         gh-pages stats \
         install-deps \
-        bot-index bot-run bot-install \
         install-hooks \
         help
 
@@ -202,22 +201,6 @@ install-deps:
 	@echo "ℹ️  Для mermaid: npm install @mermaid-js/mermaid-cli"
 
 # ══════════════════════════════════════════════════════════════════
-# TELEGRAM-БОТ
-# ══════════════════════════════════════════════════════════════════
-
-## Перестроить поисковый индекс для Telegram-бота
-bot-index:
-	python3 $(BOT_DIR)/indexer.py
-
-## Запустить Telegram-бота (требует BOT_TOKEN в окружении)
-bot-run:
-	python3 $(BOT_DIR)/main.py
-
-## Установить зависимости Telegram-бота
-bot-install:
-	pip3 install -r $(BOT_DIR)/requirements.txt
-
-# ══════════════════════════════════════════════════════════════════
 # СТАТИСТИКА
 # ══════════════════════════════════════════════════════════════════
 
@@ -280,6 +263,3 @@ help:
 	@echo "  install-deps   — установка pre-built бинарников (Linux)"
 	@echo "  install-hooks  — установка pre-commit hook"
 	@echo "  stats          — статистика проекта"
-	@echo "  bot-index      — перестроить поисковый индекс бота"
-	@echo "  bot-run        — запустить Telegram-бота"
-	@echo "  bot-install    — установить зависимости бота"
