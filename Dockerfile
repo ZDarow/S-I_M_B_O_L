@@ -6,6 +6,9 @@
 # Многостадийная сборка:
 #   builder — установка зависимостей + сборка книги
 #   alpine — минимальный образ с результатом
+#
+# Ключевое исправление: WORKDIR=/app, .puppeteerrc.cjs копируется
+# в рабочую директорию для корректного обнаружения Puppeteer.
 
 # ================================================================
 # STAGE 1: Builder
@@ -33,31 +36,26 @@ RUN curl -fsSL https://github.com/rust-lang/mdBook/releases/latest/download/mdbo
 RUN curl -fsSL https://github.com/HollowMan6/mdbook-pdf/releases/download/v0.1.13/mdbook-pdf-v0.1.13-x86_64-unknown-linux-gnu \
     -o /usr/local/bin/mdbook-pdf && chmod +x /usr/local/bin/mdbook-pdf
 
-# Установка mermaid-cli для рендеринга SVG
+# Установка mermaid-cli и pikepdf
 RUN npm install -g @mermaid-js/mermaid-cli --ignore-engines && \
-    mkdir -p /root/.puppeteerrc && \
-    echo '{"executablePath":"/usr/bin/chromium","args":["--no-sandbox"]}' \
-    > /root/.puppeteerrc/puppeteer.json && \
-    npm cache clean --force
+    npm cache clean --force && \
+    pip3 install --no-cache-dir pikepdf
 
-# Установка pikepdf для пост-обработки
-RUN pip3 install --no-cache-dir pikepdf
+WORKDIR /app
 
-WORKDIR /book
-
-# Копирование исходников и скриптов
-COPY book/ .
-COPY scripts/ /scripts/
-COPY .puppeteerrc.cjs /.puppeteerrc.cjs
+# Копирование исходников с корректными путями (см. mermaid-preprocess.py: Path("book"))
+COPY book/ ./book/
+COPY scripts/ ./scripts/
+COPY .puppeteerrc.cjs ./    # Puppeteer ищет конфиг в CWD
 
 # Mermaid-рендеринг + сборка книги (HTML + PDF)
-RUN python3 /scripts/mermaid-preprocess.py --render-only && \
-    python3 /scripts/mermaid-preprocess.py && \
-    mdbook build && \
-    python3 /scripts/mermaid-preprocess.py --restore
+RUN python3 scripts/mermaid-preprocess.py --render-only && \
+    python3 scripts/mermaid-preprocess.py && \
+    mdbook build book && \
+    python3 scripts/mermaid-preprocess.py --restore
 
 # Пост-обработка PDF (Letter → A4)
-RUN python3 /scripts/pdf-a4.py
+RUN python3 scripts/pdf-a4.py
 
 # ================================================================
 # STAGE 2: Minimal runtime image
@@ -67,7 +65,7 @@ FROM alpine:latest
 RUN apk add --no-cache ca-certificates && \
     adduser -D -H -h /output nobody
 
-COPY --from=builder /book/book /output
+COPY --from=builder /app/book/book /output
 RUN chown -R nobody:nobody /output
 
 USER nobody

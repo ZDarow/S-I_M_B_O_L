@@ -15,7 +15,8 @@ BOT_DIR     := bot
 PUPPETEER ?= /usr/bin/chromium
 
 # ── Фантомные цели ───────────────────────────────────────────────
-.PHONY: all build serve clean validate \
+.PHONY: all build build-html build-pdf sitemap post-process \
+        serve clean validate \
         lint check-links spellcheck fmt \
         pdf dist \
         docker-build docker-run \
@@ -45,17 +46,32 @@ mermaid-replace:
 mermaid-restore:
 	python3 $(MERMAID_PRE) --restore
 
-## Сборка книги (Mermaid SVG + HTML + PDF + пост-обработка)
-build: export PUPPETEER_EXECUTABLE_PATH = $(PUPPETEER)
-build: mermaid-replace
+## Сборка HTML через mdBook (с Mermaid)
+build-html: export PUPPETEER_EXECUTABLE_PATH = $(PUPPETEER)
+build-html: mermaid-replace
 	$(MDBOOK) build $(BOOK_DIR)
 	python3 $(MERMAID_PRE) --restore 2>/dev/null || true
-	python3 $(SCRIPT_DIR)/pdf-a4.py $(PDF_DIR)/output.pdf /tmp/out.pdf 2>/dev/null \
+
+## Сборка PDF через mdbook-pdf
+build-pdf: build-html
+	python3 $(SCRIPT_DIR)/pdf-a4.py $(PDF_DIR)/output.pdf $(PDF_DIR)/output-a4.pdf 2>/dev/null \
 		|| echo "⚠️  PDF post-processing skipped"
+	@if [ -f "$(PDF_DIR)/output-a4.pdf" ]; then \
+		mv $(PDF_DIR)/output-a4.pdf $(PDF_DIR)/output.pdf; \
+	fi
+
+## Генерация sitemap.xml
+sitemap:
 	python3 $(SCRIPT_DIR)/sitemap.py --source $(HTML_DIR) 2>/dev/null \
 		|| echo "⚠️  sitemap skipped"
+
+## Пост-обработка: 404, PDF копия
+post-process:
 	cp -n $(SCRIPT_DIR)/404.html $(HTML_DIR)/404.html 2>/dev/null || true
 	cp $(PDF_DIR)/output.pdf $(HTML_DIR)/reno-symbol.pdf 2>/dev/null || true
+
+## Полная сборка книги (Mermaid → HTML → PDF → пост-обработка)
+build: build-pdf sitemap post-process
 	@echo "✅ Сборка завершена"
 
 ## Сборка только PDF
@@ -211,7 +227,11 @@ help:
 	@echo "Руководство по ремонту Renault Symbol — Makefile"
 	@echo ""
 	@echo "Сборка:"
-	@echo "  build          — собрать книгу (HTML + PDF + пост-обработка)"
+	@echo "  build          — полная сборка (HTML + PDF + пост-обработка)"
+	@echo "  build-html     — только HTML (с Mermaid)"
+	@echo "  build-pdf      — HTML + PDF"
+	@echo "  sitemap        — генерация sitemap.xml"
+	@echo "  post-process   — копирование 404, PDF в HTML"
 	@echo "  serve          — локальный сервер с livereload (http://localhost:3000)"
 	@echo "  clean          — очистить сборку"
 	@echo "  pdf            — собрать только PDF"

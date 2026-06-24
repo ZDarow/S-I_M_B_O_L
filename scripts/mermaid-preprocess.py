@@ -15,56 +15,19 @@
   3. Заменяет блоки на markdown-ссылки
   4. Все изменения в .md файлах можно откатить через --restore
 """
-import hashlib
-import subprocess
-import sys
-import tempfile
+import logging
 import os
-import re
+import sys
 from pathlib import Path
+
+from mermaid_core import MERMAID_RE, find_mmdc, hash_mermaid, render_svg
+
+logger = logging.getLogger(__name__)
 
 BOOK_DIR = Path("book")
 SRC_DIR = BOOK_DIR / "src"
 CACHE_DIR = SRC_DIR / "img" / "mermaid"
-MERMAID_RE = re.compile(r'```mermaid\s*\n(.*?)```', re.DOTALL)
 BACKUP_PREFIX = ".mermaid-backup."
-
-
-def find_mmdc() -> str | None:
-    for c in [
-        Path("node_modules/.bin/mmdc"),
-        BOOK_DIR / "node_modules" / ".bin" / "mmdc",
-        Path("../node_modules/.bin/mmdc"),
-    ]:
-        if c.is_file():
-            return str(c.resolve())
-    for p in os.environ.get("PATH", "").split(os.pathsep):
-        mmdc = Path(p) / "mmdc"
-        if mmdc.is_file():
-            return str(mmdc)
-    return None
-
-
-def render_svg(mermaid_source: str, output: Path) -> bool:
-    mmdc = find_mmdc()
-    if not mmdc:
-        return False
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".mmd",
-                                     delete=False, encoding="utf-8") as tmp:
-        tmp.write(mermaid_source)
-        tmp_path = tmp.name
-    try:
-        r = subprocess.run(
-            [mmdc, "-i", tmp_path, "-o", str(output),
-             "-b", "transparent", "-w", "1200"],
-            capture_output=True, text=True, timeout=30,
-        )
-        return r.returncode == 0 and output.exists() and output.stat().st_size >= 50
-    except (subprocess.TimeoutExpired, OSError):
-        return False
-    finally:
-        try: os.unlink(tmp_path)
-        except OSError: pass
 
 
 def process_file(md_path: Path, cache_dir: Path) -> int:
@@ -79,16 +42,16 @@ def process_file(md_path: Path, cache_dir: Path) -> int:
         source = m.group(1).strip()
         if not source:
             return m.group(0)
-        h = hashlib.sha256(source.encode()).hexdigest()[:16]
+        h = hash_mermaid(source)
         svg_file = cache_dir / f"{h}.svg"
 
         if not svg_file.exists():
             if not render_svg(source, svg_file):
-                print(f"  ✗ {md_path.name}: hash={h} — ошибка рендера", file=sys.stderr)
+                logger.warning("  ✗ %s: hash=%s — ошибка рендера", md_path.name, h)
                 failed += 1
                 return m.group(0)
             size = svg_file.stat().st_size
-            print(f"  ✓ {md_path.name}: hash={h} ({size/1024:.1f} KB)", file=sys.stderr)
+            logger.info("  ✓ %s: hash=%s (%.1f KB)", md_path.name, h, size / 1024)
 
         rel = os.path.relpath(svg_file, md_path.parent)
         changes += 1
@@ -102,9 +65,9 @@ def process_file(md_path: Path, cache_dir: Path) -> int:
         backup.write_text(original, encoding="utf-8")
         # Запись изменённого
         md_path.write_text(text, encoding="utf-8")
-        print(f"  → {md_path.name}: {changes} замен, {failed} ошибок", file=sys.stderr)
+        logger.info("  → %s: %d замен, %d ошибок", md_path.name, changes, failed)
     elif changes > 0:
-        print(f"  → {md_path.name}: все блоки уже были заменены", file=sys.stderr)
+        logger.info("  → %s: все блоки уже были заменены", md_path.name)
 
     return changes
 
@@ -114,7 +77,7 @@ def restore_file(md_path: Path) -> bool:
     backup = md_path.with_suffix(md_path.suffix + BACKUP_PREFIX)
     if backup.exists():
         backup.replace(md_path)
-        print(f"  ✓ {md_path.name}: восстановлен", file=sys.stderr)
+        logger.info("  ✓ %s: восстановлен", md_path.name)
         return True
     return False
 
@@ -129,16 +92,22 @@ def main():
                         help="Только рендерить SVG, не заменять блоки")
     args = parser.parse_args()
 
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+        stream=sys.stderr,
+    )
+
     cache_dir = Path.cwd() / CACHE_DIR
     src_dir = Path.cwd() / SRC_DIR
 
     if args.restore:
-        print("Mermaid: восстановление .md файлов...", file=sys.stderr)
+        logger.info("Mermaid: восстановление .md файлов...")
         restored = 0
         for md_path in sorted(src_dir.rglob("*.md")):
             if restore_file(md_path):
                 restored += 1
-        print(f"  Восстановлено: {restored} файлов", file=sys.stderr)
+        logger.info("  Восстановлено: %d файлов", restored)
         # Удаление оставшихся бэкапов
         for bak in src_dir.rglob(f"*{BACKUP_PREFIX}"):
             bak.unlink()
@@ -147,15 +116,13 @@ def main():
     # Проверка mmdc
     mmdc = find_mmdc()
     if not mmdc:
-        print("⚠ mmdc не найден. Установите: npm install @mermaid-js/mermaid-cli",
-              file=sys.stderr)
-        print("  Или: PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium npm install @mermaid-js/mermaid-cli",
-              file=sys.stderr)
+        logger.error("mmdc не найден. Установите: npm install @mermaid-js/mermaid-cli")
+        logger.error("  Или: PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium npm install @mermaid-js/mermaid-cli")
         sys.exit(1)
 
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Mermaid: обход {src_dir}...", file=sys.stderr)
+    logger.info("Mermaid: обход %s...", src_dir)
     total_changes = 0
     total_files = 0
     for md_path in sorted(src_dir.rglob("*.md")):
@@ -173,19 +140,21 @@ def main():
                     source = m.group(1).strip()
                     if not source:
                         continue
-                    h = hashlib.sha256(source.encode()).hexdigest()[:16]
+                    h = hash_mermaid(source)
                     svg_file = cache_dir / f"{h}.svg"
                     if not svg_file.exists():
                         if render_svg(source, svg_file):
-                            print(f"  ✓ {md_path.name}: {h}.svg", file=sys.stderr)
+                            logger.info("  ✓ %s: %s.svg", md_path.name, h)
                         else:
-                            print(f"  ✗ {md_path.name}: {h} — ошибка", file=sys.stderr)
+                            logger.warning("  ✗ %s: %s — ошибка", md_path.name, h)
                     else:
-                        print(f"  · {md_path.name}: {h} — кеш", file=sys.stderr)
+                        logger.info("  · %s: %s — кеш", md_path.name, h)
 
     total_svg = len(list(cache_dir.glob("*.svg")))
-    print(f"\nГотово: {total_files} файлов, {total_changes} замен, "
-          f"{total_svg} SVG в кеше ({cache_dir})", file=sys.stderr)
+    logger.info(
+        "\nГотово: %d файлов, %d замен, %d SVG в кеше (%s)",
+        total_files, total_changes, total_svg, cache_dir,
+    )
 
 
 if __name__ == "__main__":
