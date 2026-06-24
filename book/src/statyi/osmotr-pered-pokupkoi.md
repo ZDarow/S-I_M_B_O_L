@@ -108,7 +108,7 @@ flowchart TD
   categories.forEach(function(cat, ci) {
     var catDiv = document.createElement('div');
     catDiv.style.cssText = 'border-bottom:1px solid var(--searchbar-border-color);';
-    
+
     var header = document.createElement('div');
     header.style.cssText = 'padding:10px 16px;font-weight:bold;cursor:pointer;display:flex;justify-content:space-between;align-items:center;';
     header.innerHTML = '<span>' + cat.name + '</span><span class="cat-progress" id="cp-' + ci + '">0/' + cat.items.length + '</span>';
@@ -117,37 +117,37 @@ flowchart TD
       var body = catDiv.querySelector('.cat-body');
       body.style.display = body.style.display === 'none' ? '' : 'none';
     };
-    
+
     var body = document.createElement('div');
     body.className = 'cat-body';
     body.style.cssText = 'padding:0 16px 12px;';
-    
+
     cat.items.forEach(function(item) {
       var row = document.createElement('div');
       row.style.cssText = 'display:flex;align-items:flex-start;gap:8px;margin:6px 0;';
-      
+
       var cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.id = item.id;
       cb.style.cssText = 'margin-top:4px;flex-shrink:0;';
-      
+
       var labelDiv = document.createElement('div');
       labelDiv.style.cssText = 'flex:1;font-size:0.9em;';
-      
+
       var strong = document.createElement('strong');
       strong.textContent = item.label;
       labelDiv.appendChild(strong);
-      
+
       var badP = document.createElement('div');
       badP.style.cssText = 'opacity:0.8;font-size:0.85em;color:#f44336;';
       badP.innerHTML = '⚠️ На что обратить внимание: ' + item.bad;
       labelDiv.appendChild(badP);
-      
+
       var costP = document.createElement('div');
       costP.style.cssText = 'opacity:0.7;font-size:0.8em;';
       costP.innerHTML = '💰 Стоимость ремонта: ' + item.cost;
       labelDiv.appendChild(costP);
-      
+
       cb.addEventListener('change', function() {
         var items = catDiv.querySelectorAll('input[type="checkbox"]');
         var checked = 0;
@@ -155,29 +155,29 @@ flowchart TD
         catDiv.querySelector('.cat-progress').textContent = checked + '/' + items.length;
         updateSummary();
       });
-      
+
       row.appendChild(cb);
       row.appendChild(labelDiv);
       body.appendChild(row);
     });
-    
+
     catDiv.appendChild(header);
     catDiv.appendChild(body);
     container.appendChild(catDiv);
   });
-  
+
   var summary = document.createElement('div');
   summary.id = 'inspection-summary';
   summary.style.cssText = 'margin:16px;padding:12px 16px;border-radius:8px;background:rgba(76,175,80,0.08);text-align:center;';
   summary.innerHTML = '<strong>Итого:</strong> проверено 0/' + countTotal() + ' пунктов';
   container.appendChild(summary);
-  
+
   function countTotal() {
     var n = 0;
     categories.forEach(function(c) { n += c.items.length; });
     return n;
   }
-  
+
   function updateSummary() {
     var all = document.querySelectorAll('#inspection-checklist input[type="checkbox"]');
     var total = all.length;

@@ -18,13 +18,13 @@ document.addEventListener('DOMContentLoaded', function() {
     items.forEach(function(item) {
       const text = item.textContent.toLowerCase();
       const passText = !activeQuery || text.includes(activeQuery);
-      
+
       let passCost = true;
       if (activeCost !== 'all') {
         const costTags = item.querySelectorAll('.cost-tag.' + activeCost);
         passCost = costTags.length > 0;
       }
-      
+
       if (passText && passCost) {
         item.style.display = '';
         visible++;
@@ -172,7 +172,7 @@ flowchart TD
     L -->|Синий| N[Масло в цилиндрах]
     L -->|Белый| O[Антифриз в цилиндрах]
     L -->|Нет| P[Проверить свечи / форсунки]
-    
+
     style A fill:#1565c0,color:#fff
     style G fill:#e65100,color:#fff
     style O fill:#c62828,color:#fff

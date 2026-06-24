@@ -8,16 +8,16 @@ gantt
     title Timeline поколений Renault Symbol
     dateFormat  YYYY
     axisFormat  %Y
-    
+
     section Symbol I
     Symbol I (1999–2002)    :1999, 2002
-    
+
     section Symbol II
     Symbol II (2002–2008)   :2002, 2008
-    
+
     section Symbol III
     Symbol III / Рестайлинг (2008–2014) :2008, 2014
-    
+
     section Двигатели
     K7J 1.4 8V       :1999, 2014
     K7M 1.6 8V       :1999, 2008
@@ -112,22 +112,22 @@ gantt
 ```mermaid
 flowchart TD
     Look[Осмотрите переднюю часть авто] --> Grill{Решётка радиатора?}
-    
+
     Grill -->|Узкая решётка<br/>без хрома| SI[Symbol I 1999–2002<br/>бампер без вырезов ПТФ]
     Grill -->|Широкая решётка<br/>с хромом| SII{Противотуманки?}
-    
+
     SII -->|ПТФ круглые<br/>в бампере| SIIA[Symbol II 2002–2005<br/>ранний]
     SII -->|ПТФ прямоугольные<br/>или рестайл| SIIB[Symbol II 2005–2008<br/>поздний]
-    
+
     Grill -->|Рестайлинг<br/>новая оптика| SIII{Задние фонари?}
     SIII -->|Частично светодиоды<br/>изменённая форма| SIII_A[Symbol III 2008–2014<br/>рестайлинг]
     SIII -->|Старые фонари<br/>галоген| SII_Check[Скорее всего Symbol II<br/>с рестайлинговым передком]
-    
+
     SI -->|Салон: трос сцепления<br/>нет CAN, ABS опция| Y1[1999–2002]
     SIIA -->|Салон: гидравлика сцепления<br/>CAN с 2003| Y2[2002–2005]
     SIIB -->|CAN, ABS Bosch 8.0<br/>2-скоростной вентилятор| Y3[2005–2008]
     SIII_A -->|Светодиодные задние<br/>ЭУР опционально| Y4[2008–2014]
-    
+
     style SI fill:#1565c0,color:#fff
     style SIIA fill:#2e7d32,color:#fff
     style SIIB fill:#e65100,color:#fff

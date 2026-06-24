@@ -4,6 +4,7 @@
 # OS files
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # Editor files
 *.swp
@@ -11,11 +12,42 @@ Thumbs.db
 *~
 .vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
-# Python / Bot
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Bot
 bot/search_index.json
 .env
+.env.local
 *.mermaid-backup.
+
+# Node
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.docker/
+
+# Temp
+tmp/
+temp/
+*.log
+
+# GitHub Pages local build
+gh-pages/
+
+# PDF artifacts
+*.pdf
+!book/src/**/*.pdf

@@ -9,28 +9,28 @@ flowchart TD
         HEATER[Радиатор отопителя<br/>(печка)]
         COOLOUT[ОЖ обратно в двигатель]
     end
-    
+
     subgraph Cabin[Салон]
         BLOWER[Электромотор вентилятора<br/>с сопрот. резистором]
         FILTER[Салонный фильтр<br/>под бардачком]
-        
+
         subgraph Ducts[Воздуховоды]
             DEFR[Обдув стекла<br/>дефлекторы]
             FACE[Обдув лица<br/>центральные + боковые]
             FEET[Обдув ног<br/>вниз]
         end
-        
+
         CONTROL[Блок управления<br/>режимы + скорость]
     end
-    
+
     COOL --> HEATER
     HEATER --> COOLOUT
-    
+
     BLOWER -->|воздух| FILTER
     FILTER -->|очищенный| HEATER
     HEATER -->|нагретый| Ducts
     CONTROL --> BLOWER
-    
+
     style HEATER fill:#f44336,color:#fff
     style BLOWER fill:#1565c0,color:#fff
     style FILTER fill:#2e7d32,color:#fff

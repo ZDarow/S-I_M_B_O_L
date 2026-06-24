@@ -7,8 +7,12 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +36,20 @@ jobs:
             hunspell -d ru_RU -l "$f" | sort -u | head -10 || true
           done
 
+      - name: Check trailing whitespace
+        run: |
+          if grep -rn '[[:space:]]$' book/src/ --include='*.md'; then
+            echo "⚠️  Trailing whitespace found in files above"
+          else
+            echo "✅ No trailing whitespace"
+          fi
+
+  build:
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Install build tools
         run: |
           # mdBook
@@ -45,14 +63,14 @@ jobs:
           # mermaid-cli
           npm install -g @mermaid-js/mermaid-cli --ignore-engines
 
-      - name: Setup Chromium for PDF + mermaid
+      - name: Setup Chromium
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends chromium
 
-      - name: Install pikepdf
+      - name: Install Python deps
         run: pip3 install pikepdf
 
-      - name: Build book (mermaid + HTML + PDF)
+      - name: Build book
         run: |
           export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
           python3 scripts/mermaid-preprocess.py --render-only
@@ -60,7 +78,7 @@ jobs:
           mdbook build book
           python3 scripts/mermaid-preprocess.py --restore
 
-      - name: Post-process PDF (Letter → A4)
+      - name: Post-process PDF
         run: python3 scripts/pdf-a4.py
 
       - name: Post-process (sitemap, 404)
@@ -88,7 +106,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write

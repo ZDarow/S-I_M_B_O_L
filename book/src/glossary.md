@@ -9,30 +9,30 @@ flowchart TD
         E4[PCV · EVAP · EGR · PWM]
         E5[ТНВД · РХХ · ДПКВ · ДПРВ]
     end
-    
+
     subgraph Transmission[Трансмиссия]
         T1[МКПП · АКПП]
         T2[DP0 · AL4 · ATF]
         T3[ШРУС · Limp Mode]
     end
-    
+
     subgraph Electric[Электрика]
         EL1[ABS · ASR · ESP · SRS]
         EL2[BCM · UCH · ECU · CAN]
         EL3[OBD2 · DTC · K-Line · PWM]
     end
-    
+
     subgraph Suspension[Подвеска и колёса]
         S1[PCD 4×100 · ET · DIA]
         S2[ГУР · ЭУР · ШРУС]
     end
-    
+
     subgraph Standard[Стандарты и единицы]
         ST1[ACEA · API · SAE]
         ST2[DOT · Н·м · бар · CCA]
         ST3[VIN · WMI]
     end
-    
+
     Standard --> Engine
     Standard --> Transmission
     Standard --> Electric

@@ -1,0 +1,15 @@
+# Docker Compose для сборки Руководства по ремонту Renault Symbol
+# Использование:
+#   docker compose up --build
+#
+# Результат: ./book/book/ — HTML + PDF
+#
+version: "3.9"
+
+services:
+  builder:
+    build: .
+    image: reno-symbol-book
+    container_name: reno-symbol-builder
+    volumes:
+      - ./book/book:/output

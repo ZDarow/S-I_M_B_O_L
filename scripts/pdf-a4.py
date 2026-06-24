@@ -29,7 +29,7 @@ def letter_to_a4(in_path: str, out_path: str) -> bool:
             # Build transformation content stream
             content = b"q\n"
             content += f"{scale:.6f} 0 0 {scale:.6f} 0 {offset_y:.6f} cm\n".encode()
-            
+
             # Collect all existing content streams
             contents = page.Contents
             if isinstance(contents, list):
@@ -42,29 +42,29 @@ def letter_to_a4(in_path: str, out_path: str) -> bool:
                     content += contents.read_bytes()
                 except:
                     pass
-            
+
             content += b"\nQ\n"
 
             if content:
                 page.contents = Stream(pdf, content)
-            
+
             # Update MediaBox to A4
             page.MediaBox = [0, 0, A4_W, A4_H]
-            
+
             # Update CropBox if it matches Letter
             if Name.CropBox in page:
                 crop = page.CropBox
                 if abs(float(crop[2]) - float(crop[0]) - LETTER_W) < 5:
                     page.CropBox = [0, 0, A4_W, A4_H]
-            
+
             changed += 1
 
     if changed == 0:
         print("No Letter-size pages found, saving as-is", file=sys.stderr)
-    
+
     pdf.save(out_path, compress_streams=True)
     pdf.close()
-    
+
     # Verify
     pdf2 = Pdf.open(out_path)
     p = pdf2.pages[0]

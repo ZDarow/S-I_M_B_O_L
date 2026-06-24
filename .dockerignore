@@ -1,0 +1,44 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# mdBook output
+book/book/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Kilo config
+.kilo/
+
+# Audit
+аудит/
+
+# Docker
+.docker/
+
+# Temp
+tmp/
+temp/
+*.log
+gh-pages/

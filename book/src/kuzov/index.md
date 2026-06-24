@@ -17,25 +17,25 @@ flowchart TD
         ROOF[Панель крыши сталь]
         SILL[Пороги сталь + мастика]
     end
-    
+
     subgraph Bumpers[Бамперы]
         F_B[Передний<br/>пластик полипропилен]
         R_B[Задний<br/>пластик полипропилен]
     end
-    
+
     subgraph Glass[Стёкла]
         WSH[Ветровое стекло<br/>клееное триплекс]
         R_WSH[Заднее стекло<br/>клееное]
         S_WSH[Боковые стёкла<br/>закалённые]
     end
-    
+
     HOOD --> F_B
     F_FEND --> F_B
     HOOD --> WSH
     R_FEND --> R_B
     TRUNK --> R_B
     DOORS --> S_WSH
-    
+
     style HOOD fill:#1565c0,color:#fff
     style F_FEND fill:#2e7d32,color:#fff
     style R_FEND fill:#e65100,color:#fff

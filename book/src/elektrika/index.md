@@ -23,7 +23,7 @@ flowchart TD
         ECU --- SRS[Блок SRS]
         ABS --- ST[ESP / ASR *]
     end
-    
+
     subgraph CAN_low[Низкоскоростная CAN / LIN 125 кбит/с]
         BCM[Блок комфорта UCH] --> D1[ЭСП передние]
         BCM --> D2[ЭСП задние]
@@ -31,13 +31,13 @@ flowchart TD
         BCM --> Lights[Освещение салона]
         BCM --> Wipe[Дворники]
     end
-    
+
     ECU ---|шлюз через UCH| BCM
     BCM --- OBD[Диагностический разъём OBD2]
     ABS --- OBD
-    
+
     OBD --> Scanner[Сканер / ELM327]
-    
+
     style ECU fill:#1565c0,color:#fff
     style ABS fill:#e65100,color:#fff
     style BCM fill:#2e7d32,color:#fff

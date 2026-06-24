@@ -12,7 +12,7 @@ flowchart LR
         L1_5[Мультиметр]
         L1_6[Воронка + тара для масла]
     end
-    
+
     subgraph Level2[🟧 Уровень 2<br/>Средний ремонт]
         L2_1[Съёмник шаровых<br/>Съёмник сайлент-блоков]
         L2_2[Стяжки пружин<br/>Съёмник масл. фильтра]
@@ -20,7 +20,7 @@ flowchart LR
         L2_4[Нагрузочная вилка<br/>Компрессометр]
         L2_5[Компрессор + манометр]
     end
-    
+
     subgraph Level3[🟥 Уровень 3<br/>Сложный ремонт]
         L3_1[Гидропресс 10–20 т]
         L3_2[Съёмник подшипников<br/>Съёмник маховика]
@@ -28,9 +28,9 @@ flowchart LR
         L3_4[Осциллограф]
         L3_5[Сканер Renault PIN]
     end
-    
+
     Level1 --> Level2 --> Level3
-    
+
     style Level1 fill:#1565c0,color:#fff
     style Level2 fill:#e65100,color:#fff
     style Level3 fill:#f44336,color:#fff

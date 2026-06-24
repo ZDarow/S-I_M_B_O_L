@@ -17,27 +17,27 @@ flowchart TD
         end
         OIL[→ API SL/CF ACEA A3/B3<br/>Интервал: 15 000 км]
     end
-    
+
     subgraph Transm[Трансмиссия]
         MTF[Масло КПП<br/>75W-80 GL-4 <br/>1.9–2.5 л]
         GUR[Гидроусилитель<br/>Elfmatic G3<br/>0.8–1.0 л]
     end
-    
+
     subgraph Cool[Охлаждение]
         COOL[Антифриз OAT<br/>Renault D / D+<br/>5.5–6.2 л]
         COND[Хладагент R134a<br/>550–600 г<br/>Масло PAG 46]
     end
-    
+
     subgraph Brake[Тормоза]
         BRAKE[DOT 4<br/>0.6–0.8 л<br/>2 года / 40 000 км]
     end
-    
+
     BENZ[Bензиновые<br/>K7J/K7M/K4J/K4M] --> Benzin
     DIZEL[Dизельный<br/>K9K] --> Dizel
     Benzin --> ENG
     Dizel --> ENG
     ENG --> OIL
-    
+
     style Benzin fill:#1565c0,color:#fff
     style Dizel fill:#e65100,color:#fff
     style OIL fill:#2e7d32,color:#fff

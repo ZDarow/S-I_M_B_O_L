@@ -9,39 +9,39 @@ flowchart LR
         E4[Плавают обороты]
         E5[Стук на холодную]
     end
-    
+
     subgraph Transmission[Трансмиссия]
         T1[Масло в МКПП]
         T2[Хруст ЗХ]
         T3[Сцепление vs КПП]
     end
-    
+
     subgraph Suspension[Подвеска]
         S1[Стук спереди]
         S2[Тугой руль]
         S3[Развал-схождение]
     end
-    
+
     subgraph Electrical[Электрика]
         EL1[ABS лампа]
         EL2[Прикуриватель]
         EL3[Сигнализация]
         EL4[АКБ садится]
     end
-    
+
     subgraph Body[Кузов]
         B1[Гарантия коррозия]
         B2[Задние арки]
         B3[Диски R16]
     end
-    
+
     subgraph Buy[Покупка б/у]
         BU1[Лучший выбор]
         BU2[Нормальный пробег]
         BU3[Осмотр]
         BU4[Дизель?]
     end
-    
+
     Engine -->|выберите раздел| FAQ[Ответы ниже]
     Transmission --> FAQ
     Suspension --> FAQ

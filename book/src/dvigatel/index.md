@@ -13,11 +13,11 @@ flowchart TD
         K4J[▶ 3.1 K4J 1.4 16V<br/>98 л.с. · 127 Н·м · 10:1]
         K4M[▶ 3.1 K4M 1.6 16V<br/>105 л.с. · 148 Н·м · 10:1]
     end
-    
+
     subgraph Diesel[Дизельный]
         K9K[▶ 3.7 K9K 1.5 dCi<br/>64–86 л.с. · 200 Н·м]
     end
-    
+
     subgraph Systems[Системы двигателя]
         S1[▶ 3.2 Система питания<br/>топливо + впрыск]
         S2[▶ 3.3 Система смазки<br/>масло + фильтр]
@@ -26,10 +26,10 @@ flowchart TD
         S5[▶ 3.6 Замена ремня ГРМ<br/>60 000 км]
         S6[▶ 3.8 Система управления<br/>ECU + датчики]
     end
-    
+
     Petrol -.- Systems
     Diesel -.- Systems
-    
+
     style Petrol fill:#1565c0,color:#fff
     style Diesel fill:#e65100,color:#fff
     style Systems fill:#2e7d32,color:#fff
