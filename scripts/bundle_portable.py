@@ -8,9 +8,9 @@
   - README.txt с инструкцией
 
 Использование:
-  python3 scripts/bundle-portable.py              # сборка + упаковка
-  python3 scripts/bundle-portable.py --no-build   # только упаковка (без mdbook)
-  python3 scripts/bundle-portable.py --output ./dist  # кастомный путь
+  python3 scripts/bundle_portable.py              # сборка + упаковка
+  python3 scripts/bundle_portable.py --no-build   # только упаковка (без mdbook)
+  python3 scripts/bundle_portable.py --output ./dist  # кастомный путь
 """
 import argparse
 import shutil

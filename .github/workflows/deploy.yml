@@ -37,6 +37,20 @@ jobs:
             hunspell -d ru_RU -l "$f" | sort -u | head -10 || true
           done
 
+      - name: Python lint (flake8)
+        run: |
+          pip3 install flake8
+          flake8 scripts/ --ignore=E501,W503 || echo "flake8 warnings (non-blocking)"
+
+      - name: Python security (bandit)
+        run: |
+          pip3 install bandit
+          bandit -r scripts/ -ll -f txt || echo "bandit warnings (non-blocking)"
+
+      - name: Python unit tests
+        run: |
+          python3 -m unittest scripts.test_portable -v
+
       - name: Check trailing whitespace
         run: |
           if grep -rn '[[:space:]]$' book/src/ --include='*.md'; then

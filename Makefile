@@ -24,6 +24,7 @@ PUPPETEER ?= /usr/bin/chromium
         gh-pages stats \
         install-deps \
         install-hooks \
+        test \
         help
 
 # ── Сборка по умолчанию ─────────────────────────────────────────
@@ -148,13 +149,17 @@ gh-pages: build
 # ПОРТАТИВНАЯ ВЕРСИЯ
 # ══════════════════════════════════════════════════════════════════
 
+## Запустить unit-тесты Python-скриптов
+test:
+	python3 -m unittest scripts.test_portable -v
+
 ## Собрать портативную версию (bundle)
 portable: build
-	python3 $(SCRIPT_DIR)/bundle-portable.py --no-build
+	python3 $(SCRIPT_DIR)/bundle_portable.py --no-build
 
 ## Упаковать портативную версию без пересборки
 portable-bundle:
-	python3 $(SCRIPT_DIR)/bundle-portable.py --no-build
+	python3 $(SCRIPT_DIR)/bundle_portable.py --no-build
 
 ## Запустить Zero-Dependency HTTP-сервер портативной версии
 portable-serve:
@@ -263,3 +268,4 @@ help:
 	@echo "  install-deps   — установка pre-built бинарников (Linux)"
 	@echo "  install-hooks  — установка pre-commit hook"
 	@echo "  stats          — статистика проекта"
+	@echo "  test           — запуск unit-тестов Python"
