@@ -18,7 +18,7 @@ PUPPETEER ?= /usr/bin/chromium
 .PHONY: all build build-html build-pdf sitemap post-process \
         serve clean validate \
         lint check-links spellcheck fmt \
-        pdf dist \
+        pdf dist portable portable-bundle portable-serve \
         docker-build docker-run \
         mermaid mermaid-replace mermaid-restore \
         gh-pages stats \
@@ -146,6 +146,22 @@ gh-pages: build
 	@echo "📄 Страницы скопированы в gh-pages/"
 
 # ══════════════════════════════════════════════════════════════════
+# ПОРТАТИВНАЯ ВЕРСИЯ
+# ══════════════════════════════════════════════════════════════════
+
+## Собрать портативную версию (bundle)
+portable: build
+	python3 $(SCRIPT_DIR)/bundle-portable.py --no-build
+
+## Упаковать портативную версию без пересборки
+portable-bundle:
+	python3 $(SCRIPT_DIR)/bundle-portable.py --no-build
+
+## Запустить Zero-Dependency HTTP-сервер портативной версии
+portable-serve:
+	python3 $(SCRIPT_DIR)/serve.py
+
+# ══════════════════════════════════════════════════════════════════
 # DOCKER
 # ══════════════════════════════════════════════════════════════════
 
@@ -254,6 +270,11 @@ help:
 	@echo "Дистрибуция:"
 	@echo "  dist           — упаковать архив"
 	@echo "  gh-pages       — подготовить для GitHub Pages"
+	@echo ""
+	@echo "Портативная версия:"
+	@echo "  portable       — сборка + упаковка portable/"
+	@echo "  portable-bundle— упаковка portable/ (без пересборки)"
+	@echo "  portable-serve — Zero-Dependency HTTP-сервер"
 	@echo ""
 	@echo "Утилиты:"
 	@echo "  install-deps   — установка pre-built бинарников (Linux)"

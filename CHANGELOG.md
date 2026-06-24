@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 — 2026-06-25
+
+### Added
+- **Портативная версия**: `make portable` — самодостаточная директория `portable/`
+- `scripts/serve.py` — Zero-Dependency HTTP-сервер (только Python 3, без зависимостей)
+- `scripts/bundle-portable.py` — упаковщик портативной версии
+- `scripts/portable-readme.txt` — инструкция для портативной версии
+- Makefile: цели `portable`, `portable-bundle`, `portable-serve`
+- Скрипты запуска: `start.sh` (Linux/macOS), `start.bat` (Windows)
+- tar.gz архив портативной версии
+
 ## 1.1.0 — 2026-06-24
 
 ### Added

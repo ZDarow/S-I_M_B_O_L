@@ -125,6 +125,45 @@ make install-hooks   # установить pre-commit hook
 - Внутренние ссылки в изменённых файлах
 - Наличие TODO/FIXME маркеров
 
+## Портативная версия
+
+Портативная версия не требует установки mdBook, Node.js, Chromium или Docker.
+Нужен только **Python 3** (любая ОС: Windows, Linux, macOS).
+
+```bash
+# Сборка портативной версии (требует mdBook)
+make portable
+
+# Или только упаковка (если книга уже собрана)
+make portable-bundle
+
+# Результат: директория portable/ с файлами:
+#   portable/
+#   ├── serve.py          # HTTP-сервер (Python 3 stdlib)
+#   ├── start.sh          # запуск на Linux/macOS
+#   ├── start.bat         # запуск на Windows
+#   ├── README.txt        # инструкция
+#   ├── index.html        # главная страница
+#   ├── *.html            # все страницы руководства
+#   ├── css/              # стили
+#   ├── js/               # скрипты
+#   └── img/              # изображения
+#
+# Запуск:
+#   cd portable && python3 serve.py
+#   → Открыть http://localhost:8080
+```
+
+Zero-Dependency HTTP-сервер (`scripts/serve.py`) работает на чистом Python 3
+без единой внешней зависимости.
+
+```bash
+# Запустить сервер напрямую (без упаковки)
+make portable-serve
+# или
+python3 scripts/serve.py
+```
+
 ## Требования к окружению
 
 - **mdBook** — сборщик книги
