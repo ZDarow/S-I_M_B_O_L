@@ -9,8 +9,6 @@
     python3 scripts/sitemap.py --url https://mi.github.io/reno-symbol.ru  # кастомный base URL
 """
 import argparse
-import os
-import re
 from pathlib import Path
 from datetime import date
 
@@ -48,12 +46,12 @@ def generate_sitemap(source_dir: Path, base_url: str = None, output: Path = None
         depth = len(Path(url_path).parts)
         priority = max(0.3, 1.0 - depth * 0.15)
 
-        lines.append(f'  <url>')
+        lines.append('  <url>')
         lines.append(f'    <loc>{base_url}/{url_path}</loc>')
         lines.append(f'    <lastmod>{today}</lastmod>')
-        lines.append(f'    <changefreq>monthly</changefreq>')
+        lines.append('    <changefreq>monthly</changefreq>')
         lines.append(f'    <priority>{priority:.1f}</priority>')
-        lines.append(f'  </url>')
+        lines.append('  </url>')
 
     lines.append('</urlset>')
 

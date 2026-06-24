@@ -61,10 +61,10 @@ RUN python3 scripts/mermaid-preprocess.py --render-only && \
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates && \
-    adduser -D -H -h /output nobody
+    adduser -D -H -h /built-output nobody
 
-COPY --from=builder --chown=nobody:nobody /app/book/book /output
+COPY --from=builder --chown=nobody:nobody /app/book/book /built-output
 
 USER nobody
 VOLUME ["/output"]
-CMD ["cp", "-r", "/output/.", "/book-output"]
+CMD ["cp", "-r", "/built-output/.", "/output"]

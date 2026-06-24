@@ -29,6 +29,7 @@ MAX_BLOCK_LEN = 20_000
 def collect_pending(book_sections, cache_dir) -> dict:
     """Собрать хеши mermaid-блоков без кеша."""
     pending = {}
+
     def walk(data):
         if isinstance(data, dict):
             if "Chapter" in data:

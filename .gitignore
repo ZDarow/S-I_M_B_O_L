@@ -45,6 +45,10 @@ tmp/
 temp/
 *.log
 
+# Audit files (previous review exports)
+аудит/
+audit/
+
 # GitHub Pages local build
 gh-pages/
 

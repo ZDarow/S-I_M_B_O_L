@@ -5,9 +5,8 @@
 echo "🔍 Pre-commit: проверка качества..."
 
 # 1. Проверить, что mdBook собирается
-if command -v mdbook &>/dev/null; then
-    mdbook build book 2>&1 | grep -q "ERROR"
-    if [ $? -eq 0 ]; then
+if command -v mdbook >/dev/null 2>&1; then
+    if mdbook build book 2>&1 | grep -q "ERROR"; then
         echo "❌ mdBook build failed! Исправьте ошибки перед коммитом."
         mdbook build book 2>&1 | grep "ERROR"
         exit 1
@@ -37,7 +36,7 @@ fi
 
 # 3. Проверить наличие неиспользуемых `TODO` или `FIXME`
 if [ -n "$STAGED_MD" ]; then
-    TODO_COUNT=$(grep -c 'TODO\|FIXME\|HACK' $STAGED_MD 2>/dev/null || true)
+    TODO_COUNT=$(grep -c 'TODO\|FIXME\|HACK' "$STAGED_MD" 2>/dev/null || true)
     if [ "$TODO_COUNT" -gt 0 ]; then
         echo "⚠️  Найдено $TODO_COUNT TODO/FIXME в staged файлах"
     fi

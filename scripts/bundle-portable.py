@@ -13,7 +13,6 @@
   python3 scripts/bundle-portable.py --output ./dist  # кастомный путь
 """
 import argparse
-import os
 import shutil
 import subprocess
 import sys
@@ -54,7 +53,7 @@ def build_book() -> bool:
     return False
 
 
-def bundle_portable(html_dir: Path, output_dir: Path, no_build: bool = False) -> Path:
+def bundle_portable(html_dir: Path, output_dir: Path, no_build: bool = False, no_archive: bool = False) -> Path:
     """Упаковать портативную версию в output_dir."""
     if not no_build and not build_book():
         print("⚠️  Сборка не удалась, упаковываю существующий вывод...")
@@ -71,7 +70,7 @@ def bundle_portable(html_dir: Path, output_dir: Path, no_build: bool = False) ->
     output_dir.mkdir(parents=True)
 
     # Копируем HTML-вывод
-    print(f"📁 Копирование файлов...")
+    print("📁 Копирование файлов...")
     for item in html_dir.iterdir():
         dest = output_dir / item.name
         if item.is_dir():
@@ -103,8 +102,8 @@ def bundle_portable(html_dir: Path, output_dir: Path, no_build: bool = False) ->
     print(f"   ▶  Или:    cd {output_dir.name} && python3 serve.py")
     print()
 
-    # Создаём архив
-    archive_path = create_archive(output_dir)
+    if not no_archive:
+        _ = create_archive(output_dir)
     return output_dir
 
 
@@ -160,12 +159,12 @@ def main():
     parser.add_argument("--no-archive", action="store_true",
                         help="Не создавать tar.gz архив")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT,
-                        help=f"Директория для портативной версии")
+                        help="Директория для портативной версии")
     parser.add_argument("--html-dir", type=Path, default=DEFAULT_HTML_DIR,
                         help="Директория с собранным HTML")
     args = parser.parse_args()
 
-    bundle_portable(args.html_dir, args.output, args.no_build)
+    bundle_portable(args.html_dir, args.output, args.no_build, args.no_archive)
 
 
 if __name__ == "__main__":

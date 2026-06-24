@@ -1,3 +1,4 @@
+---
 # GitHub Actions: автосборка и деплой mdBook на GitHub Pages
 name: Deploy mdBook
 
