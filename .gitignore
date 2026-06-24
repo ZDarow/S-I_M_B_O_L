@@ -12,6 +12,10 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Python cache
+# Python / Bot
 __pycache__/
 *.pyc
+bot/search_index.json
+.env
+*.mermaid-backup.
+node_modules/

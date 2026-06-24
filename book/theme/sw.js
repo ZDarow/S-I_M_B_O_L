@@ -1,54 +1,87 @@
-// Service Worker для offline-доступа к руководству Renault Symbol
+/**
+ * Service Worker для офлайн-доступа к руководству Renault Symbol
+ * Кеширует все HTML, CSS, JS, изображения, шрифты и MD-исходники
+ * Стратегия: Cache-First для статики, Network-First для страниц
+ */
+
 const CACHE_NAME = 'reno-symbol-v1';
-const CACHE_URLS = [
-  './',
-  './index.html',
-  './searchindex-5bf5d96f.js',
-  './searcher-09f2665d.js',
-  './book-c22b7243.js',
-  './toc-e8962a39.js',
-  './clipboard-1626706a.min.js',
-  './highlight-abc7f01d.js',
-  './mark-09e88c2c.min.js',
-  './elasticlunr-ef4e11c1.min.js',
-  './ayu-highlight-3fdfc3ac.css',
-  './tomorrow-night-4c0ae647.css',
-  './highlight-493f70e1.css',
-  './css/general-0392ca55.css',
-  './css/chrome-fc474251.css',
-  './css/print-9e4910d8.css',
-  './css/variables-8adf115d.css',
-  './favicon-8114d1fc.png',
-  './favicon-de23e50b.svg'
+
+const PRECACHE_URLS = [
+  '/',
+  '/index.html',
 ];
 
+const ASSET_EXTENSIONS = [
+  '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
+  '.woff', '.woff2', '.ttf', '.eot',
+  '.json', '.xml', '.yaml', '.txt',
+];
+
+// Установка — кеширование предзагруженных ресурсов
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(CACHE_URLS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(PRECACHE_URLS);
+    })
   );
+  // Активировать сразу, не ждать закрытия вкладок
+  self.skipWaiting();
 });
 
+// Активация — очистка старых кешей
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       );
     }).then(() => self.clients.claim())
   );
 });
 
+// Запрос — Cache-First для ассетов, Stale-While-Revalidate для страниц
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request).then(fetchResponse => {
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Только наш домен
+  if (url.origin !== location.origin) return;
+
+  // Не кешировать Mermaid (загружается с CDN)
+  if (url.hostname.includes('cdn.jsdelivr.net')) return;
+
+  // Ассеты (CSS, JS, изображения, шрифты) — Cache-First
+  if (ASSET_EXTENSIONS.some(ext => url.pathname.endsWith(ext))) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        return cached || fetch(request).then(response => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, response.clone());
+            return response;
+          });
         });
-      }))
-  );
+      })
+    );
+    return;
+  }
+
+  // HTML-страницы — Network-First с падением на кеш
+  if (url.pathname.endsWith('.html') || url.pathname === '/' || !url.pathname.includes('.')) {
+    event.respondWith(
+      fetch(request).then(response => {
+        return caches.open(CACHE_NAME).then(cache => {
+          cache.put(request, response.clone());
+          return response;
+        });
+      }).catch(() => {
+        return caches.match(request).then(cached => {
+          return cached || caches.match('/');
+        });
+      })
+    );
+    return;
+  }
+
+  // Остальное — Network-Only
+  event.respondWith(fetch(request));
 });

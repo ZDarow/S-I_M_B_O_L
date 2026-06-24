@@ -2,6 +2,39 @@
 
 Раздел содержит описание рулевого управления Renault Symbol — реечного типа, с гидравлическим усилителем (ГУР) на большинстве комплектаций.
 
+```mermaid
+flowchart LR
+    subgraph SteeringWheel[Руль + колонка]
+        SW[Рулевое колесо<br/>регулировка наклона]
+        COL[Вал колонки<br/>травмобезопасный]
+        CARD[Карданный шарнир]
+    end
+
+    subgraph Rack[Рулевой механизм]
+        RACK[Реечный механизм<br/>передаточное ~18:1]
+        TIE_L[Тяга левая]
+        TIE_R[Тяга правая]
+        END_L[Наконечник левый]
+        END_R[Наконечник правый]
+    end
+
+    subgraph Assist[Гидроусилитель]
+        PUMP[Насос ГУР<br/>лопастной]
+        RES[Бачок ГУР<br/>0,5 л]
+        HOSE[Рукава высокого / низкого давления]
+    end
+
+    SW --> COL --> CARD --> RACK
+    RACK --> TIE_L --> END_L
+    RACK --> TIE_R --> END_R
+    PUMP --> RES
+    PUMP --> RACK
+
+    style SteeringWheel fill:#1565c0,color:#fff
+    style Rack fill:#2e7d32,color:#fff
+    style Assist fill:#e65100,color:#fff
+```
+
 ## Общая характеристика
 
 | Параметр | Значение |

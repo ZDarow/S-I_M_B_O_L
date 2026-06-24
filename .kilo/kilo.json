@@ -1,0 +1,55 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "default_agent": "git",
+  "instructions": [
+    "AGENTS.md",
+    ".kilo/instructions/*.md"
+  ],
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 8000,
+    "tail_turns": 2
+  },
+  "permission": {
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "edit": {
+      "book/src/**": "allow",
+      "scripts/**": "allow",
+      ".github/**": "allow",
+      "*.md": "allow",
+      "Makefile": "allow",
+      "Dockerfile": "allow",
+      "kilo.json": "allow",
+      ".kilo/**": "allow",
+      "*": "ask"
+    },
+    "write": {
+      "book/src/**": "allow",
+      "scripts/**": "allow",
+      ".github/**": "allow",
+      "*.md": "allow",
+      "Makefile": "allow",
+      "Dockerfile": "allow",
+      "kilo.json": "allow",
+      ".kilo/**": "allow",
+      "*": "ask"
+    },
+    "bash": {
+      "mdbook*": "allow",
+      "python3*": "allow",
+      "pip3*": "allow",
+      "cargo*": "allow",
+      "npm*": "allow",
+      "sudo apt*": "ask",
+      "sudo rm *": "deny",
+      "sudo rm -rf /*": "deny",
+      "sudo dd *": "deny",
+      "sudo mkfs*": "deny",
+      "*": "allow"
+    }
+  },
+  "snapshot": false
+}

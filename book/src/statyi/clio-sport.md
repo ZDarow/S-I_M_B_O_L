@@ -1,6 +1,32 @@
 # Обзор Clio Sport
 
-Renault Clio Sport — горячий хэтчбек, выпускавшийся в нескольких поколениях. Хотя Symbol базируется на обычном Clio, понимание Clio Sport даёт представление о возможностях платформы и её потенциале для модернизации.
+```mermaid
+flowchart LR
+    subgraph Clio[Renault Clio]
+        C1[Clio II Symbol<br/>K7J/K7M 75-90 л.с.]
+        C2[Clio II RS<br/>F4R 172-182 л.с.]
+    end
+
+    subgraph Platform[Общая платформа]
+        P1[Передняя подвеска<br/>MacPherson]
+        P2[Задняя балка<br/>торсионная]
+        P3[Кузов — несущий<br/>оцинковка]
+    end
+
+    subgraph Parts[Унификация]
+        PT1[Тормоза — суппорта<br/>возможна замена]
+        PT2[Подвеска — рычаги<br/>аналогичны]
+        PT3[Электрика — жгуты<br/>схожая архитектура]
+    end
+
+    Clio --> Platform --> Parts
+
+    style Clio fill:#1565c0,color:#fff
+    style Platform fill:#2e7d32,color:#fff
+    style Parts fill:#e65100,color:#fff
+```
+
+Renault Clio Sport — горячий хэтчбек, выпускавшийся в нескольких поколениях.
 
 ## Clio I (1990–1998)
 

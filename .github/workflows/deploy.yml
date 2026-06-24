@@ -26,23 +26,48 @@ jobs:
       - name: Spellcheck (hunspell)
         run: |
           sudo apt-get install -y --no-install-recommends hunspell hunspell-ru
-          echo "Проверка орфографии..."
-          for f in $(find book/src -name '*.md' | head -5); do
-            hunspell -d ru_RU -l "$f" | sort -u | head -20 || true
+          echo "Проверка орфографии (первые 10 страниц)..."
+          for f in $(find book/src -name '*.md' ! -name 'SUMMARY.md' | head -10); do
+            echo "--- $f ---"
+            hunspell -d ru_RU -l "$f" | sort -u | head -10 || true
           done
 
-      - name: Install mdBook and mdbook-pdf
+      - name: Install build tools
         run: |
+          # mdBook
           curl -fsSL https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-x86_64-unknown-linux-gnu.tar.gz \
             | tar xzf - -C /usr/local/bin
-          cargo install mdbook-pdf --locked
 
-      - name: Setup Chromium for PDF
+          # mdbook-pdf (pre-built binary, v0.1.13)
+          curl -fsSL https://github.com/HollowMan6/mdbook-pdf/releases/download/v0.1.13/mdbook-pdf-v0.1.13-x86_64-unknown-linux-gnu \
+            -o /usr/local/bin/mdbook-pdf && chmod +x /usr/local/bin/mdbook-pdf
+
+          # mermaid-cli
+          npm install -g @mermaid-js/mermaid-cli --ignore-engines
+
+      - name: Setup Chromium for PDF + mermaid
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends chromium
 
-      - name: Build book (HTML + PDF)
-        run: mdbook build book
+      - name: Install pikepdf
+        run: pip3 install pikepdf
+
+      - name: Build book (mermaid + HTML + PDF)
+        run: |
+          export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+          python3 scripts/mermaid-preprocess.py --render-only
+          python3 scripts/mermaid-preprocess.py
+          mdbook build book
+          python3 scripts/mermaid-preprocess.py --restore
+
+      - name: Post-process PDF (Letter → A4)
+        run: python3 scripts/pdf-a4.py
+
+      - name: Post-process (sitemap, 404)
+        run: |
+          python3 scripts/sitemap.py --source book/book/html || echo "sitemap skipped"
+          cp scripts/404.html book/book/html/404.html 2>/dev/null || echo "404 copy skipped"
+          cp book/book/pdf/output.pdf book/book/html/reno-symbol.pdf 2>/dev/null || true
 
       - name: Check internal links (lychee)
         uses: lycheeverse/lychee-action@v1

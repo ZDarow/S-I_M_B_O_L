@@ -1,7 +1,50 @@
 /* PDF-стили для руководства по ремонту Renault Symbol */
+
+/* ===== Cover page ===== */
+@page:first {
+  @bottom-center {
+    content: none;
+  }
+  margin: 0;
+}
+
+body:first-of-type {
+  page-break-before: cover;
+}
+
+/* Cover title block — first page of print.html */
+body:first-of-type .content {
+  padding-top: 30%;
+  text-align: center;
+}
+
+body:first-of-type .content > main > h1 {
+  font-size: 28pt;
+  border: none;
+  padding: 0;
+  margin-bottom: 12pt;
+  page-break-before: avoid;
+}
+
+body:first-of-type .content > main > p:first-of-type {
+  font-size: 12pt;
+  color: #444;
+  max-width: 70%;
+  margin: 0 auto;
+}
+
+/* ===== General page setup ===== */
 @page {
   size: A4;
   margin: 20mm 15mm 25mm 15mm;
+
+  @top-center {
+    content: "Renault Symbol — Руководство по ремонту";
+    font-size: 8pt;
+    color: #999;
+    font-family: 'PT Serif', 'Times New Roman', serif;
+  }
+
   @bottom-center {
     content: counter(page);
     font-size: 9pt;
@@ -9,6 +52,7 @@
   }
 }
 
+/* ===== Body ===== */
 body {
   font-family: 'PT Serif', 'Times New Roman', serif;
   font-size: 10pt;
@@ -18,6 +62,7 @@ body {
   widows: 3;
 }
 
+/* ===== Headings ===== */
 h1 {
   font-size: 18pt;
   font-weight: bold;
@@ -25,6 +70,13 @@ h1 {
   page-break-after: avoid;
   border-bottom: 2px solid #333;
   padding-bottom: 6pt;
+  margin-top: 24pt;
+}
+
+/* First h1 in the document (book title) — no page break */
+body:first-of-type .content > main > h1:first-of-type {
+  page-break-before: avoid;
+  margin-top: 0;
 }
 
 h2 {
@@ -40,6 +92,13 @@ h3 {
   page-break-after: avoid;
 }
 
+h4 {
+  font-size: 10pt;
+  font-weight: bold;
+  page-break-after: avoid;
+}
+
+/* ===== Tables ===== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -59,6 +118,11 @@ table th {
   font-weight: bold;
 }
 
+table tr:nth-child(even) td {
+  background: #f5f5f5;
+}
+
+/* ===== Code ===== */
 code, pre {
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 8pt;
@@ -73,17 +137,20 @@ pre {
   white-space: pre-wrap;
 }
 
+/* ===== Images ===== */
 img {
   max-width: 100%;
   height: auto;
   page-break-inside: avoid;
 }
 
+/* ===== Links ===== */
 a {
   color: #1565c0;
   text-decoration: none;
 }
 
+/* ===== Blockquotes / Warnings ===== */
 blockquote {
   border-left: 3px solid #e65100;
   padding-left: 8pt;
@@ -92,11 +159,29 @@ blockquote {
   font-style: italic;
 }
 
+/* ===== Lists ===== */
+ul, ol {
+  margin: 6pt 0;
+  padding-left: 20pt;
+}
+
+li {
+  margin: 3pt 0;
+}
+
+/* ===== Horizontal rule (section separator) ===== */
+hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 18pt 0;
+}
+
+/* ===== Utility class ===== */
 .page-break {
   page-break-before: always;
 }
 
-/* Table of Contents styling */
+/* ===== Table of Contents ===== */
 nav {
   page-break-after: always;
 }
@@ -113,4 +198,20 @@ nav .chapter {
 nav .section {
   margin: 2pt 0 2pt 16pt;
   font-size: 9pt;
+}
+
+/* ===== Chapter markers (generation badges) ===== */
+strong:has([class*="Symbol"]) {
+  color: #1565c0;
+}
+
+/* ===== Prevent awkward breaks ===== */
+p {
+  orphans: 2;
+  widows: 2;
+}
+
+/* ===== Torque values ===== */
+strong:has(+ span.Nm) {
+  font-weight: bold;
 }

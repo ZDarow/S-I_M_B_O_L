@@ -1,6 +1,28 @@
 # Общая презентация Renault Symbol
 
-Renault Symbol (на некоторых рынках — Thalia, Clio Sedan, а также Nissan Platina) — переднеприводный субкомпактный седан сегмента B, выпускавшийся с 1999 по 2021 год. Модель создана на базе Renault Clio II по программе X65 и предназначена для развивающихся рынков: Восточная Европа, Латинская Америка, Азия.
+```mermaid
+flowchart TD
+    subgraph Markets[Рынки сбыта]
+        M1[Турция — Oyak-Renault<br/>основное производство]
+        M2[Россия — Автофрамос<br/>с 2005 года]
+        M3[Латинская Америка<br/>Аргентина, Бразилия]
+        M4[Азия — Тайвань<br/>Марокко, Иран]
+    end
+
+    subgraph Badges[Брендирование]
+        B1[Renault Symbol<br/>Восточная Европа]
+        B2[Renault Thalia<br/>Турция, Зап. Европа]
+        B3[Renault Clio Sedan<br/>Латинская Америка]
+        B4[Nissan Platina<br/>Мексика]
+    end
+
+    Markets --> Badges
+
+    style Markets fill:#1565c0,color:#fff
+    style Badges fill:#2e7d32,color:#fff
+```
+
+Renault Symbol (на некоторых рынках — Thalia, Clio Sedan, а также Nissan Platina) — переднеприводный субкомпактный седан сегмента B.
 
 ## Разработка и позиционирование
 

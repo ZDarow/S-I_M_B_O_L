@@ -1,5 +1,22 @@
 # Щётки стеклоочистителя (дворники)
 
+```mermaid
+flowchart LR
+    subgraph Types[Типы щёток]
+        T1[Каркасные]
+        T2[Бескаркасные]
+        T3[Гибридные]
+    end
+    subgraph Symbol[Symbol]
+        S1[Водитель 650-700]
+        S2[Пассажир 400-450]
+        S3[Крючок U-hook]
+    end
+    Types --> Symbol
+    style Types fill:#1565c0,color:#fff
+    style Symbol fill:#2e7d32,color:#fff
+```
+
 ## Размеры для Symbol (седан)
 
 | Позиция | Длина (дюймы) | Длина (мм) | Тип крепления |

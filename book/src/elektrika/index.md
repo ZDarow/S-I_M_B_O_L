@@ -13,6 +13,39 @@
 | Стартер | 1,1 кВт, с тяговым реле |
 | CAN-шина | Присутствует на автомобилях с 2003 года (CAN-FD на поздних версиях) |
 
+### CAN-шина — схема взаимодействия блоков (Symbol II 2003+ / Symbol III)
+
+```mermaid
+flowchart TD
+    subgraph CAN_high[Высокоскоростная CAN 500 кбит/с]
+        ECU[ЭБУ двигателя] --- ABS[Блок ABS]
+        ECU --- TCU[ЭБУ КПП *]
+        ECU --- SRS[Блок SRS]
+        ABS --- ST[ESP / ASR *]
+    end
+    
+    subgraph CAN_low[Низкоскоростная CAN / LIN 125 кбит/с]
+        BCM[Блок комфорта UCH] --> D1[ЭСП передние]
+        BCM --> D2[ЭСП задние]
+        BCM --> Lock[Центральный замок]
+        BCM --> Lights[Освещение салона]
+        BCM --> Wipe[Дворники]
+    end
+    
+    ECU ---|шлюз через UCH| BCM
+    BCM --- OBD[Диагностический разъём OBD2]
+    ABS --- OBD
+    
+    OBD --> Scanner[Сканер / ELM327]
+    
+    style ECU fill:#1565c0,color:#fff
+    style ABS fill:#e65100,color:#fff
+    style BCM fill:#2e7d32,color:#fff
+    style OBD fill:#78909c
+```
+
+> На Symbol I (1999–2002) CAN-шина отсутствует — блоки общаются по K-Line (ISO 9141). Диагностика — через KKL/VAG-COM.
+
 ## Расположение основных элементов
 
 | Элемент | Расположение |
@@ -34,7 +67,7 @@
 
 ## CAN-шина (сеть контроллеров)
 
-На Renault Symbol с 2003–2004 года используется мультиплексная проводка с CAN-шиной (Controller Area Network).
+На Renault Symbol **[Symbol II / Symbol III]** с 2003–2004 года используется мультиплексная проводка с CAN-шиной (Controller Area Network).
 
 | Шина | Скорость | Участники |
 |------|----------|-----------|

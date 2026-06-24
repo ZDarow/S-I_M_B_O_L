@@ -21,6 +21,15 @@
         <meta name="theme-color" content="#1565c0">
         <link rel="manifest" href="{{ path_to_root }}theme/manifest.json">
 
+        <!-- Open Graph / Social -->
+        <meta property="og:title" content="Руководство по ремонту Renault Symbol">
+        <meta property="og:description" content="Технический справочник-руководство по ремонту и эксплуатации Renault Symbol (Thalia). Двигатели K7J, K4J, K7M, K4M, K9K — характеристики, диагностика, обслуживание.">
+        <meta property="og:type" content="website">
+        <meta property="og:locale" content="ru_RU">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="Руководство по ремонту Renault Symbol">
+        <meta name="twitter:description" content="Технический справочник-руководство по ремонту и эксплуатации Renault Symbol (Thalia)">
+
         {{#if favicon_svg}}
         <link rel="icon" href="{{ resource "favicon.svg" }}">
         {{/if}}
@@ -324,6 +333,7 @@
 
         <script src="{{ resource "clipboard.min.js" }}"></script>
         <script src="{{ resource "highlight.js" }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
         <script src="{{ resource "book.js" }}"></script>
 
         <!-- Custom JS scripts -->

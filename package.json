@@ -1,0 +1,15 @@
+{
+  "name": "reno-symbol.ru",
+  "version": "1.0.0",
+  "description": "[![Build & Deploy](https://github.com/mi/reno-symbol.ru/actions/workflows/deploy.yml/badge.svg)](https://github.com/mi/reno-symbol.ru/actions/workflows/deploy.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.15.0"
+  }
+}

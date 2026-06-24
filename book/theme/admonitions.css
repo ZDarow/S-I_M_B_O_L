@@ -1,0 +1,105 @@
+/* Custom admonition blocks — CSS-only, no preprocessor needed */
+
+.admonition {
+    display: flow-root;
+    margin: 1.5625em 0;
+    padding: 0 1.2rem;
+    color: var(--fg);
+    page-break-inside: avoid;
+    background-color: var(--bg);
+    border: 0 solid var(--searchbar-border-color);
+    border-inline-start-width: 0.4rem;
+    border-radius: 0.2rem;
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.05), 0 0 0.1rem rgba(0, 0, 0, 0.1);
+}
+
+.admonition > * {
+    box-sizing: border-box;
+}
+
+.admonition .admonition-title {
+    font-weight: 600;
+    margin: 0 -1.2rem;
+    padding: 0.4rem 1.2rem;
+    border-bottom: 1px solid var(--searchbar-border-color);
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.admonition .admonition-title:empty {
+    display: none;
+}
+
+/* Light theme */
+.admonition.info {
+    border-color: #2196f3;
+    background-color: rgba(33, 150, 243, 0.04);
+}
+
+.admonition.warning {
+    border-color: #ff9800;
+    background-color: rgba(255, 152, 0, 0.04);
+}
+
+.admonition.danger {
+    border-color: #f44336;
+    background-color: rgba(244, 67, 54, 0.04);
+}
+
+.admonition.tip {
+    border-color: #4caf50;
+    background-color: rgba(76, 175, 80, 0.04);
+}
+
+/* Dark: ayu */
+.theme-ayu .admonition {
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.3), 0 0 0.1rem rgba(0, 0, 0, 0.4);
+}
+.theme-ayu .admonition .admonition-title {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+.theme-ayu .admonition.info {
+    border-color: #42a5f5;
+    background-color: rgba(33, 150, 243, 0.12);
+}
+.theme-ayu .admonition.warning {
+    border-color: #ffa726;
+    background-color: rgba(255, 152, 0, 0.12);
+}
+.theme-ayu .admonition.danger {
+    border-color: #ef5350;
+    background-color: rgba(244, 67, 54, 0.12);
+}
+.theme-ayu .admonition.tip {
+    border-color: #66bb6a;
+    background-color: rgba(76, 175, 80, 0.12);
+}
+
+/* Dark: coal (navy) */
+.theme-coal .admonition {
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.4), 0 0 0.1rem rgba(0, 0, 0, 0.5);
+}
+.theme-coal .admonition .admonition-title {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+.theme-coal .admonition.info {
+    border-color: #42a5f5;
+    background-color: rgba(33, 150, 243, 0.15);
+}
+.theme-coal .admonition.warning {
+    border-color: #ffa726;
+    background-color: rgba(255, 152, 0, 0.15);
+}
+.theme-coal .admonition.danger {
+    border-color: #ef5350;
+    background-color: rgba(244, 67, 54, 0.15);
+}
+.theme-coal .admonition.tip {
+    border-color: #66bb6a;
+    background-color: rgba(76, 175, 80, 0.15);
+}
+
+@media print {
+    .admonition {
+        box-shadow: none;
+    }
+}

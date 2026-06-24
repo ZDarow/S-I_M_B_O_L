@@ -1,0 +1,47 @@
+#!/bin/sh
+# Pre-commit hook: проверка качества Markdown перед коммитом
+# Установка: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+echo "🔍 Pre-commit: проверка качества..."
+
+# 1. Проверить, что mdBook собирается
+if command -v mdbook &>/dev/null; then
+    mdbook build book 2>&1 | grep -q "ERROR"
+    if [ $? -eq 0 ]; then
+        echo "❌ mdBook build failed! Исправьте ошибки перед коммитом."
+        mdbook build book 2>&1 | grep "ERROR"
+        exit 1
+    fi
+    echo "✅ mdBook build — OK"
+fi
+
+# 2. Проверить ссылки в изменённых .md файлах
+STAGED_MD=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
+if [ -n "$STAGED_MD" ]; then
+    # Проверить отсутствие сломанных внутренних ссылок (грубая проверка)
+    for f in $STAGED_MD; do
+        if [ -f "$f" ]; then
+            # Ищем ссылки вида (../something.md) и проверяем существование файла
+            LINKS=$(grep -oP '\(\K\.\.[^)]+\.md' "$f" 2>/dev/null || true)
+            for link in $LINKS; do
+                # Относительный путь от корня проекта
+                full_path="book/src/$link"
+                if [ ! -f "$full_path" ]; then
+                    echo "⚠️  Возможно, сломана ссылка в $f: $link"
+                fi
+            done
+        fi
+    done
+    echo "✅ Ссылки проверены"
+fi
+
+# 3. Проверить наличие неиспользуемых `TODO` или `FIXME`
+if [ -n "$STAGED_MD" ]; then
+    TODO_COUNT=$(grep -c 'TODO\|FIXME\|HACK' $STAGED_MD 2>/dev/null || true)
+    if [ "$TODO_COUNT" -gt 0 ]; then
+        echo "⚠️  Найдено $TODO_COUNT TODO/FIXME в staged файлах"
+    fi
+fi
+
+echo "✅ Pre-commit проверка завершена"
+exit 0

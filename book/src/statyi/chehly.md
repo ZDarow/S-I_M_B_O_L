@@ -1,5 +1,22 @@
 # Чехлы на сиденья Renault Symbol
 
+```mermaid
+flowchart LR
+    subgraph Types[Типы чехлов]
+        T1[Универсальные]
+        T2[Экокожа]
+        T3[Велюр / алькантара]
+        T4[Сетчатые]
+    end
+    subgraph Fit[Symbol]
+        F1[Передние раздельные]
+        F2[Задняя нераздельная]
+    end
+    Types --> Fit
+    style Types fill:#1565c0,color:#fff
+    style Fit fill:#2e7d32,color:#fff
+```
+
 ## Типы чехлов
 
 ### Универсальные (бескаркасные)
