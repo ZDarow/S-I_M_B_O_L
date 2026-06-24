@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 MERMAID_RE = re.compile(r'```mermaid\s*\n(.*?)```', re.DOTALL)
 MIN_SVG_SIZE = 50
 MMDC_TIMEOUT = 30
+MAX_RETRIES = 3
 
 
 def find_mmdc() -> str | None:
@@ -40,7 +41,7 @@ def find_mmdc() -> str | None:
 
 def render_svg(mermaid_source: str, output: Path) -> bool:
     """
-    Рендерит mermaid-диаграмму в SVG через mmdc.
+    Рендерит mermaid-диаграмму в SVG через mmdc с повторными попытками.
 
     Args:
         mermaid_source: Исходный код диаграммы (Mermaid DSL)
@@ -54,35 +55,46 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
         logger.error("mmdc не найден. Установите: npm install @mermaid-js/mermaid-cli")
         return False
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".mmd",
-                                     delete=False, encoding="utf-8") as tmp:
-        tmp.write(mermaid_source)
-        tmp_path = tmp.name
+    for attempt in range(1, MAX_RETRIES + 1):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".mmd",
+                                         delete=False, encoding="utf-8") as tmp:
+            tmp.write(mermaid_source)
+            tmp_path = tmp.name
 
-    try:
-        r = subprocess.run(
-            [mmdc, "-i", tmp_path, "-o", str(output),
-             "-b", "transparent", "-w", "1200"],
-            capture_output=True, text=True, timeout=MMDC_TIMEOUT,
-        )
-        if r.returncode != 0:
-            logger.warning("mmdc вернул код %d: %s", r.returncode, r.stderr[:200])
-            return False
-        ok = output.exists() and output.stat().st_size >= MIN_SVG_SIZE
-        if not ok:
-            logger.warning("mmdc создал некорректный SVG: %s", output)
-        return ok
-    except subprocess.TimeoutExpired:
-        logger.warning("mmdc timeout (%ds) для %s", MMDC_TIMEOUT, output)
-        return False
-    except OSError as e:
-        logger.warning("Ошибка mmdc: %s", e)
-        return False
-    finally:
         try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass
+            r = subprocess.run(
+                [mmdc, "-i", tmp_path, "-o", str(output),
+                 "-b", "transparent", "-w", "1200"],
+                capture_output=True, text=True, timeout=MMDC_TIMEOUT,
+            )
+            if r.returncode != 0:
+                logger.warning(
+                    "Попытка %d/%d: mmdc вернул код %d: %s",
+                    attempt, MAX_RETRIES, r.returncode, r.stderr[:200],
+                )
+                if attempt < MAX_RETRIES:
+                    continue
+                return False
+            ok = output.exists() and output.stat().st_size >= MIN_SVG_SIZE
+            if not ok and attempt < MAX_RETRIES:
+                logger.warning("Попытка %d/%d: mmdc создал некорректный SVG", attempt, MAX_RETRIES)
+                continue
+            return ok
+        except subprocess.TimeoutExpired:
+            logger.warning("Попытка %d/%d: mmdc timeout (%ds)", attempt, MAX_RETRIES, MMDC_TIMEOUT)
+            if attempt >= MAX_RETRIES:
+                return False
+        except OSError as e:
+            logger.warning("Попытка %d/%d: Ошибка mmdc: %s", attempt, MAX_RETRIES, e)
+            if attempt >= MAX_RETRIES:
+                return False
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+    return False
 
 
 def hash_mermaid(source: str) -> str:

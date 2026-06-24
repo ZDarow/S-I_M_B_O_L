@@ -70,6 +70,14 @@ jobs:
       - name: Install Python deps
         run: pip3 install pikepdf
 
+      - name: Cache Mermaid SVGs
+        uses: actions/cache@v4
+        with:
+          path: book/src/img/mermaid
+          key: mermaid-${{ hashFiles('book/src/**/*.md') }}
+          restore-keys: |
+            mermaid-
+
       - name: Build book
         run: |
           export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium

@@ -48,14 +48,12 @@ COPY book/ ./book/
 COPY scripts/ ./scripts/
 COPY .puppeteerrc.cjs ./    # Puppeteer ищет конфиг в CWD
 
-# Mermaid-рендеринг + сборка книги (HTML + PDF)
+# Mermaid-рендеринг + сборка книги (HTML + PDF) + пост-обработка
 RUN python3 scripts/mermaid-preprocess.py --render-only && \
     python3 scripts/mermaid-preprocess.py && \
     mdbook build book && \
-    python3 scripts/mermaid-preprocess.py --restore
-
-# Пост-обработка PDF (Letter → A4)
-RUN python3 scripts/pdf-a4.py
+    python3 scripts/mermaid-preprocess.py --restore && \
+    python3 scripts/pdf-a4.py
 
 # ================================================================
 # STAGE 2: Minimal runtime image
@@ -65,8 +63,7 @@ FROM alpine:latest
 RUN apk add --no-cache ca-certificates && \
     adduser -D -H -h /output nobody
 
-COPY --from=builder /app/book/book /output
-RUN chown -R nobody:nobody /output
+COPY --from=builder --chown=nobody:nobody /app/book/book /output
 
 USER nobody
 VOLUME ["/output"]
