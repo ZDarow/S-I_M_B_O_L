@@ -44,6 +44,10 @@ tmp/
 temp/
 *.log
 
+# Portable build output
+portable/
+reno-symbol-portable*.tar.gz
+
 # Audit files (previous review exports)
 аудит/
 audit/
