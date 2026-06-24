@@ -188,8 +188,8 @@ install-hooks:
 
 ## Установка зависимостей (Linux — pre-built бинарники)
 install-deps:
-	@echo "📦 Установка mdBook..."
-	curl -fsSL https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-x86_64-unknown-linux-gnu.tar.gz \
+	@echo "📦 Установка mdBook v0.5.3..."
+	curl -fsSL https://github.com/rust-lang/mdBook/releases/download/v0.5.3/mdbook-v0.5.3-x86_64-unknown-linux-gnu.tar.gz \
 		| tar xzf - -C /usr/local/bin
 	@echo "📦 Установка mdbook-pdf..."
 	curl -fsSL https://github.com/HollowMan6/mdbook-pdf/releases/download/v0.1.13/mdbook-pdf-v0.1.13-x86_64-unknown-linux-gnu \
