@@ -1,3 +1,4 @@
+---
 # Docker Compose для сборки Руководства по ремонту Renault Symbol
 # Использование:
 #   docker compose up --build

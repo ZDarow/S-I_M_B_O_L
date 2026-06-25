@@ -13,7 +13,7 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
-from io import StringIO
+
 
 # ── Настройка путей ─────────────────────────────────────────────
 TESTS_DIR = Path(__file__).resolve().parent
@@ -260,8 +260,11 @@ class TestServe(unittest.TestCase):
         """try_build возвращает False, если html_dir не существует"""
         from scripts.serve import try_build
 
-        result = try_build(Path("/tmp/nonexistent_dir_18915abc"))
-        self.assertFalse(result)
+        import tempfile
+        import uuid
+        nonexistent = Path(tempfile.gettempdir()) / f"nonexistent_{uuid.uuid4().hex[:8]}"
+        ok = try_build(nonexistent)
+        self.assertFalse(ok)
 
 
 # ══════════════════════════════════════════════════════════════════
