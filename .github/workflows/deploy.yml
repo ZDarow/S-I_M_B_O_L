@@ -25,8 +25,7 @@ jobs:
         run: |
           markdownlint 'book/src/**/*.md' \
             --disable MD013 MD033 MD046 \
-            --ignore 'book/book' \
-          || echo "markdownlint warnings (non-blocking)"
+            --ignore 'book/book'
 
       - name: Spellcheck (hunspell)
         run: |
@@ -34,25 +33,24 @@ jobs:
           echo "Проверка орфографии (первые 10 страниц)..."
           for f in $(find book/src -name '*.md' ! -name 'SUMMARY.md' | head -10); do
             echo "--- $f ---"
-            hunspell -d ru_RU -l "$f" | sort -u | head -10 || true
+            hunspell -d ru_RU -l "$f" | sort -u | head -10
           done
 
       - name: Python lint (flake8)
         run: |
           pip3 install flake8
-          flake8 scripts/ --ignore=E501,W503 || echo "flake8 warnings (non-blocking)"
+          flake8 scripts/ --ignore=E501,W503
 
       - name: Markdown internal link checker (mlc)
         run: |
           npm install -g markdown-link-check
           find book/src -name '*.md' ! -name 'SUMMARY.md' \
-            -exec markdown-link-check {} --quiet \; \
-          || echo "link-check warnings (non-blocking)"
+            -exec markdown-link-check {} --quiet \;
 
       - name: Python security (bandit)
         run: |
           pip3 install bandit
-          bandit -r scripts/ -ll -f txt || echo "bandit warnings (non-blocking)"
+          bandit -r scripts/ -ll -f txt
 
       - name: Python unit tests + coverage
         run: |
@@ -123,7 +121,7 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: --include-fragments --no-progress --scheme=https --scheme=http './book/book/html/**/*.html'
-          fail: false
+          fail: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
