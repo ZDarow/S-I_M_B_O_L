@@ -2,6 +2,104 @@
 
 Собраны наиболее частые ошибки, которые допускают начинающие (и не только) мастера при обслуживании и ремонте Symbol. Основано на опыте владельцев и форумов.
 
+<div id="mistakes-filter" style="margin:1em 0">
+  <input type="text" id="mistakes-query" placeholder="🔍 Поиск по ошибке..." style="width:100%;padding:10px 14px;font-size:15px;border:2px solid #ff6b00;border-radius:8px;outline:none;box-sizing:border-box;margin-bottom:0.5em">
+  <div style="display:flex;flex-wrap:wrap;gap:0.3em" id="mistakes-tabs"></div>
+  <div id="mistakes-stats" style="font-size:0.85em;color:#888;margin-top:0.3em;padding:0 0.3em"></div>
+</div>
+
+<script>
+(function() {
+  var input = document.getElementById('mistakes-query');
+  var tabs = document.getElementById('mistakes-tabs');
+  var stats = document.getElementById('mistakes-stats');
+  var container = document.querySelector('.content');
+  var sections = [];
+
+  // Build section list from h2 elements
+  var headers = container.querySelectorAll('h2');
+  var activeSection = 'all';
+
+  headers.forEach(function(h2) {
+    var section = { name: h2.textContent.trim(), el: h2, items: [] };
+    var el = h2.nextElementSibling;
+    while (el && el.tagName !== 'H2') {
+      if (el.tagName === 'H3' || el.tagName === 'TABLE' || el.tagName === 'P') {
+        section.items.push(el);
+      }
+      el = el.nextElementSibling;
+    }
+    sections.push(section);
+  });
+
+  // Build tabs
+  function renderTabs() {
+    var html = '<button class="mistake-tab" data-section="all" style="padding:0.3em 0.7em;border:1px solid #ff6b00;border-radius:4px;background:#ff6b00;color:#fff;cursor:pointer;font-size:0.85em">Все разделы</button>';
+    sections.forEach(function(s) {
+      html += '<button class="mistake-tab" data-section="' + s.name + '" style="padding:0.3em 0.7em;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:0.85em">' + s.name + '</button>';
+    });
+    tabs.innerHTML = html;
+
+    tabs.querySelectorAll('.mistake-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        activeSection = this.dataset.section;
+        tabs.querySelectorAll('.mistake-tab').forEach(function(b) {
+          b.style.background = b.dataset.section === activeSection ? '#ff6b00' : '#fff';
+          b.style.color = b.dataset.section === activeSection ? '#fff' : '#333';
+          b.style.borderColor = b.dataset.section === activeSection ? '#ff6b00' : '#ddd';
+        });
+        filter();
+      });
+    });
+  }
+
+  function filter() {
+    var q = input.value.trim().toLowerCase();
+    var totalItems = 0;
+    var visibleItems = 0;
+
+    sections.forEach(function(section) {
+      var sectionVisible = (activeSection === 'all' || activeSection === section.name);
+      section.el.style.display = sectionVisible ? '' : 'none';
+      var hasVisibleItem = false;
+
+      section.items.forEach(function(item) {
+        totalItems++;
+        var text = item.textContent.toLowerCase();
+        var match = !q || text.indexOf(q) !== -1;
+        var show = sectionVisible && match;
+        item.style.display = show ? '' : 'none';
+        if (show) hasVisibleItem = true;
+        if (show) visibleItems++;
+      });
+
+      // Show h2 only if it has at least one visible item
+      if (sectionVisible) {
+        var next = section.el.nextElementSibling;
+        var hasAnyVisible = false;
+        while (next && next.tagName !== 'H2') {
+          if (next.style.display !== 'none') { hasAnyVisible = true; break; }
+          next = next.nextElementSibling;
+        }
+        section.el.style.display = hasAnyVisible ? '' : 'none';
+      }
+    });
+
+    if (!q && activeSection === 'all') {
+      stats.textContent = 'Всего: ' + totalItems + ' ошибок';
+    } else {
+      stats.textContent = 'Показано: ' + visibleItems + ' из ' + totalItems;
+    }
+  }
+
+  input.addEventListener('input', filter);
+  input.addEventListener('keydown', function(e) { if (e.key === 'Escape') { input.value = ''; filter(); input.blur(); } });
+
+  renderTabs();
+  filter();
+})();
+</script>
+
 ```mermaid
 flowchart LR
     subgraph Kuzov[Кузов и салон]
