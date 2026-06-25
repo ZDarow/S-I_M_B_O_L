@@ -7,11 +7,11 @@ src = "src"
 
 [output.html]
 no-section-label = true
-git-repository-url = "https://github.com/mi/reno-symbol.ru"
+git-repository-url = "https://github.com/ZDarow/S-I_M_B_O_L"
 default-theme = "light"
-preferred-dark-theme = "ayu"
-site-url = "https://mi.github.io/reno-symbol.ru/"
-additional-css = ["./theme/admonitions.css"]
+preferred-dark-theme = "coal"
+site-url = "https://zdarow.github.io/S-I_M_B_O_L/"
+additional-css = ["./theme/admonitions.css", "./theme/css/renault.css"]
 
 [output.html.search]
 enable = true

@@ -1,0 +1,447 @@
+/* ==============================================================
+   Renault Symbol Repair Manual — кастомная тема
+   Лицензия: MIT (как и основной проект)
+   ============================================================== */
+
+/* --- Цветовая схема Renault --- */
+:root {
+  --renault-orange: #ff6b00;
+  --renault-orange-dark: #cc5500;
+  --renault-gray: #4a4a4a;
+  --renault-light-gray: #f5f5f5;
+
+  /* Основная палитра (light) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-sidebar: #f0f2f5;
+  --fg-primary: #1a1a2e;
+  --fg-secondary: #555555;
+  --fg-muted: #888888;
+  --accent: var(--renault-orange);
+  --accent-hover: var(--renault-orange-dark);
+  --border: #ddd;
+  --code-bg: #f4f4f8;
+  --table-stripe: rgba(0,0,0,0.03);
+  --link: #1565c0;
+  --link-hover: #0d47a1;
+  --success: #2e7d32;
+  --warning: #e65100;
+  --info: #0277bd;
+}
+
+/* --- Тёмная тема (принудительно через класс .coal) --- */
+.coal {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-sidebar: #161b22;
+  --fg-primary: #e6edf3;
+  --fg-secondary: #8b949e;
+  --fg-muted: #6e7681;
+  --accent: #ff6b00;
+  --accent-hover: #ff8533;
+  --border: #30363d;
+  --code-bg: #1c2128;
+  --table-stripe: rgba(255,255,255,0.03);
+  --link: #58a6ff;
+  --link-hover: #79b8ff;
+  --success: #3fb950;
+  --warning: #d29922;
+  --info: #58a6ff;
+}
+
+/* --- Адаптация mdBook-темы ayu к бренду --- */
+.ayu {
+  --accent: #ff6b00;
+  --accent-hover: #ff8533;
+}
+
+/* --- Базовые стили --- */
+body {
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: var(--fg-primary);
+  background: var(--bg-primary);
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* --- Брендирование меню-бара --- */
+.menu-bar {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--accent);
+}
+
+.menu-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--fg-primary);
+}
+
+.menu-title::before {
+  content: "🔧 ";
+}
+
+/* --- Сайдбар --- */
+.sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-scrollbox {
+  padding: 0.5rem 0;
+}
+
+.sidebar-scrollbox a {
+  color: var(--fg-secondary);
+  border-left: 3px solid transparent;
+  padding: 0.4rem 1rem;
+  transition: all 0.15s ease;
+}
+
+.sidebar-scrollbox a:hover {
+  color: var(--accent);
+  background: rgba(255,107,0,0.06);
+  border-left-color: var(--accent);
+  text-decoration: none;
+}
+
+.sidebar-scrollbox li {
+  margin: 0;
+}
+
+.sidebar-scrollbox li.chapter-item {
+  margin-top: 0.25rem;
+}
+
+.sidebar-scrollbox .section-title {
+  font-weight: 600;
+  color: var(--fg-primary);
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-scrollbox .chapter li a {
+  padding-left: 1.5rem;
+}
+
+.sidebar-scrollbox .chapter li li a {
+  padding-left: 2.5rem;
+}
+
+/* Активная страница */
+.sidebar-scrollbox a.active {
+  color: var(--accent);
+  background: rgba(255,107,0,0.1);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+/* --- Контент --- */
+.content {
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.content h1 {
+  color: var(--fg-primary);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.4rem;
+  margin-top: 2rem;
+  font-weight: 700;
+}
+
+.content h1:first-of-type {
+  margin-top: 0;
+}
+
+.content h2 {
+  color: var(--fg-primary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 1.8rem;
+  font-weight: 600;
+}
+
+.content h3, .content h4 {
+  color: var(--fg-primary);
+  margin-top: 1.5rem;
+  font-weight: 600;
+}
+
+.content a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.content a:hover {
+  color: var(--link-hover);
+  border-bottom-color: var(--link-hover);
+}
+
+.content strong {
+  color: var(--fg-primary);
+}
+
+.content code {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-size: 0.875em;
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  color: var(--fg-primary);
+}
+
+.content pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.content pre code {
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+/* --- Таблицы: mobile-first --- */
+.content table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .content table {
+    white-space: normal;
+  }
+}
+
+.content table thead {
+  background: var(--accent);
+  color: #fff;
+}
+
+.content table th {
+  padding: 0.6rem 0.8rem;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.content table td {
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.content table tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+/* --- Кастомный класс для контейнера таблицы (для md, где нужен скролл) --- */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.table-wrapper table {
+  margin: 0;
+  border: none;
+}
+
+/* --- Блоки предупреждений (admonition) --- */
+.admonition {
+  border-radius: 6px;
+  border-left: 4px solid;
+  margin: 1.5rem 0;
+  padding: 0.8rem 1rem;
+}
+
+.admonition.note {
+  background: rgba(2,119,189,0.08);
+  border-color: var(--info);
+}
+
+.admonition.warning {
+  background: rgba(230,81,0,0.08);
+  border-color: var(--warning);
+}
+
+.admonition.success {
+  background: rgba(46,125,50,0.08);
+  border-color: var(--success);
+}
+
+.admonition-title {
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+/* --- Изображения --- */
+.content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin: 1rem 0;
+}
+
+/* --- Collapsible (details) --- */
+details {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.3rem 0;
+  outline: none;
+}
+
+details summary::-webkit-details-marker {
+  color: var(--accent);
+}
+
+details[open] {
+  padding-bottom: 1rem;
+}
+
+details[open] summary {
+  margin-bottom: 0.8rem;
+}
+
+/* --- Бейджи статуса (Shields.io) --- */
+.content img.status-badge {
+  display: inline-block;
+  margin: 0 0.2rem;
+  vertical-align: middle;
+  box-shadow: none;
+  border-radius: 3px;
+}
+
+/* --- Кнопки навигации --- */
+.nav-chapters {
+  color: var(--accent) !important;
+  font-size: 2rem;
+  transition: color 0.15s;
+}
+
+.nav-chapters:hover {
+  color: var(--accent-hover) !important;
+}
+
+/* --- Анимация для схем --- */
+.content .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- Оглавление --- */
+.content .table-of-contents {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+}
+
+/* --- Подвал --- */
+footer {
+  border-top: 1px solid var(--border);
+  margin-top: 3rem;
+  padding-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fg-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-secondary);
+}
+
+/* --- Print styles --- */
+@media print {
+  .menu-bar, .sidebar, .nav-chapters, .nav-wide-wrapper,
+  #mdbook-sidebar-toggle, #mdbook-theme-toggle, #mdbook-search-toggle {
+    display: none !important;
+  }
+
+  .content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+  }
+
+  .content a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+
+  .content pre, .content code {
+    background: #f5f5f5 !important;
+    border: 1px solid #ccc !important;
+  }
+
+  .content table {
+    white-space: normal;
+    font-size: 10pt;
+  }
+
+  .content img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  .content h1, .content h2, .content h3, .content h4 {
+    page-break-after: avoid;
+  }
+
+  .content h1 {
+    font-size: 18pt;
+  }
+
+  .content h2 {
+    font-size: 14pt;
+  }
+
+  .content h3 {
+    font-size: 12pt;
+  }
+}
