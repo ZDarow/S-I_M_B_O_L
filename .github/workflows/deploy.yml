@@ -42,14 +42,23 @@ jobs:
           pip3 install flake8
           flake8 scripts/ --ignore=E501,W503 || echo "flake8 warnings (non-blocking)"
 
+      - name: Markdown internal link checker (mlc)
+        run: |
+          npm install -g markdown-link-check
+          find book/src -name '*.md' ! -name 'SUMMARY.md' \
+            -exec markdown-link-check {} --quiet \; \
+          || echo "link-check warnings (non-blocking)"
+
       - name: Python security (bandit)
         run: |
           pip3 install bandit
           bandit -r scripts/ -ll -f txt || echo "bandit warnings (non-blocking)"
 
-      - name: Python unit tests
+      - name: Python unit tests + coverage
         run: |
-          python3 -m unittest scripts.test_portable -v
+          pip3 install coverage
+          coverage run -m unittest scripts.test_portable -v
+          coverage report --show-missing
 
       - name: Check trailing whitespace
         run: |
