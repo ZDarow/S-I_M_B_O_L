@@ -36,8 +36,8 @@ fi
 
 # 3. Проверить наличие неиспользуемых `TODO` или `FIXME`
 if [ -n "$STAGED_MD" ]; then
-    TODO_COUNT=$(grep -c 'TODO\|FIXME\|HACK' "$STAGED_MD" 2>/dev/null || true)
-    if [ "$TODO_COUNT" -gt 0 ]; then
+    TODO_COUNT=$(grep -c 'TODO\|FIXME\|HACK' "$STAGED_MD" 2>/dev/null || echo 0)
+    if [ "${TODO_COUNT:-0}" -gt 0 ] 2>/dev/null; then
         echo "⚠️  Найдено $TODO_COUNT TODO/FIXME в staged файлах"
     fi
 fi
