@@ -1,5 +1,94 @@
 # OEM-каталог запчастей
 
+<input type="text" id="oem-search" placeholder="🔍 Поиск по названию, OEM-номеру или аналогу..." style="width:100%;padding:10px 14px;font-size:15px;border:2px solid #ff6b00;border-radius:8px;margin:10px 0 20px;outline:none;box-sizing:border-box">
+
+<div id="oem-search-results" style="display:none;margin-bottom:20px"></div>
+
+<script>
+(function() {
+  var searchBox = document.getElementById('oem-search');
+  var resultsDiv = document.getElementById('oem-search-results');
+  
+  // OEM data embedded from catalog
+  var parts = [
+    {name:"Масляный фильтр",oem:"7700 275 724",engines:"K7J, K7M",analogs:["MANN W 75/3","Mahle OC 139","Bosch 0 986 452 002","Purflux LS 891"]},
+    {name:"Масляный фильтр",oem:"7700 275 727",engines:"K4J, K4M",analogs:["MANN W 75/1","Mahle OC 144","Bosch 0 986 452 029","Purflux LS 867"]},
+    {name:"Масляный фильтр",oem:"7700 275 733",engines:"K9K",analogs:["MANN W 1214/1","Mahle OC 198","Bosch 0 986 452 078"]},
+    {name:"Воздушный фильтр",oem:"77 01 036 983",engines:"K7J, K7M",analogs:["MANN C 27 778","Mahle LX 403","Bosch 1 457 433 943"]},
+    {name:"Воздушный фильтр",oem:"77 01 035 954",engines:"K4J, K4M",analogs:["MANN C 27 704","Mahle LX 427","Bosch 1 457 433 990"]},
+    {name:"Топливный фильтр",oem:"77 00 842 313",engines:"все бензин",analogs:["MANN WK 614","Mahle KL 11"]},
+    {name:"Свеча зажигания",oem:"77 00 500 204",engines:"K7J/7M",analogs:["NGK BKR6E","Bosch FR7DC"]},
+    {name:"Ремень ГРМ комплект",oem:"77 01 471 730",engines:"K7J, K7M",analogs:["Gates 5438XS","Conti CT995"]},
+    {name:"Ремень ГРМ комплект",oem:"77 01 471 734",engines:"K4J, K4M",analogs:["Gates 5429XS","Conti CT1013"]},
+    {name:"Помпа",oem:"77 00 500 372",engines:"K7J, K7M",analogs:["SKF VPC 1035","Hepu P152"]},
+    {name:"Помпа",oem:"77 00 500 373",engines:"K4J, K4M",analogs:["SKF VPC 1036","Hepu P153"]},
+    {name:"Катушка зажигания",oem:"77 00 500 205",engines:"K4J, K4M",analogs:["Bosch 0 221 004 003","Valeo 245061"]},
+    {name:"Радиатор охлаждения",oem:"77 01 035 721",engines:"K7J, K7M",analogs:["Valeo 732110","Nissens 63969A"]},
+    {name:"Термостат",oem:"77 00 500 388",engines:"все",analogs:["Vernet VR 103","Wahler 4031.87"]},
+    {name:"Колодки передние",oem:"77 01 022 743",engines:"Symbol I/II до 2005",analogs:["TRW GDB1722","Bosch 0 986 473 064"]},
+    {name:"Колодки передние",oem:"77 01 048 979",engines:"Symbol II/III после 2005",analogs:["TRW GDB1725","Bosch 0 986 494 198"]},
+    {name:"Колодки задние",oem:"77 01 026 784",engines:"Symbol I/II",analogs:["TRW GS8570","Ferodo FSB908"]},
+    {name:"Диск тормозной передний",oem:"77 01 023 797",engines:"Symbol I/II",analogs:["TRW DF6245","Brembo 09.8165.10"]},
+    {name:"Диск тормозной передний",oem:"77 01 048 987",engines:"Symbol II/III",analogs:["TRW DF6570","Brembo 09.A033.11"]},
+    {name:"Амортизатор передний",oem:"77 01 035 629",engines:"Symbol I/II",analogs:["Monroe G7335","KYB 333244","Sachs 200 950"]},
+    {name:"Амортизатор передний",oem:"77 01 048 995",engines:"Symbol III",analogs:["Monroe G8446","KYB 349144"]},
+    {name:"Стойка стабилизатора",oem:"77 01 036 163",engines:"все",analogs:["Lemforder 26763 02","TRW JTS1111"]},
+    {name:"Шаровая опора",oem:"77 01 036 161",engines:"все",analogs:["Lemforder 28123 02","TRW JBJ650","Febi 10278"]},
+    {name:"Рулевой наконечник",oem:"77 01 036 159",engines:"все",analogs:["Lemforder 26013 02","TRW JTE121"]},
+    {name:"Ступица передняя",oem:"77 01 036 165",engines:"все",analogs:["SKF VKBA 6866","SNR R155.67"]},
+    {name:"Комплект сцепления",oem:"77 01 036 015",engines:"K7J (JB3)",analogs:["Valeo 835017","Luk 622 0020 10","Sachs 3108 000 055"]},
+    {name:"Комплект сцепления",oem:"77 01 036 016",engines:"K7M/K4J/K4M (JC5)",analogs:["Valeo 835074","Luk 622 0025 10"]},
+    {name:"Генератор 80A",oem:"77 00 500 831",engines:"K7J",analogs:["Valeo 2541305","Bosch 0 986 041 350"]},
+    {name:"Генератор 120A",oem:"77 00 500 832",engines:"K4J, K4M",analogs:["Valeo 2542301","Bosch 0 986 041 620"]},
+    {name:"Стартер",oem:"77 00 500 833",engines:"K7J, K7M",analogs:["Valeo 458213","Bosch 0 001 108 302"]},
+    {name:"Лямбда-зонд передний",oem:"82 00 500 457",engines:"все",analogs:["Bosch 0 258 003 001","NGK 1801","Denso DOX-0102"]},
+    {name:"Датчик коленвала",oem:"77 00 500 843",engines:"все",analogs:["Bosch 0 261 210 203","Febi 18651"]},
+    {name:"Датчик ABS",oem:"82 00 500 456",engines:"все",analogs:["Bosch 0 265 311 003","Febi 36113"]},
+    {name:"Катализатор",oem:"77 01 035 845",engines:"K7J",analogs:["Bosch 2 097 000 011","Walker 22891"]},
+    {name:"Глушитель задний",oem:"77 01 035 850",engines:"все",analogs:["Bosch 2 097 000 110","Walker 22344"]},
+    {name:"Фильтр салона",oem:"77 01 036 857",engines:"Symbol I/II",analogs:["MANN CU 24 014","Mahle LA 271"]},
+    {name:"Фара передняя левая",oem:"77 01 036 211",engines:"Symbol II",analogs:["Tyc 311-0011","Valeo 061154"]},
+    {name:"Лампа H4",oem:"77 01 208 856",engines:"все",analogs:["Philips 12342","Osram 64210"]},
+    {name:"Прокладка ГБЦ",oem:"77 00 500 301",engines:"K7J",analogs:["Elring 366.210","Victor Reinz 61-36750-00"]},
+    {name:"Сальник коленвала передний",oem:"77 00 500 321",engines:"все",analogs:["Elring 265.210","SKF 12840"]}
+  ];
+
+  function searchParts(query) {
+    if (!query || query.length < 2) {
+      resultsDiv.style.display = 'none';
+      return;
+    }
+    var q = query.toLowerCase();
+    var matches = parts.filter(function(p) {
+      return p.name.toLowerCase().indexOf(q) !== -1 ||
+             p.oem.replace(/\\s/g,'').toLowerCase().indexOf(q.replace(/\\s/g,'')) !== -1 ||
+             p.engines.toLowerCase().indexOf(q) !== -1 ||
+             p.analogs.some(function(a) { return a.toLowerCase().indexOf(q) !== -1; });
+    });
+    if (matches.length === 0) {
+      resultsDiv.style.display = 'block';
+      resultsDiv.innerHTML = '<div style="padding:20px;text-align:center;color:#888">Ничего не найдено. Попробуйте другой запрос.</div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#ff6b00;color:#fff">' +
+      '<th style="padding:8px">Деталь</th><th style="padding:8px">OEM №</th><th style="padding:8px">Для двигателя</th><th style="padding:8px">Аналоги</th></tr></thead><tbody>';
+    matches.forEach(function(p) {
+      html += '<tr style="border-bottom:1px solid #ddd">' +
+        '<td style="padding:8px;font-weight:600">' + p.name + '</td>' +
+        '<td style="padding:8px;font-family:monospace;color:#1565c0;font-weight:bold">' + p.oem + '</td>' +
+        '<td style="padding:8px;font-size:0.9em">' + p.engines + '</td>' +
+        '<td style="padding:8px;font-size:0.9em">' + p.analogs.join(', ') + '</td></tr>';
+    });
+    html += '</tbody></table><p style="font-size:0.85em;color:#888;margin-top:8px">Найдено: ' + matches.length + '</p>';
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = html;
+  }
+
+  searchBox.addEventListener('input', function() { searchParts(this.value); });
+  searchBox.addEventListener('keydown', function(e) { if (e.key === 'Escape') { this.value = ''; resultsDiv.style.display = 'none'; } });
+})();
+</script>
+
 ```mermaid
 flowchart LR
     subgraph Engine[Двигатель]
@@ -196,6 +285,145 @@ flowchart LR
 | Задняя | 300 мм (12") | Спец. | **77 11 750 998** | Bosch H302 |
 
 > **Совет:** Для зимы используйте беспроволочные (гибридные) щётки — не примерзают.
+
+## Система охлаждения
+
+### Радиатор
+
+| Тип | Оригинал Renault | Аналоги |
+|-----|-----------------|---------|
+| K7J, K7M | **77 01 035 721** | Valeo 732110, Nissens 63969A, FRIGAIR 5001.1062 |
+| K4J, K4M | **77 01 048 893** | Valeo 732112, Nissens 63971A |
+
+### Термостат
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| K7J, K7M | **77 00 500 388** | Vernet VR 103, Wahler 4031.87, Gates 32078 |
+| K4J, K4M | **77 00 500 389** | Vernet VR 104, Wahler 4032.87 |
+
+### Помпа водяная
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| K7J, K7M | **77 00 500 372** | SKF VPC 1035, Hepu P152, Gates 4209 |
+| K4J, K4M | **77 00 500 373** | SKF VPC 1036, Hepu P153, Gates 4210 |
+
+### Расширительный бачок
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| Все | **77 00 500 381** | Valeo 703211, Nissens 50247 |
+
+### Вентилятор охлаждения (в сборе)
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| Все | **77 01 035 722** | Valeo 104680, Nissens 81148 |
+
+## Система выпуска
+
+### Приёмная труба («штаны»)
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| K7J | **77 01 035 841** | Bosch 2 097 000 001, Walker 21788 |
+| K7M | **77 01 035 842** | Bosch 2 097 000 002, Walker 21789 |
+
+### Катализатор
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| K7J | **77 01 035 845** | Bosch 2 097 000 011, Walker 22891 |
+| K4J, K4M | **77 01 035 846** | Bosch 2 097 000 012 |
+
+### Глушитель задний
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| Все | **77 01 035 850** | Bosch 2 097 000 110, Walker 22344, Sonic S1005 |
+
+## Сцепление
+
+### Комплект сцепления (диск + корзина + выжимной)
+
+| Двигатель / КПП | Оригинал Renault | Аналоги |
+|-----------------|-----------------|---------|
+| K7J (КПП JB3) | **77 01 036 015** | Valeo 835017, Luk 622 0020 10, Sachs 3108 000 055 |
+| K7M, K4J, K4M (КПП JC5) | **77 01 036 016** | Valeo 835074, Luk 622 0025 10, Sachs 3108 000 081 |
+| K9K | **77 01 036 019** | Valeo 835118, Luk 622 0030 10 |
+
+### Выжимной подшипник
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| Все МКПП | **77 01 036 020** | SKF VKM 15001, SNR GT351.11 |
+
+## Электрика и датчики
+
+### Генератор
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| K7J (80 А) | **77 00 500 831** | Valeo 2541305, Bosch 0 986 041 350 |
+| K4J, K4M (120 А) | **77 00 500 832** | Valeo 2542301, Bosch 0 986 041 620 |
+
+### Стартер
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| K7J, K7M | **77 00 500 833** | Valeo 458213, Bosch 0 001 108 302 |
+| K4J, K4M | **77 00 500 834** | Valeo 458214 |
+
+### Датчики
+
+| Название | Оригинал Renault | Аналоги |
+|----------|-----------------|---------|
+| Датчик коленвала | **77 00 500 843** | Bosch 0 261 210 203, Febi 18651 |
+| Датчик распредвала | **77 00 500 844** | Bosch 0 261 210 204 |
+| Датчик фазы | **77 00 500 845** | Bosch 0 261 210 205 |
+| Лямбда-зонд (передний) | **82 00 500 457** | Bosch 0 258 003 001, NGK 1801, Denso DOX-0102 |
+| Лямбда-зонд (задний) | **82 00 500 458** | Bosch 0 258 003 002, NGK 1802 |
+| Датчик ABS | **82 00 500 456** | Bosch 0 265 311 003, Febi 36113 |
+| Дроссельная заслонка (в сборе) | **77 00 500 847** | Valeo 254540, Pierburg 7.03621.01 |
+
+## Кузов и салон
+
+### Оптика
+
+| Название | Оригинал Renault | Аналоги |
+|----------|-----------------|---------|
+| Фара левая (Symbol II) | **77 01 036 211** | Tyc 311-0011, Valeo 061154 |
+| Фара правая (Symbol II) | **77 01 036 212** | Tyc 311-0012, Valeo 061155 |
+| Фонарь задний левый (Symbol II) | **77 01 036 221** | Tyc 321-0011 |
+| Фонарь задний правый (Symbol II) | **77 01 036 222** | Tyc 321-0012 |
+
+### Зеркала
+
+| Название | Оригинал Renault | Аналоги |
+|----------|-----------------|---------|
+| Зеркало левое | **77 01 036 201** | Tyc 301-0011, Van Wezel 4638811 |
+| Зеркало правое | **77 01 036 202** | Tyc 301-0012 |
+
+## Прокладки и сальники
+
+### Прокладка ГБЦ
+
+| Двигатель | Оригинал Renault | Аналоги |
+|-----------|-----------------|---------|
+| K7J | **77 00 500 301** | Elring 366.210, Victor Reinz 61-36750-00 |
+| K7M | **77 00 500 302** | Elring 366.220 |
+| K4J | **77 00 500 303** | Elring 366.230 |
+| K4M | **77 00 500 304** | Elring 366.240 |
+
+### Прокладки и сальники
+
+| Название | Оригинал Renault | Аналоги |
+|----------|-----------------|---------|
+| Прокладка клапанной крышки | **77 00 500 311** | Elring 182.310 |
+| Прокладка впускного коллектора | **77 00 500 312** | Elring 182.320 |
+| Сальник коленвала (передний) | **77 00 500 321** | Elring 265.210, SKF 12840 |
+| Сальник коленвала (задний) | **77 00 500 322** | Elring 265.220, SKF 12841 |
 
 ## Как найти номер по VIN
 

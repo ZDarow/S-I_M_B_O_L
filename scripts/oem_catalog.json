@@ -1,0 +1,178 @@
+[
+  {
+    "category": "Двигатель — система смазки",
+    "parts": [
+      {"name": "Масляный фильтр", "oem": "7700 275 724", "engines": "K7J, K7M", "analogs": ["MANN W 75/3", "Mahle OC 139", "Bosch 0 986 452 002", "Purflux LS 891"]},
+      {"name": "Масляный фильтр", "oem": "7700 275 727", "engines": "K4J, K4M", "analogs": ["MANN W 75/1", "Mahle OC 144", "Bosch 0 986 452 029", "Purflux LS 867"]},
+      {"name": "Масляный фильтр", "oem": "7700 275 733", "engines": "K9K", "analogs": ["MANN W 1214/1", "Mahle OC 198", "Bosch 0 986 452 078"]}
+    ]
+  },
+  {
+    "category": "Двигатель — система питания",
+    "parts": [
+      {"name": "Воздушный фильтр", "oem": "77 01 036 983", "engines": "K7J, K7M", "analogs": ["MANN C 27 778", "Mahle LX 403", "Bosch 1 457 433 943"]},
+      {"name": "Воздушный фильтр", "oem": "77 01 035 954", "engines": "K4J, K4M", "analogs": ["MANN C 27 704", "Mahle LX 427", "Bosch 1 457 433 990"]},
+      {"name": "Воздушный фильтр", "oem": "82 00 428 896", "engines": "K9K", "analogs": ["MANN C 27 773", "Mahle LX 423"]},
+      {"name": "Топливный фильтр", "oem": "77 00 842 313", "engines": "K7J, K7M", "analogs": ["MANN WK 614", "Mahle KL 11", "Bosch 1 457 434 209"]},
+      {"name": "Топливный фильтр", "oem": "77 00 845 063", "engines": "K4J, K4M", "analogs": ["MANN WK 614/1", "Mahle KL 14", "Bosch 1 457 434 229"]},
+      {"name": "Топливный фильтр", "oem": "77 00 842 455", "engines": "K9K", "analogs": ["MANN WK 5 016", "Mahle KL 67"]}
+    ]
+  },
+  {
+    "category": "Двигатель — система зажигания",
+    "parts": [
+      {"name": "Свеча зажигания", "oem": "77 00 500 187", "engines": "K7J до 2002", "analogs": ["NGK BPR6ES", "Bosch WR7DC", "Champion N9YC"]},
+      {"name": "Свеча зажигания", "oem": "77 00 500 204", "engines": "K7J после 2002, K7M", "analogs": ["NGK BKR6E", "Bosch FR7DC", "Champion RC9YC"]},
+      {"name": "Свеча зажигания", "oem": "77 00 500 193", "engines": "K4J, K4M", "analogs": ["NGK PFR6G", "Bosch FR7DP"]},
+      {"name": "Катушка зажигания", "oem": "77 00 500 205", "engines": "K4J, K4M", "analogs": ["Bosch 0 221 004 003", "Valeo 245061"]},
+      {"name": "Высоковольтные провода (комплект)", "oem": "77 00 500 217", "engines": "K7J, K7M", "analogs": ["NGK 7256", "Bosch 1 987 480 011"]}
+    ]
+  },
+  {
+    "category": "Двигатель — ГРМ",
+    "parts": [
+      {"name": "Ремень ГРМ (комплект)", "oem": "77 01 471 730", "engines": "K7J, K7M", "analogs": ["Gates 5438XS", "Conti CT995", "SKF VKMA 34010"]},
+      {"name": "Ремень ГРМ (комплект)", "oem": "77 01 471 734", "engines": "K4J, K4M", "analogs": ["Gates 5429XS", "Conti CT1013", "SKF VKMA 34012"]},
+      {"name": "Ремень ГРМ (комплект)", "oem": "77 01 471 746", "engines": "K9K", "analogs": ["Gates 5537XS", "SKF VKMA 35130"]},
+      {"name": "Помпа водяная", "oem": "77 00 500 372", "engines": "K7J, K7M", "analogs": ["SKF VPC 1035", "Hepu P152", "Gates 4209"]},
+      {"name": "Помпа водяная", "oem": "77 00 500 373", "engines": "K4J, K4M", "analogs": ["SKF VPC 1036", "Hepu P153", "Gates 4210"]}
+    ]
+  },
+  {
+    "category": "Система охлаждения",
+    "parts": [
+      {"name": "Радиатор охлаждения", "oem": "77 01 035 721", "engines": "K7J, K7M", "analogs": ["Valeo 732110", "Nissens 63969A", "FRIGAIR 5001.1062"]},
+      {"name": "Радиатор охлаждения", "oem": "77 01 048 893", "engines": "K4J, K4M", "analogs": ["Valeo 732112", "Nissens 63971A"]},
+      {"name": "Расширительный бачок", "oem": "77 00 500 381", "engines": "все", "analogs": ["Valeo 703211", "Nissens 50247"]},
+      {"name": "Термостат", "oem": "77 00 500 388", "engines": "K7J, K7M", "analogs": ["Vernet VR 103", "Wahler 4031.87", "Gates 32078"]},
+      {"name": "Термостат", "oem": "77 00 500 389", "engines": "K4J, K4M", "analogs": ["Vernet VR 104", "Wahler 4032.87"]},
+      {"name": "Вентилятор охлаждения (в сборе)", "oem": "77 01 035 722", "engines": "все", "analogs": ["Valeo 104680", "Nissens 81148"]}
+    ]
+  },
+  {
+    "category": "Система выпуска",
+    "parts": [
+      {"name": "Приёмная труба (штаны)", "oem": "77 01 035 841", "engines": "K7J", "analogs": ["Bosch 2 097 000 001", "Walker 21788"]},
+      {"name": "Приёмная труба (штаны)", "oem": "77 01 035 842", "engines": "K7M", "analogs": ["Bosch 2 097 000 002", "Walker 21789"]},
+      {"name": "Катализатор", "oem": "77 01 035 845", "engines": "K7J", "analogs": ["Bosch 2 097 000 011", "Walker 22891"]},
+      {"name": "Катализатор", "oem": "77 01 035 846", "engines": "K4J, K4M", "analogs": ["Bosch 2 097 000 012"]},
+      {"name": "Глушитель задний", "oem": "77 01 035 850", "engines": "все", "analogs": ["Bosch 2 097 000 110", "Walker 22344", "Sonic S1005"]},
+      {"name": "Глушитель средний (резонатор)", "oem": "77 01 035 848", "engines": "все", "analogs": ["Bosch 2 097 000 108", "Walker 22343"]}
+    ]
+  },
+  {
+    "category": "Сцепление",
+    "parts": [
+      {"name": "Комплект сцепления", "oem": "77 01 036 015", "engines": "K7J (JB3)", "analogs": ["Valeo 835017", "Luk 622 0020 10", "Sachs 3108 000 055"]},
+      {"name": "Комплект сцепления", "oem": "77 01 036 016", "engines": "K7M, K4J, K4M (JC5)", "analogs": ["Valeo 835074", "Luk 622 0025 10", "Sachs 3108 000 081"]},
+      {"name": "Комплект сцепления", "oem": "77 01 036 019", "engines": "K9K", "analogs": ["Valeo 835118", "Luk 622 0030 10"]},
+      {"name": "Выжимной подшипник", "oem": "77 01 036 020", "engines": "все МКПП", "analogs": ["SKF VKM 15001", "SNR GT351.11"]},
+      {"name": "Главный цилиндр сцепления", "oem": "77 01 036 022", "engines": "все", "analogs": ["TRW PJQ100", "Febi 23785"]}
+    ]
+  },
+  {
+    "category": "Тормозная система",
+    "parts": [
+      {"name": "Колодки передние", "oem": "77 01 022 743", "engines": "Symbol I/II до 2005", "analogs": ["TRW GDB1722", "Bosch 0 986 473 064", "Ferodo FDB1891"]},
+      {"name": "Колодки передние", "oem": "77 01 048 979", "engines": "Symbol II/III после 2005", "analogs": ["TRW GDB1725", "Bosch 0 986 494 198", "Ferodo FDB2096"]},
+      {"name": "Колодки задние (барабан)", "oem": "77 01 026 784", "engines": "Symbol I/II", "analogs": ["TRW GS8570", "Ferodo FSB908"]},
+      {"name": "Колодки задние (барабан)", "oem": "77 01 048 983", "engines": "Symbol III", "analogs": ["TRW GS8600", "Ferodo FSB910"]},
+      {"name": "Диск тормозной передний", "oem": "77 01 023 797", "engines": "Symbol I/II", "analogs": ["TRW DF6245", "Brembo 09.8165.10"]},
+      {"name": "Диск тормозной передний", "oem": "77 01 048 987", "engines": "Symbol II/III", "analogs": ["TRW DF6570", "Brembo 09.A033.11"]},
+      {"name": "Главный тормозной цилиндр", "oem": "77 01 022 750", "engines": "все", "analogs": ["TRW PMH131", "Bosch 0 986 498 010"]},
+      {"name": "Блок ABS Bosch 5.3", "oem": "77 01 022 758", "engines": "Symbol I/II до 2005", "analogs": ["Bosch 0 265 222 053"]},
+      {"name": "Блок ABS Bosch 8.0", "oem": "77 01 048 861", "engines": "Symbol II/III после 2005", "analogs": ["Bosch 0 265 224 080"]}
+    ]
+  },
+  {
+    "category": "Подвеска и рулевое",
+    "parts": [
+      {"name": "Амортизатор передний", "oem": "77 01 035 629", "engines": "Symbol I/II", "analogs": ["Monroe G7335", "KYB 333244", "Sachs 200 950"]},
+      {"name": "Амортизатор передний", "oem": "77 01 048 995", "engines": "Symbol III", "analogs": ["Monroe G8446", "KYB 349144"]},
+      {"name": "Амортизатор задний", "oem": "77 01 035 630", "engines": "все", "analogs": ["Monroe G7336", "KYB 343315", "Sachs 200 952"]},
+      {"name": "Пружина передняя", "oem": "77 01 035 635", "engines": "K7J, K7M", "analogs": ["KYB RH7301", "Sachs 993 223"]},
+      {"name": "Пружина передняя", "oem": "77 01 035 636", "engines": "K4J, K4M", "analogs": ["KYB RH7302"]},
+      {"name": "Стойка стабилизатора", "oem": "77 01 036 163", "engines": "все", "analogs": ["Lemförder 26763 02", "TRW JTS1111", "Febi 22267"]},
+      {"name": "Шаровая опора", "oem": "77 01 036 161", "engines": "все", "analogs": ["Lemförder 28123 02", "TRW JBJ650", "Febi 10278"]},
+      {"name": "Сайлентблок рычага (передний)", "oem": "77 01 036 157", "engines": "все", "analogs": ["Lemförder 25612 03", "TRW JBU1015"]},
+      {"name": "Сайлентблок рычага (задний)", "oem": "77 01 036 169", "engines": "все", "analogs": ["Lemförder 25613 03", "TRW JBU1034"]},
+      {"name": "Рулевой наконечник", "oem": "77 01 036 159", "engines": "все", "analogs": ["Lemförder 26013 02", "TRW JTE121", "Febi 18141"]},
+      {"name": "Тяга рулевая", "oem": "77 01 036 160", "engines": "все", "analogs": ["Lemförder 26111 02", "TRW JTR211"]},
+      {"name": "Ступица передняя (подшипник)", "oem": "77 01 036 165", "engines": "все", "analogs": ["SKF VKBA 6866", "SNR R155.67", "FAG 713 6401 40"]},
+      {"name": "Ступица задняя (подшипник)", "oem": "77 01 036 167", "engines": "все", "analogs": ["SKF VKBA 6867", "SNR R155.68"]}
+    ]
+  },
+  {
+    "category": "Кузов и салон",
+    "parts": [
+      {"name": "Зеркало наружное (левое)", "oem": "77 01 036 201", "engines": "Symbol II", "analogs": ["Tyc 301-0011", "Van Wezel 4638811"]},
+      {"name": "Зеркало наружное (правое)", "oem": "77 01 036 202", "engines": "Symbol II", "analogs": ["Tyc 301-0012"]},
+      {"name": "Фара передняя (левая)", "oem": "77 01 036 211", "engines": "Symbol II", "analogs": ["Tyc 311-0011", "Valeo 061154"]},
+      {"name": "Фара передняя (правая)", "oem": "77 01 036 212", "engines": "Symbol II", "analogs": ["Tyc 311-0012", "Valeo 061155"]},
+      {"name": "Фонарь задний (левый)", "oem": "77 01 036 221", "engines": "Symbol II", "analogs": ["Tyc 321-0011"]},
+      {"name": "Фонарь задний (правый)", "oem": "77 01 036 222", "engines": "Symbol II", "analogs": ["Tyc 321-0012"]},
+      {"name": "Замок двери (передней)", "oem": "77 01 036 231", "engines": "все", "analogs": ["Metzger 2303019"]},
+      {"name": "Стекло лобовое", "oem": "77 01 036 241", "engines": "Symbol II", "analogs": ["Saint Gobain 169184", "Pilkington 149086"]}
+    ]
+  },
+  {
+    "category": "Электрика и датчики",
+    "parts": [
+      {"name": "Генератор", "oem": "77 00 500 831", "engines": "K7J 80A", "analogs": ["Valeo 2541305", "Bosch 0 986 041 350"]},
+      {"name": "Генератор", "oem": "77 00 500 832", "engines": "K4J/K4M 120A", "analogs": ["Valeo 2542301", "Bosch 0 986 041 620"]},
+      {"name": "Стартер", "oem": "77 00 500 833", "engines": "K7J, K7M", "analogs": ["Valeo 458213", "Bosch 0 001 108 302"]},
+      {"name": "Стартер", "oem": "77 00 500 834", "engines": "K4J, K4M", "analogs": ["Valeo 458214"]},
+      {"name": "Датчик скорости (ABS)", "oem": "82 00 500 456", "engines": "все", "analogs": ["Bosch 0 265 311 003", "Febi 36113"]},
+      {"name": "Датчик коленвала", "oem": "77 00 500 843", "engines": "все", "analogs": ["Bosch 0 261 210 203", "Febi 18651"]},
+      {"name": "Датчик распредвала", "oem": "77 00 500 844", "engines": "K4J, K4M", "analogs": ["Bosch 0 261 210 204"]},
+      {"name": "Датчик фазы", "oem": "77 00 500 845", "engines": "K7J, K7M", "analogs": ["Bosch 0 261 210 205"]},
+      {"name": "Лямбда-зонд (передний)", "oem": "82 00 500 457", "engines": "все", "analogs": ["Bosch 0 258 003 001", "NGK 1801", "Denso DOX-0102"]},
+      {"name": "Лямбда-зонд (задний)", "oem": "82 00 500 458", "engines": "Euro 3+", "analogs": ["Bosch 0 258 003 002", "NGK 1802"]},
+      {"name": "Дроссельная заслонка (в сборе)", "oem": "77 00 500 847", "engines": "все", "analogs": ["Valeo 254540", "Pierburg 7.03621.01"]},
+      {"name": "Форсунка топливная", "oem": "77 00 500 851", "engines": "все MPI", "analogs": ["Bosch 0 280 150 487", "Siemens VDO 343 300 000"]}
+    ]
+  },
+  {
+    "category": "Фильтры и жидкости",
+    "parts": [
+      {"name": "Фильтр салона (угольный)", "oem": "77 01 036 857", "engines": "Symbol I/II", "analogs": ["MANN CU 24 014", "Mahle LA 271"]},
+      {"name": "Фильтр салона (угольный)", "oem": "77 01 048 999", "engines": "Symbol III", "analogs": ["MANN CU 23 007", "Mahle LA 306"]},
+      {"name": "Масло моторное 10W-40", "oem": "77 11 750 821", "engines": "K7J, K7M", "analogs": ["Elf Evolution 500", "Mobil Super 2000", "Shell Helix HX7"]},
+      {"name": "Масло моторное 5W-40", "oem": "77 11 750 833", "engines": "K4J, K4M, K9K", "analogs": ["Elf Evolution 900", "Castrol Edge", "Shell Helix Ultra"]},
+      {"name": "Антифриз G30 (концентрат)", "oem": "77 11 750 801", "engines": "все", "analogs": ["Glysantin G30", "Febi 26899"]},
+      {"name": "Жидкость ГУР", "oem": "77 11 750 804", "engines": "все", "analogs": ["Elfmatic G3", "Febi 08939"]},
+      {"name": "Тормозная жидкость DOT4", "oem": "77 01 215 006", "engines": "все", "analogs": ["Bosch DOT 4", "Castrol Response"]}
+    ]
+  },
+  {
+    "category": "Освещение и лампы",
+    "parts": [
+      {"name": "Лампа ближний/дальний H4", "oem": "77 01 208 856", "engines": "все", "analogs": ["Philips 12342", "Osram 64210"]},
+      {"name": "Лампа H7 (ближний Symbol III)", "oem": "77 01 208 858", "engines": "Symbol III", "analogs": ["Philips H7", "Osram 64219"]},
+      {"name": "Лампа противотуманная H11", "oem": "77 01 208 593", "engines": "все", "analogs": ["Philips 12377", "Osram 64212"]},
+      {"name": "Лампа стоп-сигнал P21W", "oem": "77 01 208 044", "engines": "все", "analogs": ["Philips 12427"]},
+      {"name": "Лампа габарит W5W", "oem": "77 01 208 003", "engines": "все", "analogs": ["Philips 12253"]},
+      {"name": "Лампа поворот PY21W", "oem": "77 01 208 431", "engines": "все", "analogs": ["Philips 12498"]}
+    ]
+  },
+  {
+    "category": "Ремни навесного оборудования",
+    "parts": [
+      {"name": "Ремень генератора", "oem": "77 01 208 901", "engines": "K7J, K7M", "analogs": ["Gates 4PK815", "Conti 4PK815", "Bosch 1 987 946 815"]},
+      {"name": "Ремень генератора", "oem": "77 01 208 903", "engines": "K4J, K4M", "analogs": ["Gates 5PK875", "Conti 5PK875"]},
+      {"name": "Ремень кондиционера", "oem": "77 01 208 905", "engines": "K4J, K4M", "analogs": ["Gates 4PK620", "Conti 4PK620"]}
+    ]
+  },
+  {
+    "category": "Прокладки и уплотнения",
+    "parts": [
+      {"name": "Прокладка ГБЦ", "oem": "77 00 500 301", "engines": "K7J", "analogs": ["Elring 366.210", "Victor Reinz 61-36750-00"]},
+      {"name": "Прокладка ГБЦ", "oem": "77 00 500 302", "engines": "K7M", "analogs": ["Elring 366.220"]},
+      {"name": "Прокладка ГБЦ", "oem": "77 00 500 303", "engines": "K4J", "analogs": ["Elring 366.230"]},
+      {"name": "Прокладка ГБЦ", "oem": "77 00 500 304", "engines": "K4M", "analogs": ["Elring 366.240"]},
+      {"name": "Прокладка клапанной крышки", "oem": "77 00 500 311", "engines": "K7J, K7M", "analogs": ["Elring 182.310"]},
+      {"name": "Сальник коленвала (передний)", "oem": "77 00 500 321", "engines": "все", "analogs": ["Elring 265.210", "SKF 12840"]},
+      {"name": "Сальник коленвала (задний)", "oem": "77 00 500 322", "engines": "все", "analogs": ["Elring 265.220", "SKF 12841"]}
+    ]
+  }
+]
