@@ -58,7 +58,7 @@ RUN python3 scripts/mermaid-preprocess.py --render-only && \
 # ================================================================
 # STAGE 2: Minimal runtime image
 # ================================================================
-FROM alpine:latest
+FROM alpine:3.19
 
 RUN apk add --no-cache ca-certificates && \
     adduser -D -H -h /built-output nobody

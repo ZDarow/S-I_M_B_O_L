@@ -77,11 +77,17 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
                 return False
             ok = output.exists() and output.stat().st_size >= MIN_SVG_SIZE
             if not ok and attempt < MAX_RETRIES:
-                logger.warning("Попытка %d/%d: mmdc создал некорректный SVG", attempt, MAX_RETRIES)
+                logger.warning(
+                    "Попытка %d/%d: mmdc создал некорректный SVG",
+                    attempt, MAX_RETRIES,
+                )
                 continue
             return ok
         except subprocess.TimeoutExpired:
-            logger.warning("Попытка %d/%d: mmdc timeout (%ds)", attempt, MAX_RETRIES, MMDC_TIMEOUT)
+            logger.warning(
+                "Попытка %d/%d: mmdc timeout (%ds)",
+                attempt, MAX_RETRIES, MMDC_TIMEOUT,
+            )
             if attempt >= MAX_RETRIES:
                 return False
         except OSError as e:

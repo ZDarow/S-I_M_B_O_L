@@ -13,11 +13,14 @@
   python3 scripts/bundle_portable.py --output ./dist  # кастомный путь
 """
 import argparse
+import logging
 import shutil
 import subprocess
 import sys
 import tarfile
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -53,7 +56,10 @@ def build_book() -> bool:
     return False
 
 
-def bundle_portable(html_dir: Path, output_dir: Path, no_build: bool = False, no_archive: bool = False) -> Path:
+def bundle_portable(
+    html_dir: Path, output_dir: Path,
+    no_build: bool = False, no_archive: bool = False,
+) -> Path:
     """Упаковать портативную версию в output_dir."""
     if not no_build and not build_book():
         print("⚠️  Сборка не удалась, упаковываю существующий вывод...")

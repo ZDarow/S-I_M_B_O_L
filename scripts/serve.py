@@ -13,6 +13,7 @@ Zero-Dependency HTTP-сервер для портативной версии
   python3 scripts/serve.py --no-browser       # без открытия браузера
 """
 import argparse
+import logging
 import os
 import shutil
 import subprocess
@@ -21,6 +22,8 @@ import threading
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 # ─── Пути ─────────────────────────────────────────────────────────
@@ -128,6 +131,9 @@ def main():
     )
     parser.add_argument("--port", type=int, default=DEFAULT_PORT,
                         help=f"Порт сервера (по умолч. {DEFAULT_PORT})")
+    parser.add_argument("--log-level", default="WARNING",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+                        help="Уровень логирования")
     parser.add_argument("--dir", type=Path, default=DEFAULT_HTML_DIR,
                         help="Директория с HTML (по умолч. book/book/html)")
     parser.add_argument("--no-browser", action="store_true",
@@ -136,9 +142,12 @@ def main():
                         help="Подробные логи запросов")
     args = parser.parse_args()
 
+    logging.basicConfig(level=getattr(logging, args.log_level),
+                        format="%(levelname)s: %(message)s")
     if args.verbose:
         os.environ["SERVE_VERBOSE"] = "1"
 
+    logger.info("Сервер запускается...")
     html_dir = args.dir.resolve()
 
     # Попытка сборки, если директория пуста

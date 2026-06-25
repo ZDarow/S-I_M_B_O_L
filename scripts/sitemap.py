@@ -9,8 +9,11 @@
     python3 scripts/sitemap.py --url https://mi.github.io/reno-symbol.ru  # кастомный base URL
 """
 import argparse
+import logging
 from pathlib import Path
 from datetime import date
+
+logger = logging.getLogger(__name__)
 
 
 def generate_sitemap(source_dir: Path, base_url: str = None, output: Path = None):
