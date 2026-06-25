@@ -25,5 +25,6 @@ runnable = false
 [output.pdf]
 chrome = "chromium"
 no-sandbox = true
+optional = true
 additional-css = ["./theme/pdf.css"]
 cover-image = "./src/img/1-22.jpg"
