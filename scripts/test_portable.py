@@ -29,7 +29,7 @@ class TestSitemap(unittest.TestCase):
 
     maxDiff = None
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.tmpdir = Path(tempfile.mkdtemp(prefix="sitemap_test_"))
         self.html_dir = self.tmpdir / "html"
         self.html_dir.mkdir(parents=True)
@@ -44,10 +44,10 @@ class TestSitemap(unittest.TestCase):
             "<h1>Fuel</h1>", encoding="utf-8"
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
-    def test_generate_sitemap_creates_file(self):
+    def test_generate_sitemap_creates_file(self) -> None:
         """sitemap.xml создаётся в source_dir"""
         from scripts.sitemap import generate_sitemap
 
@@ -55,7 +55,7 @@ class TestSitemap(unittest.TestCase):
         self.assertTrue(result.exists())
         self.assertEqual(result, self.html_dir / "sitemap.xml")
 
-    def test_generate_sitemap_contains_proper_xml(self):
+    def test_generate_sitemap_contains_proper_xml(self) -> None:
         """sitemap содержит корректный XML"""
         from scripts.sitemap import generate_sitemap
 
@@ -66,7 +66,7 @@ class TestSitemap(unittest.TestCase):
         self.assertIn('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', content)
         self.assertIn('</urlset>', content)
 
-    def test_generate_sitemap_expected_urls(self):
+    def test_generate_sitemap_expected_urls(self) -> None:
         """Проверка количества и содержания URL"""
         from scripts.sitemap import generate_sitemap
 
@@ -77,7 +77,7 @@ class TestSitemap(unittest.TestCase):
         self.assertIn("dvigatel/3-2.html", content)
         self.assertIn("index.html", content)
 
-    def test_generate_sitemap_priority_by_depth(self):
+    def test_generate_sitemap_priority_by_depth(self) -> None:
         """Приоритет уменьшается с глубиной вложенности"""
         from scripts.sitemap import generate_sitemap
 
@@ -89,7 +89,7 @@ class TestSitemap(unittest.TestCase):
         self.assertIn("<priority>0.8</priority>", content)
         self.assertIn("<priority>0.7</priority>", content)
 
-    def test_generate_sitemap_custom_base_url(self):
+    def test_generate_sitemap_custom_base_url(self) -> None:
         """Кастомный base_url подставляется в <loc>"""
         from scripts.sitemap import generate_sitemap
 
@@ -98,7 +98,7 @@ class TestSitemap(unittest.TestCase):
         self.assertIn("https://example.com/book", content)
         self.assertNotIn("mi.github.io", content)
 
-    def test_generate_sitemap_empty_dir(self):
+    def test_generate_sitemap_empty_dir(self) -> None:
         """Пустая директория → sitemap с пустым urlset"""
         from scripts.sitemap import generate_sitemap
 
@@ -116,14 +116,14 @@ class TestSitemap(unittest.TestCase):
 class TestMermaidCore(unittest.TestCase):
     """Тесты общего модуля mermaid"""
 
-    def test_hash_mermaid_consistent(self):
+    def test_hash_mermaid_consistent(self) -> None:
         """Хеш одинаков для одинакового кода диаграммы"""
         from scripts.mermaid_core import hash_mermaid
 
         source = "graph TD; A-->B;"
         self.assertEqual(hash_mermaid(source), hash_mermaid(source))
 
-    def test_hash_mermaid_different(self):
+    def test_hash_mermaid_different(self) -> None:
         """Хеш разный для разного кода диаграммы"""
         from scripts.mermaid_core import hash_mermaid
 
@@ -131,21 +131,21 @@ class TestMermaidCore(unittest.TestCase):
         b = hash_mermaid("graph TD; A-->C;")
         self.assertNotEqual(a, b)
 
-    def test_hash_mermaid_length(self):
+    def test_hash_mermaid_length(self) -> None:
         """Хеш — 16 символов"""
         from scripts.mermaid_core import hash_mermaid
 
         h = hash_mermaid("graph TD; A-->B;")
         self.assertEqual(len(h), 16)
 
-    def test_hash_mermaid_empty(self):
+    def test_hash_mermaid_empty(self) -> None:
         """Пустая строка тоже хешируется"""
         from scripts.mermaid_core import hash_mermaid
 
         h = hash_mermaid("")
         self.assertEqual(len(h), 16)
 
-    def test_mergemare_re_matches(self):
+    def test_mergemare_re_matches(self) -> None:
         """MERMAID_RE находит ```mermaid блоки"""
         from scripts.mermaid_core import MERMAID_RE
 
@@ -155,14 +155,14 @@ class TestMermaidCore(unittest.TestCase):
         self.assertIn("graph TD;", matches[0])
         self.assertIn("A-->B;", matches[0])
 
-    def test_mergemare_re_no_false_positives(self):
+    def test_mergemare_re_no_false_positives(self) -> None:
         """MERMAID_RE не матчит обычные блоки кода"""
         from scripts.mermaid_core import MERMAID_RE
 
         text = "```python\nprint('hello')\n```"
         self.assertEqual(MERMAID_RE.findall(text), [])
 
-    def test_mergemare_re_multi_matches(self):
+    def test_mergemare_re_multi_matches(self) -> None:
         """MERMAID_RE находит несколько блоков"""
         from scripts.mermaid_core import MERMAID_RE
 
@@ -173,7 +173,7 @@ class TestMermaidCore(unittest.TestCase):
         )
         self.assertEqual(len(MERMAID_RE.findall(text)), 2)
 
-    def test_find_mmdc_returns_none_on_empty_path(self):
+    def test_find_mmdc_returns_none_on_empty_path(self) -> None:
         """find_mmdc() → None, когда mmdc нет"""
         from scripts.mermaid_core import find_mmdc
 
@@ -193,41 +193,41 @@ class TestMermaidCore(unittest.TestCase):
 class TestServe(unittest.TestCase):
     """Тесты Zero-Dependency HTTP-сервера"""
 
-    def test_guess_type_html(self):
+    def test_guess_type_html(self) -> None:
         """guess_type возвращает text/html для .html"""
         self._test_mime("index.html", "text/html; charset=utf-8")
 
-    def test_guess_type_css(self):
+    def test_guess_type_css(self) -> None:
         """guess_type возвращает text/css для .css"""
         self._test_mime("style.css", "text/css; charset=utf-8")
 
-    def test_guess_type_svg(self):
+    def test_guess_type_svg(self) -> None:
         """guess_type возвращает image/svg+xml для .svg"""
         self._test_mime("diagram.svg", "image/svg+xml")
 
-    def test_guess_type_woff2(self):
+    def test_guess_type_woff2(self) -> None:
         """guess_type возвращает font/woff2 для .woff2"""
         self._test_mime("font.woff2", "font/woff2")
 
-    def test_guess_type_pdf(self):
+    def test_guess_type_pdf(self) -> None:
         """guess_type возвращает application/pdf для .pdf"""
         self._test_mime("manual.pdf", "application/pdf")
 
-    def test_guess_type_unknown(self):
+    def test_guess_type_unknown(self) -> None:
         """guess_type возвращает octet-stream для неизвестных расширений"""
         self._test_mime("data.bin", "application/octet-stream")
 
-    def test_guess_type_no_ext(self):
+    def test_guess_type_no_ext(self) -> None:
         """guess_type возвращает octet-stream для файлов без расширения"""
         self._test_mime("README", "application/octet-stream")
 
-    def _test_mime(self, path, expected):
+    def _test_mime(self, path, expected) -> None:
         from scripts.serve import PortableHandler
         handler = PortableHandler.__new__(PortableHandler)
         result = handler.guess_type(path)
         self.assertEqual(result, expected)
 
-    def test_find_available_port_returns_integer(self):
+    def test_find_available_port_returns_integer(self) -> None:
         """find_available_port возвращает int"""
         from scripts.serve import find_available_port
 
@@ -236,7 +236,7 @@ class TestServe(unittest.TestCase):
         self.assertGreaterEqual(port, 18900)
         self.assertLess(port, 19000)
 
-    def test_find_available_port_actually_free(self):
+    def test_find_available_port_actually_free(self) -> None:
         """Возвращённый порт действительно свободен"""
         from scripts.serve import find_available_port
         import socket
@@ -246,7 +246,7 @@ class TestServe(unittest.TestCase):
             result = s.connect_ex(("127.0.0.1", port))
             self.assertNotEqual(result, 0, f"Порт {port} должен быть свободен")
 
-    def test_try_build_returns_true_if_exists(self):
+    def test_try_build_returns_true_if_exists(self) -> None:
         """try_build возвращает True, если index.html уже есть"""
         from scripts.serve import try_build
 
@@ -256,7 +256,7 @@ class TestServe(unittest.TestCase):
             (html_dir / "index.html").write_text("ok", encoding="utf-8")
             self.assertTrue(try_build(html_dir))
 
-    def test_try_build_returns_false_if_not_exists(self):
+    def test_try_build_returns_false_if_not_exists(self) -> None:
         """try_build возвращает False, если html_dir не существует"""
         from scripts.serve import try_build
 
@@ -273,7 +273,7 @@ class TestServe(unittest.TestCase):
 class TestBundlePortable(unittest.TestCase):
     """Тесты упаковщика портативной версии"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.tmpdir = Path(tempfile.mkdtemp(prefix="bundle_test_"))
         self.html_dir = self.tmpdir / "html"
         self.html_dir.mkdir(parents=True)
@@ -287,10 +287,10 @@ class TestBundlePortable(unittest.TestCase):
         self.fake_serve = self.tmpdir / "serve.py"
         self.fake_serve.write_text("#!/usr/bin/env python3\nprint('ok')\n", encoding="utf-8")
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
-    def test_create_launcher_creates_scripts(self):
+    def test_create_launcher_creates_scripts(self) -> None:
         """create_launcher создаёт start.sh и start.bat"""
         from scripts.bundle_portable import create_launcher
 
@@ -301,7 +301,7 @@ class TestBundlePortable(unittest.TestCase):
         self.assertTrue((out / "start.sh").exists())
         self.assertTrue((out / "start.bat").exists())
 
-    def test_create_launcher_start_sh_executable(self):
+    def test_create_launcher_start_sh_executable(self) -> None:
         """start.sh должен быть исполняемым"""
         from scripts.bundle_portable import create_launcher
 
@@ -311,7 +311,7 @@ class TestBundlePortable(unittest.TestCase):
 
         self.assertTrue(os.access(out / "start.sh", os.X_OK))
 
-    def test_create_launcher_start_sh_content(self):
+    def test_create_launcher_start_sh_content(self) -> None:
         """start.sh содержит корректный shebang и команду"""
         from scripts.bundle_portable import create_launcher
 
@@ -323,7 +323,7 @@ class TestBundlePortable(unittest.TestCase):
         self.assertIn("#!/usr/bin/env bash", content)
         self.assertIn("python3 serve.py", content)
 
-    def test_create_launcher_bat_content(self):
+    def test_create_launcher_bat_content(self) -> None:
         """start.bat содержит корректные команды Windows"""
         from scripts.bundle_portable import create_launcher
 
@@ -336,7 +336,7 @@ class TestBundlePortable(unittest.TestCase):
         self.assertIn("python3 serve.py", content)
         self.assertIn("pause", content)
 
-    def test_create_archive_creates_tar_gz(self):
+    def test_create_archive_creates_tar_gz(self) -> None:
         """create_archive создаёт tar.gz с содержимым директории"""
         from scripts.bundle_portable import create_archive, BUNDLE_NAME
 
@@ -354,7 +354,7 @@ class TestBundlePortable(unittest.TestCase):
             names = tar.getnames()
             self.assertTrue(any("test.txt" in n for n in names))
 
-    def test_bundle_portable_creates_output_dir(self):
+    def test_bundle_portable_creates_output_dir(self) -> None:
         """bundle_portable создаёт директорию с содержимым html + serve.py + README"""
         from scripts.bundle_portable import bundle_portable
 
@@ -376,7 +376,7 @@ class TestBundlePortable(unittest.TestCase):
         finally:
             bp.SERVE_SCRIPT = orig_serve
 
-    def test_bundle_portable_skips_archive(self):
+    def test_bundle_portable_skips_archive(self) -> None:
         """bundle_portable с no_archive=True не создаёт архив"""
         from scripts.bundle_portable import bundle_portable, BUNDLE_NAME
 

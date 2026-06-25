@@ -2,7 +2,7 @@
 
 **Renault Symbol (Рено Симбол) — бюджетный субкомпактный седан B-сегмента, выпускавшийся с 1999 по 2014 год (три поколения: [Symbol I (1999–2002), II (2002–2008), III (2008–2014)](generations.md)). Создан на платформе Renault Clio II, адаптированной для развивающихся рынков. На некоторых рынках известен как Renault Thalia.**
 
-![Renault Symbol II (2008) — передний вид](../img/symbol-ii-front.jpg)
+![Renault Symbol II (2008) — передний вид](./img/symbol-ii-front.jpg)
 
 | Параметр | Значение |
 |----------|----------|
@@ -45,7 +45,7 @@ flowchart TD
     style Ref fill:#e65100,color:#fff
 ```
 
-![Renault Symbol II (2008) — задний вид](../img/symbol-ii-rear.jpg)
+![Renault Symbol II (2008) — задний вид](./img/symbol-ii-rear.jpg)
 
 ---
 

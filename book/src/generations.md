@@ -28,7 +28,7 @@ gantt
 
 ## Symbol I (1999–2002)
 
-![Symbol I / Thalia (2004 рестайлинг)](../img/flickr-thalia-1.4.jpg)
+![Symbol I / Thalia (2004 рестайлинг)](./img/flickr-thalia-1.4.jpg)
 
 - **Платформа**: Renault Clio II Phase 1
 - **Кузов**: оригинальные бамперы, узкая решётка радиатора
@@ -44,7 +44,7 @@ gantt
 
 ## Symbol II (2002–2008)
 
-![Symbol II передний вид](../img/symbol-ii-front.jpg)
+![Symbol II передний вид](./img/symbol-ii-front.jpg)
 
 - **Платформа**: Renault Clio II Phase 2
 - **Кузов**: обновлённые бамперы, хромированная решётка
@@ -59,11 +59,11 @@ gantt
 - **Топливный фильтр**: в баке, сменный фильтр отсутствует
 - **Задние фонари**: галоген
 
-![Symbol II задний вид](../img/symbol-ii-rear.jpg)
+![Symbol II задний вид](./img/symbol-ii-rear.jpg)
 
 ## Symbol III / Рестайлинг (2008–2014)
 
-![Symbol III (2015 Expression)](../img/flickr-symbol-291.jpg)
+![Symbol III (2015 Expression)](./img/flickr-symbol-291.jpg)
 
 - **Платформа**: Renault Clio II Phase 3
 - **Кузов**: рестайлинг передней части, изменённая оптика
@@ -82,32 +82,32 @@ gantt
 
 ### Symbol I / Thalia (1999–2002)
 
-![Thalia 1.4 передний вид](../img/flickr-thalia-1.4.jpg)
-![Thalia центр](../img/flickr-thalia-centre.jpg)
-![Thalia сзади](../img/flickr-thalia-other.jpg)
-![Thalia в движении](../img/flickr-thalia-mus.jpg)
-![Thalia универсал (вид спереди)](../img/flickr-thalia-est-1.jpg)
-![Thalia универсал (вид сзади)](../img/flickr-thalia-est-2.jpg)
+![Thalia 1.4 передний вид](./img/flickr-thalia-1.4.jpg)
+![Thalia центр](./img/flickr-thalia-centre.jpg)
+![Thalia сзади](./img/flickr-thalia-other.jpg)
+![Thalia в движении](./img/flickr-thalia-mus.jpg)
+![Thalia универсал (вид спереди)](./img/flickr-thalia-est-1.jpg)
+![Thalia универсал (вид сзади)](./img/flickr-thalia-est-2.jpg)
 
 ### Symbol II (2002–2008)
 
-![Symbol II передний вид](../img/symbol-ii-front.jpg)
-![Symbol II передний вид сбоку](../img/symbol-ii-frontright.jpg)
-![Symbol II боковой вид](../img/symbol-ii-side.jpg)
-![Symbol II задний вид](../img/symbol-ii-rear.jpg)
-![Symbol II задний вид сбоку](../img/symbol-ii-backright.jpg)
-![Symbol II рестайлинг перед](../img/flickr-symbol-ph2.jpg)
-![Symbol II рестайлинг сзади](../img/flickr-symbol-ph2-2.jpg)
-![Symbol II рестайлинг сбоку](../img/flickr-symbol-ph2-3.jpg)
+![Symbol II передний вид](./img/symbol-ii-front.jpg)
+![Symbol II передний вид сбоку](./img/symbol-ii-frontright.jpg)
+![Symbol II боковой вид](./img/symbol-ii-side.jpg)
+![Symbol II задний вид](./img/symbol-ii-rear.jpg)
+![Symbol II задний вид сбоку](./img/symbol-ii-backright.jpg)
+![Symbol II рестайлинг перед](./img/flickr-symbol-ph2.jpg)
+![Symbol II рестайлинг сзади](./img/flickr-symbol-ph2-2.jpg)
+![Symbol II рестайлинг сбоку](./img/flickr-symbol-ph2-3.jpg)
 
 ### Symbol III / Рестайлинг (2008–2014)
 
-![Symbol III (2015 Expression) перед](../img/flickr-symbol-291.jpg)
-![Symbol III сзади](../img/flickr-symbol-302.jpg)
-![Symbol III бок](../img/flickr-symbol-3633.jpg)
-![Symbol III перед](../img/flickr-symbol-490.jpg)
-![Symbol III сбоку](../img/flickr-symbol-5233.jpg)
-![Symbol III зад](../img/flickr-symbol-524.jpg)
+![Symbol III (2015 Expression) перед](./img/flickr-symbol-291.jpg)
+![Symbol III сзади](./img/flickr-symbol-302.jpg)
+![Symbol III бок](./img/flickr-symbol-3633.jpg)
+![Symbol III перед](./img/flickr-symbol-490.jpg)
+![Symbol III сбоку](./img/flickr-symbol-5233.jpg)
+![Symbol III зад](./img/flickr-symbol-524.jpg)
 
 ```mermaid
 flowchart TD
