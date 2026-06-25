@@ -120,7 +120,7 @@ jobs:
           cp book/book/pdf/output.pdf book/book/html/reno-symbol.pdf 2>/dev/null || true
 
       - name: Check internal links (lychee)
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@v2
         with:
           args: --include-fragments --no-progress --scheme=https --scheme=http './book/book/html/**/*.html'
           fail: false
