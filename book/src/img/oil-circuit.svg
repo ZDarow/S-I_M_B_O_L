@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" width="700" height="450>
+  <rect width="700" height="450" fill="#ffffff" rx="8"/>
+  <text x="300" y="30" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="bold" fill="#333">Система смазки двигателя K7J/K4J — схема циркуляции</text>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+    </marker>
+  </defs>
+  <rect x="180" y="15" width="140" height="50" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="250" y="45" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1565c0">Масляный поддон</text>
+  <rect x="180" y="105" width="140" height="50" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="250" y="135" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1565c0">Масляный насос</text>
+  <rect x="330" y="105" width="140" height="50" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="400" y="135" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1565c0">Масляный фильтр</text>
+  <rect x="180" y="225" width="140" height="50" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="250" y="255" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1565c0">ГБЦ (распредвал,
+гидрокомпенсаторы)</text>
+  <rect x="330" y="225" width="140" height="50" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="400" y="255" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1565c0">Блок (коленвал,
+шатуны, поршни)</text>
+  <rect x="480" y="105" width="140" height="50" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="550" y="135" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1565c0">Редукционный клапан</text>
+  <rect x="30" y="105" width="140" height="50" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <text x="100" y="135" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="normal" fill="#1565c0">Масляный радиатор</text>
+  <line x1="250" y1="90" x2="250" y2="108" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="320" y1="130" x2="330" y2="130" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="400" y1="180" x2="400" y2="195" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="400" y1="195" x2="325" y2="195" stroke="#666" stroke-width="2"/>
+  <line x1="325" y1="195" x2="250" y2="195" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="400" y1="210" x2="400" y2="215" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="400" y1="215" x2="325" y2="215" stroke="#666" stroke-width="2"/>
+  <line x1="325" y1="215" x2="250" y2="215" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="250" y1="300" x2="250" y2="390" stroke="#666" stroke-width="2"/>
+  <line x1="250" y1="390" x2="250" y2="400" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="400" y1="130" x2="480" y2="130" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="550" y1="155" x2="550" y2="80" stroke="#e65100" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="570" y="100" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#e65100">Слив при избытке
+давления</text>
+  <line x1="100" y1="155" x2="100" y2="80" stroke="#e65100" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="75" y="100" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#e65100">Охлаждение
+масла</text>
+</svg>

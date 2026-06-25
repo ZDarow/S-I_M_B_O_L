@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 350" width="550" height="350>
+  <rect width="550" height="350" fill="#ffffff" rx="8"/>
+  <text x="300" y="30" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="bold" fill="#333">Генератор Valeo — устройство</text>
+  <rect x="150" y="80" width="250" height="150" rx="20" fill="#e8eaf6" stroke="#283593" stroke-width="2"/>
+<circle cx="275" cy="155" r="50" fill="none" stroke="#1565c0" stroke-width="4"/>  <text x="275" y="155" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="bold" fill="#1565c0">Статор (обмотка)</text>
+<circle cx="275" cy="155" r="20" fill="#e65100" stroke="#bf360c" stroke-width="2"/>  <text x="275" y="120" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#bf360c">Ротор (магнит)</text>
+<circle cx="120" cy="155" r="25" fill="none" stroke="#666" stroke-width="4"/><circle cx="120" cy="155" r="8" fill="#666"/>  <text x="120" y="130" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#666">Шкив привода</text>
+  <line x1="145" y1="155" x2="200" y2="155" stroke="#e65100" stroke-width="3"/>
+  <text x="170" y="170" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="8" font-weight="normal" fill="#e65100">Ремень</text>
+  <rect x="350" y="90" width="40" height="50" rx="6" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+  <text x="370" y="85" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#e65100">Реле-регулятор</text>
+  <rect x="350" y="150" width="40" height="50" rx="6" fill="#fce4ec" stroke="#c62828" stroke-width="2"/>
+  <text x="370" y="148" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#c62828">Диодный мост</text>
+  <rect x="380" y="180" width="40" height="10" rx="6" fill="#c62828" stroke="#1565c0" stroke-width="2"/>
+  <text x="420" y="190" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#c62828">B+ (выход)</text>
+  <text x="60" y="280" text-anchor="start" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">Характеристики:</text>
+  <text x="60" y="297" text-anchor="start" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#666">• Напряжение: 12 В</text>
+  <text x="60" y="314" text-anchor="start" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#666">• Ток: 80–120 А</text>
+  <text x="60" y="331" text-anchor="start" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#666">• Мощность: 1.0–1.5 кВт</text>
+</svg>

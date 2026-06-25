@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400>
+  <rect width="600" height="400" fill="#ffffff" rx="8"/>
+  <text x="300" y="30" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="bold" fill="#333">Привод ГРМ — схема ремня и шкивов</text>
+<circle cx="300" cy="310" r="45" fill="none" stroke="#333" stroke-width="5"/><circle cx="300" cy="310" r="15" fill="#666" stroke="#333" stroke-width="2"/>  <rect x="285" y="340" width="30" height="20" rx="6" fill="#78909c" stroke="#546e7a" stroke-width="2"/>
+  <text x="300" y="275" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">Шкив коленвала
+(звёздочка)</text>
+<circle cx="300" cy="90" r="35" fill="none" stroke="#1565c0" stroke-width="5"/><circle cx="300" cy="90" r="12" fill="#1565c0"/>  <text x="300" y="50" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="bold" fill="#1565c0">Шкив распредвала</text>
+<path d="M 300 55 L 300 265" stroke="#e65100" stroke-width="4" stroke-dasharray="8,4" fill="none"/>  <text x="310" y="160" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="bold" fill="#e65100">Ремень ГРМ</text>
+<circle cx="380" cy="200" r="15" fill="none" stroke="#6a1b9a" stroke-width="3"/><circle cx="380" cy="200" r="5" fill="#6a1b9a"/>  <text x="400" y="195" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#6a1b9a">Натяжной ролик</text>
+<circle cx="400" cy="310" r="20" fill="none" stroke="#2e7d32" stroke-width="3"/>  <text x="430" y="310" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#2e7d32">Шкив помпы</text>
+<path d="M 300 55 L 300 265 L 350 310 L 380 215 L 380 185 L 300 55" fill="none" stroke="#e65100" stroke-width="2" opacity="0.3"/>  <line x1="300" y1="90" x2="300" y2="55" stroke="#c62828" stroke-width="2"/>
+  <line x1="300" y1="310" x2="300" y2="265" stroke="#c62828" stroke-width="2"/>
+  <text x="265" y="55" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#c62828">▲ метки</text>
+  <text x="265" y="265" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#c62828">▲ метки</text>
+  <text x="60" y="360" text-anchor="start" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">Порядок замены ГРМ:</text>
+  <text x="60" y="375" text-anchor="start" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#666">1. Снять ремень навесных агрегатов</text>
+  <text x="60" y="388" text-anchor="start" font-family="Inter, Arial, sans-serif" font-size="9" font-weight="normal" fill="#666">2. Зафиксировать коленвал и распредвал</text>
+</svg>
