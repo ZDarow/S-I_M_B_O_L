@@ -13,12 +13,14 @@ Zero-Dependency HTTP-сервер для портативной версии
   python3 scripts/serve.py --no-browser       # без открытия браузера
 """
 import argparse
+import json
 import logging
 import os
 import shutil
 import subprocess
 import sys
 import threading
+import urllib.parse
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -73,6 +75,131 @@ class PortableHandler(SimpleHTTPRequestHandler):
         """Тихий режим: не выводить каждый запрос."""
         if os.environ.get("SERVE_VERBOSE"):
             super().log_message(format, *args)
+
+
+class OEMAPIMixin:
+    """Mixin для добавления OEM API эндпоинтов."""
+
+
+# ─── Загрузка OEM-каталога ──────────────────────────────────────
+OEM_CATALOG = None
+OEM_CATALOG_PATH = SCRIPT_DIR / "oem_catalog.json"
+
+
+def _load_oem_catalog():
+    """Загрузить и нормализовать OEM-каталог из JSON (ленивая загрузка).
+
+    Поддерживает два формата:
+    - Плоский список: [{name, oem, analogs, engines}, ...]
+    - С категориями: [{category, parts: [{name, oem, ...}, ...]}, ...]
+    """
+    global OEM_CATALOG
+    if OEM_CATALOG is not None:
+        return OEM_CATALOG
+    try:
+        if OEM_CATALOG_PATH.exists():
+            with open(OEM_CATALOG_PATH, encoding="utf-8") as f:
+                raw = json.load(f)
+            # Нормализация: если есть category/parts — разворачиваем
+            if isinstance(raw, list) and raw and isinstance(raw[0], dict):
+                if "parts" in raw[0]:
+                    flat = []
+                    for group in raw:
+                        category = group.get("category", "")
+                        for part in group.get("parts", []):
+                            part["category"] = category
+                            flat.append(part)
+                    OEM_CATALOG = flat
+                else:
+                    OEM_CATALOG = raw
+            else:
+                OEM_CATALOG = raw
+            logger.info("OEM-каталог загружен: %d записей", len(OEM_CATALOG))
+        else:
+            OEM_CATALOG = []
+            logger.warning("OEM-каталог не найден: %s", OEM_CATALOG_PATH)
+    except Exception as exc:
+        OEM_CATALOG = []
+        logger.error("Ошибка загрузки OEM-каталога: %s", exc)
+    return OEM_CATALOG
+
+
+def _search_oem(query: str, max_results: int = 50) -> list:
+    """Поиск по OEM-каталогу (название, номер, аналог, двигатель)."""
+    catalog = _load_oem_catalog()
+    if not catalog:
+        return []
+    if not query or len(query) < 2:
+        return catalog[:max_results] if isinstance(catalog, list) else []
+    q = query.lower().replace(" ", "")
+    results = []
+    for item in catalog:
+        if isinstance(item, dict):
+            name = item.get("name", "")
+            oem_num = item.get("oem", "").replace(" ", "").lower()
+            analogs = item.get("analogs", "")
+            engines = item.get("engines", "").lower()
+            category = item.get("category", "").lower()
+            if (q in name.lower() or
+                q in oem_num or
+                q in engines or
+                q in category or
+                any(q in a.lower().replace(" ", "") for a in (analogs if isinstance(analogs, list) else [analogs]))):
+                results.append(item)
+    return results[:max_results]
+
+
+class PortableHandler(SimpleHTTPRequestHandler):
+    """Кастомный обработчик с русскоязычными index, MIME-типами и OEM API."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def guess_type(self, path):
+        ext = os.path.splitext(path)[1].lower()
+        return MIME_TYPES.get(ext, "application/octet-stream")
+
+    def log_message(self, format, *args):
+        """Тихий режим: не выводить каждый запрос."""
+        if os.environ.get("SERVE_VERBOSE"):
+            super().log_message(format, *args)
+
+    def do_GET(self):
+        """Обработка GET-запросов с поддержкой API."""
+        parsed = urllib.parse.urlparse(self.path)
+        query_params = urllib.parse.parse_qs(parsed.query)
+
+        if parsed.path == "/api/oem-search":
+            self._handle_oem_search(query_params.get("q", [""])[0])
+            return
+        if parsed.path == "/api/oem-catalog.json":
+            self._serve_oem_catalog()
+            return
+        super().do_GET()
+
+    def _handle_oem_search(self, query: str):
+        """Эндпоинт /api/oem-search?q=... — поиск по OEM-каталогу."""
+        results = _search_oem(query)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(json.dumps({
+            "query": query,
+            "count": len(results),
+            "results": results,
+        }, ensure_ascii=False, indent=2).encode("utf-8"))
+
+    def _serve_oem_catalog(self):
+        """Эндпоинт /api/oem-catalog.json — полный каталог."""
+        catalog = _load_oem_catalog()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Cache-Control", "max-age=3600")
+        self.end_headers()
+        self.wfile.write(json.dumps(catalog, ensure_ascii=False, indent=2).encode("utf-8"))
 
 
 def find_available_port(start: int = DEFAULT_PORT) -> int:

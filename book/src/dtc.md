@@ -2,6 +2,10 @@
 
 Коды OBD2 (Diagnostic Trouble Codes) для Renault Symbol с двигателями K7J, K4J, K7M, K4M.
 
+> Используйте интерактивный поиск ниже — введите код (P0170) или ключевое слово (лямбда, ABS, пропуски, форсунка).
+
+<div id="dtc-widget"></div>
+
 ```mermaid
 mindmap
   root((OBD2 DTC))
