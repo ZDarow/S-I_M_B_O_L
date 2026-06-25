@@ -17,7 +17,7 @@ PUPPETEER ?= /usr/bin/chromium
 # ── Фантомные цели ───────────────────────────────────────────────
 .PHONY: all build build-html build-pdf sitemap post-process \
         serve clean validate \
-        lint check-links spellcheck fmt \
+        lint check-links spellcheck fmt ruff \
         pdf dist portable portable-bundle portable-serve \
         docker-build docker-run \
         mermaid mermaid-replace mermaid-restore \
@@ -149,9 +149,9 @@ gh-pages: build
 # ПОРТАТИВНАЯ ВЕРСИЯ
 # ══════════════════════════════════════════════════════════════════
 
-## Запустить unit-тесты Python-скриптов
+## Запустить unit-тесты Python-скриптов (pytest)
 test:
-	python3 -m unittest scripts.test_portable -v
+	python3 -m pytest scripts/ -v $(PYTEST_ARGS)
 
 ## Собрать портативную версию (bundle)
 portable: build
@@ -191,7 +191,7 @@ install-hooks:
 	cp $(SCRIPT_DIR)/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 	@echo "✅ Pre-commit hook установлен"
 
-## Установка зависимостей (Linux — pre-built бинарники)
+## Установка зависимостей (Linux — pre-built бинарники + Python пакет)
 install-deps:
 	@echo "📦 Установка mdBook v0.5.3..."
 	curl -fsSL https://github.com/rust-lang/mdBook/releases/download/v0.5.3/mdbook-v0.5.3-x86_64-unknown-linux-gnu.tar.gz \
@@ -199,11 +199,18 @@ install-deps:
 	@echo "📦 Установка mdbook-pdf..."
 	curl -fsSL https://github.com/HollowMan6/mdbook-pdf/releases/download/v0.1.13/mdbook-pdf-v0.1.13-x86_64-unknown-linux-gnu \
 		-o /usr/local/bin/mdbook-pdf && chmod +x /usr/local/bin/mdbook-pdf
-	@echo "📦 Установка Python-зависимостей..."
-	pip3 install pikepdf 2>/dev/null || pip install pikepdf
+	@echo "📦 Установка Python-зависимостей (pyproject.toml)..."
+	pip3 install -e . 2>/dev/null || pip install -e .
+	pip3 install "reno-symbol-manual[dev]" 2>/dev/null || pip install "reno-symbol-manual[dev]"
 	@echo "✅ Зависимости установлены"
 	@echo "ℹ️  Для орфографии: sudo apt-get install hunspell hunspell-ru"
 	@echo "ℹ️  Для mermaid: npm install @mermaid-js/mermaid-cli"
+
+## Статический анализ Python (ruff)
+ruff:
+	@echo "🔍 Ruff — статический анализ Python..."
+	ruff check scripts/ --fix 2>/dev/null || ruff check scripts/
+	ruff format scripts/ --check 2>/dev/null || true
 
 # ══════════════════════════════════════════════════════════════════
 # СТАТИСТИКА
@@ -243,6 +250,7 @@ help:
 	@echo "Качество:"
 	@echo "  validate       — сборка + линтинг + ссылки + орфография"
 	@echo "  lint           — линтинг Markdown (markdownlint)"
+	@echo "  ruff           — статический анализ Python (ruff)"
 	@echo "  fmt            — удалить trailing whitespace в .md"
 	@echo "  spellcheck     — проверка орфографии (hunspell)"
 	@echo "  check-links    — проверка битых ссылок"
