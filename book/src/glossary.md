@@ -1,5 +1,48 @@
 # Глоссарий терминов и сокращений
 
+<div id="glossary-search" style="margin:1em 0">
+  <input type="text" id="glossary-query" placeholder="🔍 Поиск по термину, расшифровке или пояснению..." style="width:100%;padding:10px 14px;font-size:15px;border:2px solid #ff6b00;border-radius:8px;outline:none;box-sizing:border-box">
+  <div id="glossary-stats" style="font-size:0.85em;color:#888;margin-top:0.3em;padding:0 0.3em"></div>
+</div>
+
+<script>
+(function() {
+  var input = document.getElementById('glossary-query');
+  var stats = document.getElementById('glossary-stats');
+  var rows = document.querySelectorAll('.content table tbody tr, .content table tr:not(:first-child)');
+  var total = 0;
+  var visible = 0;
+
+  function filter() {
+    var q = input.value.trim().toLowerCase();
+    visible = 0;
+    total = 0;
+    rows.forEach(function(row) {
+      var text = row.textContent.toLowerCase();
+      var isHeader = row.querySelector('th');
+      if (isHeader) return;
+      total++;
+      var match = !q || text.indexOf(q) !== -1;
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    if (!q) {
+      stats.textContent = 'Всего терминов: ' + total;
+    } else {
+      stats.textContent = 'Найдено: ' + visible + ' из ' + total;
+    }
+  }
+
+  input.addEventListener('input', filter);
+  // Initial count
+  filter();
+  // Add Escape to clear
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { input.value = ''; filter(); input.blur(); }
+  });
+})();
+</script>
+
 ```mermaid
 flowchart TD
     subgraph Engine[Двигатель и системы]
