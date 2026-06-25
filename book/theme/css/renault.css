@@ -445,3 +445,54 @@ footer {
     font-size: 12pt;
   }
 }
+
+/* --- Мобильная оптимизация JS-виджетов (DTC поиск, планировщик ТО) --- */
+@media (max-width: 600px) {
+  .dtc-widget .dtc-search-wrap {
+    flex-direction: column;
+  }
+  .dtc-widget .dtc-results {
+    max-height: 400px;
+    font-size: 0.9em;
+  }
+  .dtc-widget .dtc-item {
+    padding: 0.5em 0.6em;
+  }
+  .dtc-widget .dtc-item-detail {
+    font-size: 0.85em;
+  }
+  .dtc-widget .dtc-tab {
+    font-size: 0.78em;
+    padding: 0.3em 0.5em;
+  }
+
+  .service-widget .sw-field {
+    min-width: 100%;
+  }
+  .service-widget .sw-field input {
+    font-size: 16px;  /* предотвращает зум на iOS */
+  }
+  .service-widget .sw-card-header {
+    flex-wrap: wrap;
+    gap: 0.3em;
+    font-size: 0.9em;
+  }
+  .service-widget .sw-card-km {
+    font-size: 0.85em;
+  }
+  .service-widget .sw-stat-item {
+    min-width: calc(50% - 0.5em);
+  }
+  .service-widget .sw-stat-num {
+    font-size: 1.1em;
+  }
+
+  /* Мобильные таблицы — скролл вместо сжатия */
+  .content table {
+    font-size: 0.85em;
+  }
+  .content table td,
+  .content table th {
+    padding: 4px 6px;
+  }
+}
