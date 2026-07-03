@@ -51,7 +51,7 @@ jobs:
         run: |
           npm install -g markdown-link-check
           find book/src -name '*.md' ! -name 'SUMMARY.md' \
-            -exec markdown-link-check {} --quiet \;
+            -exec markdown-link-check {} --config .mlc.json --quiet \;
 
       - name: Python security (bandit)
         run: |
