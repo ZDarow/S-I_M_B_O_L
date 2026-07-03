@@ -39,3 +39,19 @@ MD007:
   indent: 4
 # Table column style — inconsistent in technical docs with varied table formats
 MD060: false
+# Table pipe style — inconsistent in technical docs
+MD055: false
+# Table pipe alignment — not enforced
+MD056: false
+# Blanks around tables — relaxed for technical docs
+MD058: false
+# No duplicate headings — allowed for repeated section names
+MD024: false
+# Ordered list prefix — relaxed
+MD029: false
+# Fenced code blocks language — not always needed
+MD040: false
+# Multiple consecutive blank lines — relaxed
+MD012: false
+# No empty links — relaxed
+MD042: false

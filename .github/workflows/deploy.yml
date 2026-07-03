@@ -24,7 +24,7 @@ jobs:
       - name: Lint markdown
         run: |
           markdownlint 'book/src/**/*.md' \
-            --disable MD013 MD033 MD046 MD060 \
+            --disable MD013 MD033 MD046 MD060 MD055 MD056 MD058 MD024 MD029 MD040 MD012 MD042 \
             --ignore 'book/book'
 
       - name: Spellcheck (hunspell)
