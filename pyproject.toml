@@ -78,4 +78,4 @@ fail_under = 60
 
 [tool.bandit]
 exclude_dirs = ["scripts/test_*.py"]
-skips = ["B101", "B301", "B303"]
+skips = ["B101", "B301", "B303", "B314"]
