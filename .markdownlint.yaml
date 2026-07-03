@@ -55,3 +55,5 @@ MD040: false
 MD012: false
 # No empty links — relaxed
 MD042: false
+# No link fragments — false positives on anchor-only badges
+MD051: false
