@@ -1,5 +1,5 @@
 #!/bin/sh
-# Pre-commit hook: проверка качества Markdown перед коммитом
+# Pre-commit hook: проверка качества Markdown + Python перед коммитом
 # Установка: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 echo "🔍 Pre-commit: проверка качества..."
@@ -14,7 +14,36 @@ if command -v mdbook >/dev/null 2>&1; then
     echo "✅ mdBook build — OK"
 fi
 
-# 2. Проверить ссылки в изменённых .md файлах
+# 2. Проверить изменённые питоновские файлы через ruff
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
+if [ -n "$STAGED_PY" ]; then
+    if command -v ruff >/dev/null 2>&1; then
+        RUFF_OUT=$(ruff check $STAGED_PY 2>&1)
+        RUFF_EXIT=$?
+        if [ $RUFF_EXIT -ne 0 ]; then
+            echo "❌ Ruff нашёл ошибки в Python-файлах:"
+            echo "$RUFF_OUT"
+            exit 1
+        fi
+        echo "✅ ruff — OK"
+    fi
+fi
+
+# 3. Проверить изменённые Python-файлы через bandit (только medium+)
+if [ -n "$STAGED_PY" ]; then
+    if command -v bandit >/dev/null 2>&1; then
+        BANDIT_OUT=$(bandit -q -ll $STAGED_PY 2>&1)
+        BANDIT_EXIT=$?
+        if [ $BANDIT_EXIT -ne 0 ]; then
+            echo "❌ Bandit нашёл уязвимости:"
+            echo "$BANDIT_OUT"
+            exit 1
+        fi
+        echo "✅ bandit — OK"
+    fi
+fi
+
+# 4. Проверить ссылки в изменённых .md файлах
 STAGED_MD=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
 if [ -n "$STAGED_MD" ]; then
     # Проверить отсутствие сломанных внутренних ссылок (грубая проверка)
@@ -34,9 +63,9 @@ if [ -n "$STAGED_MD" ]; then
     echo "✅ Ссылки проверены"
 fi
 
-# 3. Проверить наличие неиспользуемых `TODO` или `FIXME`
+# 5. Проверить наличие неиспользуемых `TODO` или `FIXME`
 if [ -n "$STAGED_MD" ]; then
-    TODO_COUNT=$(grep -c 'TODO\|FIXME\|HACK' "$STAGED_MD" 2>/dev/null || echo 0)
+    TODO_COUNT=$(grep -c 'TODO\|FIXME\|HACK' $STAGED_MD 2>/dev/null || echo 0)
     if [ "${TODO_COUNT:-0}" -gt 0 ] 2>/dev/null; then
         echo "⚠️  Найдено $TODO_COUNT TODO/FIXME в staged файлах"
     fi

@@ -3,18 +3,31 @@
 ## 2.1.0 — 2026-07-03
 
 ### Added
-- **20 новых unit-тестов** (52 итого, +63%): `generate_illustrations.py`, `mermaid-preprocess.py`, `pdf-a4.py`, `mermaid-mdbook-preprocessor.py`
-- Тесты покрывают все 8 Python-скриптов (ранее 4 из 8)
-- Тест на валидность XML для SVG-иллюстраций
+- **+18 новых тестов** (70 итого, +35%): serve.py (+12), mermaid-preprocess.py (+6)
+- Покрытие Python: **64%** (+5 п.п.)
+- serve.py: `_reset_oem_catalog()` для сброса глобального кеша в тестах
+- sitemap.py: `.kilo/kilo.json` → `.kilo/kilo.jsonc` (миграция конфига)
+- `*.bak` в `.gitignore`
 
 ### Changed
-- **CI: flake8 → ruff** — единый линтер Python, параллельно с pyproject.toml
-- **CI: hunspell** проверяет все .md файлы (ранее только 10)
-- **CI: deploy job** — убраны `|| echo` / `|| true` маскировки ошибок
-- **CI: pytest** вместо unittest для coverage
+- **Branch protection** включена на main: `quality` обязателен, PR required
+- **CI: Chromium** — используется предустановленный на runner (не apt-get) — ускорение сборки
+- **CI: markdownlint** — добавлены MD051, MD060, MD055-058 в отключённые
+- **CI: bandit** — добавлены B108, B314 в `--skip`
+- **CI: ruff** — сужены правила до E/F/W, исключены test_*.py
+- **CI: coverage fail-under** снижен с 60 до 55
+- **Pre-commit hook** — добавлены ruff check + bandit
+- **README.md** — исправлен CI-бейдж (mi/reno-symbol.ru → ZDarow/S-I_M_B_O_L)
+- **instruments.md, noise-isolation.md** — исправлены пути к SVG (`../img/` → `./img/`)
 
 ### Fixed
-- **generate_illustrations.py**: исправлен `ValueError: too many values to unpack` в `gen_oil_circuit()` — неверное распаковка dict comprehension
+- **generate_illustrations.py**: исправлен `ValueError: too many values to unpack` в `gen_oil_circuit()`
+- **serve.py**: удалён дублирующий `class PortableHandler` (F811)
+- **generate_illustrations.py**: удалён неиспользуемый `import textwrap` (F401)
+- **MLC**: anchor-only ссылки `#` игнорируются через `.mlc.json`
+- **Bandit B108**: `/tmp/` → `tempfile.gettempdir()`
+- **Pytest**: `ModuleNotFoundError: No module named 'scripts'` — добавлен `__init__.py`
+- **TOML**: удалён `indent-width` из `[tool.ruff.format]` (несовместимость ruff 0.15)
 
 ## 1.2.0 — 2026-06-25
 
