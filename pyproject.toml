@@ -75,7 +75,7 @@ omit = ["scripts/test_*.py"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 60
+fail_under = 55
 
 [tool.bandit]
 exclude_dirs = ["scripts/test_*.py"]

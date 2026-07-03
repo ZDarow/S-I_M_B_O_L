@@ -1,10 +1,10 @@
 # Руководство по ремонту Renault Symbol
 
-[![Статус: готово](https://img.shields.io/badge/Статус-готово-brightgreen?style=flat-square)](#)
-[![Страниц: ~240](https://img.shields.io/badge/Страниц-~240-blue?style=flat-square)](#)
-[![Двигатели: K7J/K4J/K7M/K4M/K9K](https://img.shields.io/badge/Двигатели-K7J/K4J/K7M/K4M/K9K-orange?style=flat-square)](#)
-[![CI: quality+build](https://img.shields.io/github/actions/workflow/status/mi/reno-symbol.ru/deploy.yml?branch=main&label=CI&style=flat-square)](https://github.com/mi/reno-symbol.ru/actions)
-[![Лицензия: MIT](https://img.shields.io/badge/Лицензия-MIT-green?style=flat-square)](#)
+[![Статус: готово](https://img.shields.io/badge/Статус-готово-brightgreen?style=flat-square)](#статус)
+[![Страниц: ~240](https://img.shields.io/badge/Страниц-~240-blue?style=flat-square)](#содержание)
+[![Двигатели: K7J/K4J/K7M/K4M/K9K](https://img.shields.io/badge/Двигатели-K7J/K4J/K7M/K4M/K9K-orange?style=flat-square)](#содержание)
+[![CI: quality+build](https://img.shields.io/github/actions/workflow/status/ZDarow/S-I_M_B_O_L/deploy.yml?branch=main&label=CI&style=flat-square)](https://github.com/ZDarow/S-I_M_B_O_L/actions)
+[![Лицензия: MIT](https://img.shields.io/badge/Лицензия-MIT-green?style=flat-square)](#лицензия)
 
 **Renault Symbol (Рено Симбол) — бюджетный субкомпактный седан B-сегмента, выпускавшийся с 1999 по 2014 год (три поколения: [Symbol I (1999–2002), II (2002–2008), III (2008–2014)](generations.md)). Создан на платформе Renault Clio II, адаптированной для развивающихся рынков. На некоторых рынках известен как Renault Thalia.**
 
