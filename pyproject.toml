@@ -61,7 +61,6 @@ ignore = ["E501"]  # line length enforced by formatter
 
 [tool.ruff.format]
 quote-style = "double"
-indent-width = 4
 
 [tool.pytest.ini_options]
 minversion = "8.0"
