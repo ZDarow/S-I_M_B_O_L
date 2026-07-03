@@ -801,6 +801,94 @@ class TestMermaidPreprocess(unittest.TestCase):
         md.write_text("content", encoding="utf-8")
         self.assertFalse(mod.restore_file(md))
 
+    def test_process_file_empty_mermaid_block(self) -> None:
+        """process_file не меняет файл если mermaid блок пустой"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "empty.md"
+        original = "text\n```mermaid\n\n```\nend"
+        md.write_text(original, encoding="utf-8")
+
+        changes = mod.process_file(md, self.cache_dir)
+        self.assertEqual(changes, 0)
+        content = md.read_text(encoding="utf-8")
+        self.assertEqual(content, original)  # без изменений
+
+    def test_process_file_no_changes_when_no_mermaid(self) -> None:
+        """process_file возвращает 0 если mermaid блоков нет"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "plain.md"
+        original = "просто текст без диаграмм\n"
+        md.write_text(original, encoding="utf-8")
+
+        changes = mod.process_file(md, self.cache_dir)
+        self.assertEqual(changes, 0)
+        self.assertEqual(md.read_text(encoding="utf-8"), original)
+
+    def test_process_file_backup_not_created_on_no_changes(self) -> None:
+        """process_file не создаёт бэкап если изменений нет"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "nochange.md"
+        md.write_text("just text", encoding="utf-8")
+        mod.process_file(md, self.cache_dir)
+
+        backup = md.with_suffix(md.suffix + mod.BACKUP_PREFIX)
+        self.assertFalse(backup.exists())
+
+    def test_process_file_multiple_blocks(self) -> None:
+        """process_file заменяет несколько mermaid блоков"""
+        mod = self._import_preprocess()
+        from scripts.mermaid_core import hash_mermaid
+
+        md = self.src_dir / "multi.md"
+        source1 = "graph TD;\nA-->B;"
+        source2 = "graph LR;\nX-->Y;"
+        md.write_text(
+            f"text\n```mermaid\n{source1}\n```\nmore\n```mermaid\n{source2}\n```\nend",
+            encoding="utf-8",
+        )
+
+        h1 = hash_mermaid(source1)
+        h2 = hash_mermaid(source2)
+        (self.cache_dir / f"{h1}.svg").write_text("<svg></svg>", encoding="utf-8")
+        (self.cache_dir / f"{h2}.svg").write_text("<svg></svg>", encoding="utf-8")
+
+        changes = mod.process_file(md, self.cache_dir)
+        self.assertEqual(changes, 2)
+        content = md.read_text(encoding="utf-8")
+        self.assertIn("![Диаграмма]", content)
+        self.assertEqual(content.count("![Диаграмма]"), 2)
+
+    def test_main_restore_via_subprocess(self) -> None:
+        """main() с --restore восстанавливает файлы и не падает"""
+        import subprocess
+
+        # Создаём .md и его .mermaid-backup
+        md = self.src_dir / "restore_main.md"
+        original = "content\n```mermaid\ngraph TD;\nA;\n```\nend"
+        md.write_text(original, encoding="utf-8")
+        backup = md.with_suffix(md.suffix + ".mermaid-backup.")
+        backup.write_text("restored content", encoding="utf-8")
+
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "mermaid-preprocess.py"), "--restore"],
+            cwd=self.tmpdir, capture_output=True, text=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(md.read_text(encoding="utf-8"), "restored content")
+
+    def test_main_restore_no_backup(self) -> None:
+        """main() с --restore не падает если бэкапов нет"""
+        import subprocess
+
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "mermaid-preprocess.py"), "--restore"],
+            cwd=self.tmpdir, capture_output=True, text=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 0)
+
 
 # ══════════════════════════════════════════════════════════════════
 # PDF-A4
