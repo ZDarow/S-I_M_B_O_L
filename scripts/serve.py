@@ -61,26 +61,6 @@ MIME_TYPES = {
 }
 
 
-class PortableHandler(SimpleHTTPRequestHandler):
-    """Кастомный обработчик с русскоязычными index и MIME-типами."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def guess_type(self, path):
-        ext = os.path.splitext(path)[1].lower()
-        return MIME_TYPES.get(ext, "application/octet-stream")
-
-    def log_message(self, format, *args):
-        """Тихий режим: не выводить каждый запрос."""
-        if os.environ.get("SERVE_VERBOSE"):
-            super().log_message(format, *args)
-
-
-class OEMAPIMixin:
-    """Mixin для добавления OEM API эндпоинтов."""
-
-
 # ─── Загрузка OEM-каталога ──────────────────────────────────────
 OEM_CATALOG = None
 OEM_CATALOG_PATH = SCRIPT_DIR / "oem_catalog.json"
