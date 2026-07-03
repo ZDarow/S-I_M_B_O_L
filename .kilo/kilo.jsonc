@@ -22,18 +22,7 @@
       "*.md": "allow",
       "Makefile": "allow",
       "Dockerfile": "allow",
-      "kilo.json": "allow",
-      ".kilo/**": "allow",
-      "*": "ask"
-    },
-    "write": {
-      "book/src/**": "allow",
-      "scripts/**": "allow",
-      ".github/**": "allow",
-      "*.md": "allow",
-      "Makefile": "allow",
-      "Dockerfile": "allow",
-      "kilo.json": "allow",
+      "kilo.jsonc": "allow",
       ".kilo/**": "allow",
       "*": "ask"
     },
@@ -43,12 +32,15 @@
       "pip3*": "allow",
       "cargo*": "allow",
       "npm*": "allow",
+      "echo*": "allow",
+      "ls*": "allow",
+      "which*": "allow",
       "sudo apt*": "ask",
       "sudo rm *": "deny",
       "sudo rm -rf /*": "deny",
       "sudo dd *": "deny",
       "sudo mkfs*": "deny",
-      "*": "allow"
+      "*": "ask"
     }
   },
   "snapshot": false

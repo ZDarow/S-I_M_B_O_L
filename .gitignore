@@ -58,3 +58,4 @@ gh-pages/
 # PDF artifacts
 *.pdf
 !book/src/**/*.pdf
+*.bak
