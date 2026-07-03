@@ -92,9 +92,21 @@ jobs:
           # mermaid-cli
           npm install -g @mermaid-js/mermaid-cli --ignore-engines
 
-      - name: Setup Chromium
+      - name: Setup build environment
         run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends chromium
+          # Chromium/Chrome уже предустановлены на runner (149.0.7827.0)
+          # Определяем путь к браузеру
+          BROWSER=""
+          for p in /usr/bin/google-chrome /usr/bin/chromium /snap/bin/chromium /usr/bin/chromium-browser; do
+            [ -x "$p" ] && BROWSER="$p" && break
+          done
+          if [ -z "$BROWSER" ]; then
+            echo "⚠️  Chromium/Chrome не найден, устанавливаю..."
+            sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends chromium
+            BROWSER="/usr/bin/chromium"
+          fi
+          echo "PUPPETEER_EXECUTABLE_PATH=$BROWSER" >> $GITHUB_ENV
+          echo "✅ Браузер: $BROWSER"
 
       - name: Install Python deps
         run: pip3 install pikepdf
@@ -109,7 +121,6 @@ jobs:
 
       - name: Build book
         run: |
-          export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
           python3 scripts/mermaid-preprocess.py --render-only
           python3 scripts/mermaid-preprocess.py
           mdbook build book
