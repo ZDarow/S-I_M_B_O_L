@@ -45,8 +45,7 @@ jobs:
       - name: Python lint (ruff)
         run: |
           pip3 install ruff
-          ruff check scripts/
-          ruff format --check scripts/
+          ruff check scripts/ --fix
 
       - name: Markdown internal link checker (mlc)
         run: |

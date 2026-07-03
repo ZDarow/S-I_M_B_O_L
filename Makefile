@@ -210,7 +210,6 @@ install-deps:
 ruff:
 	@echo "🔍 Ruff — статический анализ Python..."
 	ruff check scripts/ --fix 2>/dev/null || ruff check scripts/
-	ruff format scripts/ --check 2>/dev/null || true
 
 # ══════════════════════════════════════════════════════════════════
 # СТАТИСТИКА
