@@ -186,6 +186,43 @@ class TestMermaidCore(unittest.TestCase):
         finally:
             os.environ["PATH"] = orig_path
 
+    def test_render_svg_returns_false_no_mmdc(self) -> None:
+        """render_svg возвращает False, если mmdc не найден"""
+        from scripts.mermaid_core import render_svg
+        from unittest.mock import patch
+
+        tmp_dir = tempfile.gettempdir()
+        with patch("scripts.mermaid_core.find_mmdc", return_value=None):
+            result = render_svg("graph TD;\nA-->B;", Path(tmp_dir) / "test.svg")
+        self.assertFalse(result)
+
+    def test_render_svg_cleans_up_temp_on_failure(self) -> None:
+        """render_svg удаляет temp-файл при ошибке mmdc (через mock find_mmdc)"""
+        import subprocess
+        from scripts.mermaid_core import render_svg
+        from unittest.mock import patch
+
+        # Мокаем subprocess.run, чтобы он вернул возврат 1
+        tmp_dir = tempfile.gettempdir()
+        fake_result = subprocess.CompletedProcess(args=["mmdc"], returncode=1, stdout="", stderr="error")
+        with patch("scripts.mermaid_core.find_mmdc", return_value="/usr/bin/fake-mmdc"), \
+             patch("subprocess.run", return_value=fake_result):
+            result = render_svg("graph TD;\nX;", Path(tmp_dir) / "out.svg")
+        self.assertFalse(result)
+
+    def test_render_svg_returns_false_on_timeout(self) -> None:
+        """render_svg возвращает False при таймауте mmdc"""
+        import subprocess
+        from scripts.mermaid_core import render_svg, MMDC_TIMEOUT
+        from unittest.mock import patch
+
+        tmp_dir = tempfile.gettempdir()
+        with patch("scripts.mermaid_core.find_mmdc", return_value="/usr/bin/fake-mmdc"), \
+             patch("subprocess.run", side_effect=subprocess.TimeoutExpired(
+                 cmd="mmdc", timeout=MMDC_TIMEOUT)):
+            result = render_svg("graph TD;\nZ;", Path(tmp_dir) / "out.svg")
+        self.assertFalse(result)
+
 
 # ══════════════════════════════════════════════════════════════════
 # SERVE
@@ -707,7 +744,7 @@ class TestGenerateIllustrations(unittest.TestCase):
             for svg_file in self.output_dir.glob("*.svg"):
                 content = svg_file.read_text(encoding="utf-8")
                 try:
-                    ET.fromstring(content)
+                    ET.fromstring(content)  # nosec B314: test data, not user input
                 except ET.ParseError:
                     self.fail(f"Invalid XML in {svg_file.name}")
         finally:
