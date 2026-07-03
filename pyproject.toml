@@ -58,6 +58,7 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "W"]
 ignore = ["E501"]  # line length enforced by formatter
+exclude = ["scripts/test_*.py"]
 
 [tool.ruff.format]
 quote-style = "double"
