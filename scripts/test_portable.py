@@ -266,6 +266,197 @@ class TestServe(unittest.TestCase):
         ok = try_build(nonexistent)
         self.assertFalse(ok)
 
+    def test_load_oem_catalog_flat_list(self) -> None:
+        """_load_oem_catalog загружает плоский список"""
+        import json
+        from unittest.mock import patch
+        from scripts.serve import _load_oem_catalog, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        data = [
+            {"name": "Фильтр масляный", "oem": "7700274177", "category": "Двигатель"},
+            {"name": "Фильтр воздушный", "oem": "172024135R", "category": "Двигатель"},
+        ]
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False,
+                                         encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+            tmp = f.name
+
+        try:
+            with patch("scripts.serve.OEM_CATALOG_PATH", Path(tmp)):
+                result = _load_oem_catalog()
+            self.assertEqual(len(result), 2)
+            self.assertEqual(result[0]["name"], "Фильтр масляный")
+        finally:
+            os.unlink(tmp)
+            _reset_oem_catalog()
+
+    def test_load_oem_catalog_categorized(self) -> None:
+        """_load_oem_catalog разворачивает категоризированный формат"""
+        import json
+        from unittest.mock import patch
+        from scripts.serve import _load_oem_catalog, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        data = [
+            {
+                "category": "Двигатель",
+                "parts": [
+                    {"name": "Фильтр масляный", "oem": "7700274177"},
+                    {"name": "Фильтр воздушный", "oem": "172024135R"},
+                ],
+            },
+            {
+                "category": "Тормоза",
+                "parts": [
+                    {"name": "Колодки передние", "oem": "440607877R"},
+                ],
+            },
+        ]
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False,
+                                         encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+            tmp = f.name
+
+        try:
+            with patch("scripts.serve.OEM_CATALOG_PATH", Path(tmp)):
+                result = _load_oem_catalog()
+            self.assertEqual(len(result), 3)
+            self.assertEqual(result[0]["name"], "Фильтр масляный")
+            self.assertEqual(result[0]["category"], "Двигатель")
+            self.assertEqual(result[2]["category"], "Тормоза")
+        finally:
+            os.unlink(tmp)
+            _reset_oem_catalog()
+
+    def test_load_oem_catalog_missing_file(self) -> None:
+        """_load_oem_catalog возвращает [] при отсутствии файла"""
+        from unittest.mock import patch
+        from scripts.serve import _load_oem_catalog, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        missing = Path("/tmp/nonexistent_oem_catalog.json")
+        with patch("scripts.serve.OEM_CATALOG_PATH", missing):
+            result = _load_oem_catalog()
+        self.assertEqual(result, [])
+        _reset_oem_catalog()
+
+    def test_load_oem_catalog_invalid_json(self) -> None:
+        """_load_oem_catalog возвращает [] при невалидном JSON"""
+        from unittest.mock import patch
+        from scripts.serve import _load_oem_catalog, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False,
+                                         encoding="utf-8") as f:
+            f.write("это не json")
+            tmp = f.name
+
+        try:
+            with patch("scripts.serve.OEM_CATALOG_PATH", Path(tmp)):
+                result = _load_oem_catalog()
+            self.assertEqual(result, [])
+        finally:
+            os.unlink(tmp)
+            _reset_oem_catalog()
+
+    def test_search_oem_empty_query(self) -> None:
+        """_search_oem('') возвращает весь каталог (до лимита)"""
+        from unittest.mock import patch
+        from scripts.serve import _search_oem, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        mock_catalog = [{"name": f"Part {i}", "oem": f"OEM{i}"} for i in range(60)]
+        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+            result = _search_oem("")
+        self.assertEqual(len(result), 50)  # max_results
+        _reset_oem_catalog()
+
+    def test_search_oem_short_query(self) -> None:
+        """_search_oem('a') с коротким запросом возвращает весь каталог"""
+        from unittest.mock import patch
+        from scripts.serve import _search_oem, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        mock_catalog = [{"name": "Part", "oem": "OEM1"}]
+        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+            result = _search_oem("a")
+        self.assertEqual(len(result), 1)
+        _reset_oem_catalog()
+
+    def test_search_oem_by_name(self) -> None:
+        """_search_oem ищет по названию"""
+        from unittest.mock import patch
+        from scripts.serve import _search_oem, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        mock_catalog = [
+            {"name": "Фильтр масляный", "oem": "7700274177"},
+            {"name": "Фильтр воздушный", "oem": "172024135R"},
+            {"name": "Свеча зажигания", "oem": "7700101234"},
+        ]
+        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+            result = _search_oem("фильтр")
+        self.assertEqual(len(result), 2)
+        _reset_oem_catalog()
+
+    def test_search_oem_by_oem_number(self) -> None:
+        """_search_oem ищет по OEM-номеру"""
+        from unittest.mock import patch
+        from scripts.serve import _search_oem, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        mock_catalog = [
+            {"name": "Фильтр", "oem": "7700274177"},
+            {"name": "Свеча", "oem": "7700101234"},
+        ]
+        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+            result = _search_oem("7700")
+        self.assertEqual(len(result), 2)
+        _reset_oem_catalog()
+
+    def test_search_oem_by_analog(self) -> None:
+        """_search_oem ищет по аналогу"""
+        from unittest.mock import patch
+        from scripts.serve import _search_oem, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        mock_catalog = [
+            {"name": "Фильтр", "oem": "OE1", "analogs": "MANN W610"},
+            {"name": "Свеча", "oem": "OE2", "analogs": "NGK BKR6E"},
+        ]
+        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+            result = _search_oem("mann")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["name"], "Фильтр")
+        _reset_oem_catalog()
+
+    def test_search_oem_no_results(self) -> None:
+        """_search_oem возвращает [] при отсутствии совпадений"""
+        from unittest.mock import patch
+        from scripts.serve import _search_oem, _reset_oem_catalog
+
+        _reset_oem_catalog()
+        mock_catalog = [{"name": "Фильтр", "oem": "7700"}]
+        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+            result = _search_oem("ZZZZZZ")
+        self.assertEqual(result, [])
+        _reset_oem_catalog()
+
+    def test_open_browser_starts_thread(self) -> None:
+        """open_browser запускает daemon-поток (не падает)"""
+        from scripts.serve import open_browser
+
+        result = open_browser("http://localhost:8080/")
+        self.assertIsNone(result)
+
+    def test_open_browser_with_delay(self) -> None:
+        """open_browser с кастомной задержкой (не падает)"""
+        from scripts.serve import open_browser
+
+        result = open_browser("http://localhost:8080/", delay=0.1)
+        self.assertIsNone(result)
+
 
 # ══════════════════════════════════════════════════════════════════
 # BUNDLE PORTABLE

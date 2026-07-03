@@ -66,6 +66,12 @@ OEM_CATALOG = None
 OEM_CATALOG_PATH = SCRIPT_DIR / "oem_catalog.json"
 
 
+def _reset_oem_catalog():
+    """Сбросить кеш OEM-каталога (для тестов)."""
+    global OEM_CATALOG
+    OEM_CATALOG = None
+
+
 def _load_oem_catalog():
     """Загрузить и нормализовать OEM-каталог из JSON (ленивая загрузка).
 
