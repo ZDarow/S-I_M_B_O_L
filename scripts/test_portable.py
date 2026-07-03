@@ -335,7 +335,7 @@ class TestServe(unittest.TestCase):
         from scripts.serve import _load_oem_catalog, _reset_oem_catalog
 
         _reset_oem_catalog()
-        missing = Path("/tmp/nonexistent_oem_catalog.json")
+        missing = Path(tempfile.gettempdir()) / "nonexistent_oem_catalog.json"
         with patch("scripts.serve.OEM_CATALOG_PATH", missing):
             result = _load_oem_catalog()
         self.assertEqual(result, [])
