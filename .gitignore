@@ -59,3 +59,4 @@ gh-pages/
 *.pdf
 !book/src/**/*.pdf
 *.bak
+.coverage
