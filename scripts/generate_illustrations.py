@@ -60,11 +60,7 @@ def gen_oil_circuit():
         "radiator": (100, 130, "Масляный\nрадиатор"),
     }
     
-    for (cx, cy), (x, y) in zip(comps.values(), [(cx, cy) for cx, cy in comps.keys()]):
-        pass  # we'll just use the actual positions
-    
-    # Draw boxes
-    for (cx, cy), label_text in comps.items():
+    for key, (cx, cy, label_text) in comps.items():
         wb, hb = 140, 65
         svg += rounded_rect(cx-70, cy-32, wb, hb, fill="#e3f2fd", stroke="#1565c0")
         svg += label(label_text, cx, cy-5, size=11, color="#1565c0")

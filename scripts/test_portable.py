@@ -396,6 +396,414 @@ class TestBundlePortable(unittest.TestCase):
 
 
 # ══════════════════════════════════════════════════════════════════
+# GENERATE ILLUSTRATIONS
+# ══════════════════════════════════════════════════════════════════
+class TestGenerateIllustrations(unittest.TestCase):
+    """Тесты генератора SVG-иллюстраций"""
+
+    def setUp(self) -> None:
+        self.tmpdir = Path(tempfile.mkdtemp(prefix="illustrations_test_"))
+        self.output_dir = self.tmpdir / "img"
+        self.output_dir.mkdir(parents=True)
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def test_svg_header_contains_dimensions(self) -> None:
+        """svg_header содержит указанные width и height"""
+        from scripts.generate_illustrations import svg_header
+
+        result = svg_header("Test", 800, 600)
+        self.assertIn('viewBox="0 0 800 600"', result)
+        self.assertIn('width="800"', result)
+        self.assertIn('height="600"', result)
+        self.assertIn("Test", result)
+
+    def test_svg_footer_closes_svg(self) -> None:
+        """svg_footer возвращает закрывающий тег"""
+        from scripts.generate_illustrations import svg_footer
+
+        self.assertEqual(svg_footer(), "</svg>\n")
+
+    def test_rounded_rect_produces_rect(self) -> None:
+        """rounded_rect возвращает SVG rect с параметрами"""
+        from scripts.generate_illustrations import rounded_rect
+
+        result = rounded_rect(10, 20, 100, 50, r=8, fill="#fff", stroke="#000")
+        self.assertIn("x=\"10\"", result)
+        self.assertIn("y=\"20\"", result)
+        self.assertIn('width="100"', result)
+        self.assertIn('height="50"', result)
+        self.assertIn('rx="8"', result)
+        self.assertIn('#fff', result)
+        self.assertIn('#000', result)
+
+    def test_label_contains_text(self) -> None:
+        """label возвращает SVG text с указанным текстом"""
+        from scripts.generate_illustrations import label
+
+        result = label("Hello", 50, 60, size=14, color="#333", anchor="middle", bold=True)
+        self.assertIn("Hello", result)
+        self.assertIn('x="50"', result)
+        self.assertIn('y="60"', result)
+        self.assertIn('font-size="14"', result)
+        self.assertIn('#333', result)
+        self.assertIn('font-weight="bold"', result)
+
+    def test_arrow_produces_line(self) -> None:
+        """arrow возвращает SVG line с маркером"""
+        from scripts.generate_illustrations import arrow
+
+        result = arrow(0, 0, 100, 100, color="#666", width=3)
+        self.assertIn('x1="0"', result)
+        self.assertIn('y1="0"', result)
+        self.assertIn('x2="100"', result)
+        self.assertIn('y2="100"', result)
+        self.assertIn('marker-end="url(#arrow)"', result)
+
+    def test_arrow_def_contains_marker(self) -> None:
+        """arrow_def содержит defs с маркером"""
+        from scripts.generate_illustrations import arrow_def
+
+        result = arrow_def()
+        self.assertIn("<defs>", result)
+        self.assertIn("<marker", result)
+        self.assertIn("arrow", result)
+
+    def test_line_produces_svg_line(self) -> None:
+        """line возвращает SVG line без маркера"""
+        from scripts.generate_illustrations import line
+
+        result = line(10, 20, 30, 40, color="#999", width=1)
+        self.assertIn('x1="10"', result)
+        self.assertIn('y1="20"', result)
+        self.assertIn('x2="30"', result)
+        self.assertIn('y2="40"', result)
+        self.assertNotIn("marker-end", result)
+
+    def test_main_creates_svg_files(self) -> None:
+        """main() создаёт 9 SVG файлов"""
+        import scripts.generate_illustrations as gi
+
+        orig_dir = gi.OUTPUT_DIR
+        try:
+            gi.OUTPUT_DIR = str(self.output_dir)
+            gi.main()
+            svg_files = list(self.output_dir.glob("*.svg"))
+            self.assertEqual(len(svg_files), 9)
+            expected = [
+                "oil-circuit.svg", "coolant-circuit.svg", "disc-brake.svg",
+                "suspension-mcpherson.svg", "battery.svg", "timing-belt.svg",
+                "noise-isolation-zones.svg", "tools.svg", "alternator.svg",
+            ]
+            for name in expected:
+                self.assertTrue(
+                    (self.output_dir / name).exists(),
+                    f"Missing: {name}"
+                )
+        finally:
+            gi.OUTPUT_DIR = orig_dir
+
+    def test_svg_files_are_valid_xml(self) -> None:
+        """main() создаёт валидные SVG-файлы"""
+        import xml.etree.ElementTree as ET
+        import scripts.generate_illustrations as gi
+
+        orig_dir = gi.OUTPUT_DIR
+        try:
+            gi.OUTPUT_DIR = str(self.output_dir)
+            gi.main()
+            for svg_file in self.output_dir.glob("*.svg"):
+                content = svg_file.read_text(encoding="utf-8")
+                try:
+                    ET.fromstring(content)
+                except ET.ParseError:
+                    self.fail(f"Invalid XML in {svg_file.name}")
+        finally:
+            gi.OUTPUT_DIR = orig_dir
+
+
+# ══════════════════════════════════════════════════════════════════
+# MERMAID PREPROCESS
+# ══════════════════════════════════════════════════════════════════
+class TestMermaidPreprocess(unittest.TestCase):
+    """Тесты препроцессора Mermaid"""
+
+    @staticmethod
+    def _import_preprocess():
+        """Импортирует mermaid-preprocess.py (имя с дефисами)"""
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "mermaid_preprocess",
+            TESTS_DIR / "mermaid-preprocess.py",
+            submodule_search_locations=[],
+        )
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["mermaid_preprocess"] = mod
+        spec.loader.exec_module(mod)
+        return mod
+
+    def setUp(self) -> None:
+        self.tmpdir = Path(tempfile.mkdtemp(prefix="mermaid_preprocess_test_"))
+        self.src_dir = self.tmpdir / "book" / "src"
+        self.src_dir.mkdir(parents=True)
+        self.cache_dir = self.src_dir / "img" / "mermaid"
+        self.cache_dir.mkdir(parents=True)
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def test_process_file_replaces_mermaid_block(self) -> None:
+        """process_file заменяет ```mermaid блок на SVG-ссылку"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "test.md"
+        md.write_text("text\n```mermaid\ngraph TD;\nA-->B;\n```\nend", encoding="utf-8")
+
+        from scripts.mermaid_core import hash_mermaid
+        h = hash_mermaid("graph TD;\nA-->B;")
+        (self.cache_dir / f"{h}.svg").write_text("<svg></svg>", encoding="utf-8")
+
+        changes = mod.process_file(md, self.cache_dir)
+        self.assertEqual(changes, 1)
+        content = md.read_text(encoding="utf-8")
+        self.assertIn("![Диаграмма]", content)
+        self.assertNotIn("```mermaid", content)
+
+    def test_process_file_creates_backup(self) -> None:
+        """process_file создаёт бэкап .md файла"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "backup_test.md"
+        original = "text\n```mermaid\ngraph TD;\nA-->B;\n```\nend"
+        md.write_text(original, encoding="utf-8")
+
+        from scripts.mermaid_core import hash_mermaid
+        h = hash_mermaid("graph TD;\nA-->B;")
+        (self.cache_dir / f"{h}.svg").write_text("<svg></svg>", encoding="utf-8")
+
+        mod.process_file(md, self.cache_dir)
+
+        backup = md.with_suffix(md.suffix + mod.BACKUP_PREFIX)
+        self.assertTrue(backup.exists())
+        self.assertEqual(backup.read_text(encoding="utf-8"), original)
+
+    def test_restore_file_restores_from_backup(self) -> None:
+        """restore_file восстанавливает .md из бэкапа"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "restore_test.md"
+        original = "original content"
+        backup = md.with_suffix(md.suffix + mod.BACKUP_PREFIX)
+        backup.write_text(original, encoding="utf-8")
+        md.write_text("modified content", encoding="utf-8")
+
+        result = mod.restore_file(md)
+        self.assertTrue(result)
+        self.assertEqual(md.read_text(encoding="utf-8"), original)
+
+    def test_restore_file_returns_false_when_no_backup(self) -> None:
+        """restore_file возвращает False если бэкапа нет"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "no_backup.md"
+        md.write_text("content", encoding="utf-8")
+        self.assertFalse(mod.restore_file(md))
+
+
+# ══════════════════════════════════════════════════════════════════
+# PDF-A4
+# ══════════════════════════════════════════════════════════════════
+class TestPdfA4(unittest.TestCase):
+    """Тесты конвертера Letter → A4"""
+
+    @staticmethod
+    def _import_pdf_a4():
+        """Импортирует pdf-a4.py (имя с дефисами), возвращает None если pikepdf нет"""
+        import importlib.util
+        try:
+            spec = importlib.util.spec_from_file_location(
+                "pdf_a4",
+                TESTS_DIR / "pdf-a4.py",
+                submodule_search_locations=[],
+            )
+            mod = importlib.util.module_from_spec(spec)
+            sys.modules["pdf_a4"] = mod
+            spec.loader.exec_module(mod)
+            return mod
+        except (ModuleNotFoundError, ImportError):
+            return None
+
+    def setUp(self) -> None:
+        self.tmpdir = Path(tempfile.mkdtemp(prefix="pdf_a4_test_"))
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def test_letter_to_a4_returns_false_on_missing(self) -> None:
+        """letter_to_a4 возвращает False для несуществующего файла"""
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+
+        result = mod.letter_to_a4("/nonexistent/input.pdf", str(self.tmpdir / "out.pdf"))
+        self.assertFalse(result)
+
+    def test_letter_to_a4_converts_letter_to_a4(self) -> None:
+        """letter_to_a4 конвертирует Letter PDF в A4"""
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+        try:
+            from pikepdf import Pdf, Page
+        except ImportError:
+            self.skipTest("pikepdf не установлен")
+
+        # Создаём Letter PDF
+        in_pdf = self.tmpdir / "letter.pdf"
+        pdf = Pdf.new()
+        page = Page(pdf)
+        page.MediaBox = [0, 0, mod.LETTER_W, mod.LETTER_H]
+        pdf.pages.append(page)
+        pdf.save(str(in_pdf))
+        pdf.close()
+
+        out_pdf = self.tmpdir / "output.pdf"
+        result = mod.letter_to_a4(str(in_pdf), str(out_pdf))
+        self.assertTrue(result)
+        self.assertTrue(out_pdf.exists())
+
+        # Проверяем A4 размеры
+        pdf2 = Pdf.open(str(out_pdf))
+        mb = pdf2.pages[0].MediaBox
+        w = float(mb[2]) - float(mb[0])
+        h = float(mb[3]) - float(mb[1])
+        pdf2.close()
+
+        self.assertAlmostEqual(w, mod.A4_W, delta=5)
+        self.assertAlmostEqual(h, mod.A4_H, delta=5)
+
+
+# ══════════════════════════════════════════════════════════════════
+# MERMAID MDBOOK PREPROCESSOR
+# ══════════════════════════════════════════════════════════════════
+class TestMermaidMdbookPreprocessor(unittest.TestCase):
+    """Тесты mdBook preprocessor для Mermaid"""
+
+    @staticmethod
+    def _import_preprocessor():
+        """Импортирует mermaid-mdbook-preprocessor.py (имя с дефисами)"""
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "mermaid_mdbook_preprocessor",
+            TESTS_DIR / "mermaid-mdbook-preprocessor.py",
+            submodule_search_locations=[],
+        )
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["mermaid_mdbook_preprocessor"] = mod
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_collect_pending_finds_uncached_blocks(self) -> None:
+        """collect_pending находит блоки без SVG в кеше"""
+        mod = self._import_preprocessor()
+
+        tmpdir = Path(tempfile.mkdtemp(prefix="preproc_test_"))
+        try:
+            cache_dir = tmpdir / "img" / "mermaid"
+            cache_dir.mkdir(parents=True)
+
+            book_sections = [
+                {"Chapter": {"content": "text\n```mermaid\ngraph TD;\nA-->B;\n```\nend"}}
+            ]
+
+            pending = mod.collect_pending(book_sections, cache_dir)
+            self.assertEqual(len(pending), 1)
+            self.assertIn("graph TD;", list(pending.values())[0])
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_collect_pending_skips_cached(self) -> None:
+        """collect_pending пропускает блоки с SVG в кеше"""
+        mod = self._import_preprocessor()
+        from scripts.mermaid_core import hash_mermaid
+
+        tmpdir = Path(tempfile.mkdtemp(prefix="preproc_cached_"))
+        try:
+            cache_dir = tmpdir / "img" / "mermaid"
+            cache_dir.mkdir(parents=True)
+
+            source = "graph TD;\nA-->B;"
+            h = hash_mermaid(source)
+            (cache_dir / f"{h}.svg").write_text("<svg></svg>", encoding="utf-8")
+
+            book_sections = [
+                {"Chapter": {"content": f"```mermaid\n{source}\n```"}}
+            ]
+
+            pending = mod.collect_pending(book_sections, cache_dir)
+            self.assertEqual(len(pending), 0)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_collect_pending_skips_empty_and_long(self) -> None:
+        """collect_pending пропускает пустые и слишком длинные блоки"""
+        mod = self._import_preprocessor()
+
+        tmpdir = Path(tempfile.mkdtemp(prefix="preproc_skips_"))
+        try:
+            cache_dir = tmpdir / "cache"
+            cache_dir.mkdir()
+
+            book_sections = [
+                {"Chapter": {"content": "```mermaid\n\n```"}},
+                {"Chapter": {"content": f"```mermaid\n{'x' * (mod.MAX_BLOCK_LEN + 1)}\n```"}},
+            ]
+
+            pending = mod.collect_pending(book_sections, cache_dir)
+            self.assertEqual(len(pending), 0)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_replace_in_book_substitutes_cached_blocks(self) -> None:
+        """replace_in_book заменяет блоки на SVG-ссылки если SVG в кеше"""
+        mod = self._import_preprocessor()
+        from scripts.mermaid_core import hash_mermaid
+
+        tmpdir = Path(tempfile.mkdtemp(prefix="preproc_replace_"))
+        try:
+            cache_dir = tmpdir / "cache"
+            cache_dir.mkdir()
+            src_dir = tmpdir / "src"
+            src_dir.mkdir()
+
+            source = "graph TD;\nA-->B;"
+            h = hash_mermaid(source)
+            (cache_dir / f"{h}.svg").write_text("<svg></svg>", encoding="utf-8")
+
+            book_sections = [
+                {"Chapter": {"content": f"before\n```mermaid\n{source}\n```\nafter"}}
+            ]
+
+            mod.replace_in_book(book_sections, cache_dir, src_dir)
+            content = book_sections[0]["Chapter"]["content"]
+            self.assertNotIn("```mermaid", content)
+            self.assertIn("![Диаграмма]", content)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_supports_returns_true(self) -> None:
+        """supports <renderer> возвращает 'true'"""
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "mermaid-mdbook-preprocessor.py"),
+             "supports", "html"],
+            capture_output=True, text=True, timeout=5,
+        )
+        self.assertEqual(result.stdout.strip(), "true")
+
+
+# ══════════════════════════════════════════════════════════════════
 # ЗАПУСК
 # ══════════════════════════════════════════════════════════════════
 if __name__ == "__main__":

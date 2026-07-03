@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.1.0 — 2026-07-03
+
+### Added
+- **20 новых unit-тестов** (52 итого, +63%): `generate_illustrations.py`, `mermaid-preprocess.py`, `pdf-a4.py`, `mermaid-mdbook-preprocessor.py`
+- Тесты покрывают все 8 Python-скриптов (ранее 4 из 8)
+- Тест на валидность XML для SVG-иллюстраций
+
+### Changed
+- **CI: flake8 → ruff** — единый линтер Python, параллельно с pyproject.toml
+- **CI: hunspell** проверяет все .md файлы (ранее только 10)
+- **CI: deploy job** — убраны `|| echo` / `|| true` маскировки ошибок
+- **CI: pytest** вместо unittest для coverage
+
+### Fixed
+- **generate_illustrations.py**: исправлен `ValueError: too many values to unpack` в `gen_oil_circuit()` — неверное распаковка dict comprehension
+
 ## 1.2.0 — 2026-06-25
 
 ### Added
