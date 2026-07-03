@@ -37,3 +37,5 @@ MD036: false
 # SUMMARY.md indent — mdBook specific
 MD007:
   indent: 4
+# Table column style — inconsistent in technical docs with varied table formats
+MD060: false
