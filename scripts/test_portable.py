@@ -927,6 +927,159 @@ class TestMermaidPreprocess(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
 
 
+class TestServeMain(unittest.TestCase):
+    """Тесты main() функции serve.py"""
+
+    def test_main_help_succeeds(self) -> None:
+        """serve.py --help возвращает 0 и содержит описание"""
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "serve.py"), "--help"],
+            capture_output=True, text=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Renault Symbol", result.stdout)
+
+    def test_main_nonexistent_dir_exits_nonzero(self) -> None:
+        """serve.py с несуществующей директорией завершается с ошибкой"""
+        import subprocess
+        import uuid
+        bad_dir = tempfile.gettempdir() / Path(f"nonexistent_{uuid.uuid4().hex[:8]}")
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "serve.py"), "--dir", str(bad_dir)],
+            capture_output=True, text=True, timeout=10,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("не найдена", result.stderr)  # "не найдена" or "не существует"
+
+    def test_main_verbose_sets_env_var(self) -> None:
+        """serve.py --verbose запускается без ошибок"""
+        import subprocess
+        import time
+
+        with tempfile.TemporaryDirectory() as tmp:
+            html_dir = Path(tmp) / "html"
+            html_dir.mkdir(parents=True)
+            (html_dir / "index.html").write_text("ok", encoding="utf-8")
+
+            proc = subprocess.Popen(
+                [sys.executable, str(TESTS_DIR / "serve.py"), "--dir", str(html_dir),
+                 "--verbose", "--no-browser", "--port", "19100"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            )
+            time.sleep(1.5)
+            try:
+                poll = proc.poll()
+                if poll is not None:
+                    stderr_out = proc.stderr.read() if proc.stderr else ""
+                    self.fail(f"Сервер упал сразу (код {poll}): {stderr_out[:200]}")
+            finally:
+                proc.terminate()
+                proc.wait(timeout=3)
+
+
+# ══════════════════════════════════════════════════════════════════
+# SERVE — HTTP handler integration
+# ══════════════════════════════════════════════════════════════════
+class TestServeHandler(unittest.TestCase):
+    """Интеграционные тесты HTTP-обработчика PortableHandler"""
+
+    tmpdir: Path
+    html_dir: Path
+    port: int
+    server = None
+    base = ""
+
+    @classmethod
+    def setUpClass(cls):
+        import threading
+        from http.server import HTTPServer
+        from scripts.serve import PortableHandler, find_available_port
+
+        cls.tmpdir = Path(tempfile.mkdtemp(prefix="serve_handler_test_"))
+        cls.html_dir = cls.tmpdir / "html"
+        cls.html_dir.mkdir(parents=True)
+        # Создаём тестовые файлы
+        (cls.html_dir / "index.html").write_text(
+            "<html><body>INDEX</body></html>", encoding="utf-8")
+        (cls.html_dir / "test.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8")
+        (cls.html_dir / "sub").mkdir()
+        (cls.html_dir / "sub" / "page.html").write_text(
+            "<html><body>SUB PAGE</body></html>", encoding="utf-8")
+
+        cls.port = find_available_port(18850)
+        os.chdir(cls.html_dir)
+        cls.server = HTTPServer(("127.0.0.1", cls.port), PortableHandler)
+        cls.server.allow_reuse_address = True
+        t = threading.Thread(target=cls.server.serve_forever, daemon=True)
+        t.start()
+        cls.base = f"http://127.0.0.1:{cls.port}"
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.server:
+            cls.server.shutdown()
+            cls.server.server_close()
+        shutil.rmtree(cls.tmpdir, ignore_errors=True)
+
+    def _get(self, path: str):
+        """Выполнить GET запрос и вернуть (code, body)."""
+        import urllib.request
+        import urllib.error
+        try:
+            with urllib.request.urlopen(f"{self.base}{path}", timeout=3) as resp:  # nosec B310: test URL
+                return resp.status, resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.read().decode("utf-8")
+
+    def test_get_root_returns_index(self):
+        """GET / возвращает index.html"""
+        code, body = self._get("/")
+        self.assertEqual(code, 200)
+        self.assertIn("INDEX", body)
+
+    def test_get_subdir_html_file(self):
+        """GET /sub/page.html возвращает HTML"""
+        code, body = self._get("/sub/page.html")
+        self.assertEqual(code, 200)
+        self.assertIn("SUB PAGE", body)
+
+    def test_get_svg_returns_svg_mime(self):
+        """GET /test.svg возвращает SVG с image/svg+xml"""
+        import urllib.request
+        with urllib.request.urlopen(f"{self.base}/test.svg", timeout=3) as resp:  # nosec B310: test URL
+            self.assertEqual(resp.status, 200)
+            content_type = resp.headers.get("Content-Type", "")
+            self.assertIn("image/svg+xml", content_type)
+
+    def test_get_nonexistent_returns_404(self):
+        """GET /nonexistent.html возвращает 404"""
+        code, body = self._get("/nonexistent.html")
+        self.assertEqual(code, 404)
+
+    def test_get_oem_search_json(self):
+        """GET /api/oem-search?q=7700274177 возвращает JSON"""
+        import json
+        from scripts.serve import _reset_oem_catalog
+        _reset_oem_catalog()
+        code, body = self._get("/api/oem-search?q=7700274177")
+        self.assertEqual(code, 200)
+        data = json.loads(body)
+        self.assertIn("query", data)
+        self.assertIn("results", data)
+
+    def test_get_oem_catalog_json(self):
+        """GET /api/oem-catalog.json возвращает полный каталог"""
+        import json
+        from scripts.serve import _reset_oem_catalog
+        _reset_oem_catalog()
+        code, body = self._get("/api/oem-catalog.json")
+        self.assertEqual(code, 200)
+        data = json.loads(body)
+        self.assertIsInstance(data, list)
+
+
 # ══════════════════════════════════════════════════════════════════
 # PDF-A4
 # ══════════════════════════════════════════════════════════════════
