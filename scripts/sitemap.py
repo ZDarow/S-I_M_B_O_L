@@ -6,7 +6,7 @@
 Использование:
     python3 scripts/sitemap.py                  # default: book/book/html → book/book/html/sitemap.xml
     python3 scripts/sitemap.py --source ./out   # произвольная директория
-    python3 scripts/sitemap.py --url https://mi.github.io/reno-symbol.ru  # кастомный base URL
+    python3 scripts/sitemap.py --url https://zdarow.github.io/S-I_M_B_O_L  # кастомный base URL
 """
 import argparse
 import logging
@@ -21,7 +21,7 @@ def generate_sitemap(source_dir: Path, base_url: str = None, output: Path = None
     html_files = sorted(source_dir.rglob("*.html"))
 
     if not base_url:
-        base_url = "https://mi.github.io/reno-symbol.ru"
+        base_url = "https://zdarow.github.io/S-I_M_B_O_L"
 
     if base_url.endswith('/'):
         base_url = base_url.rstrip('/')
@@ -70,7 +70,7 @@ def main():
     parser.add_argument('--source', type=Path, default='book/book/html',
                         help='Директория с собранным HTML (по умолч. book/book/html)')
     parser.add_argument('--url', type=str, default=None,
-                        help='Base URL (по умолч. https://mi.github.io/reno-symbol.ru)')
+                        help='Base URL (по умолч. https://zdarow.github.io/S-I_M_B_O_L)')
     parser.add_argument('--output', type=Path, default=None,
                         help='Путь для sitemap.xml (по умолч. --source/sitemap.xml)')
 
