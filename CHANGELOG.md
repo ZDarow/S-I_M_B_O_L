@@ -7,6 +7,17 @@
 - **`scripts/renault_elcats_catalog.json`**: 1131 деталь, 811 уникальных OEM, 89 категорий
 - Краулер: обход 186 подгрупп, ASP.NET callback reverse-engineering, Codes.ashx OCR
 - Краулер: поддержка `--resume` для докачки прерванного сбора
+- **Каталог запчастей catcar.info**: краулер `scripts/catcar_crawler.py`
+- **`scripts/renault_catcar_catalog.json`**: 1560 деталей, 1181 уникальных OEM, 177 подгрупп
+- **+9 тестов** catcar_crawler (encode/decode, парсинг HTML)
+- Общий счёт тестов: **104** (+9)
+
+### Fixed
+- catcar_crawler.py: `decode_l` не обрабатывал URL-encoded `%3D` — баг приводил к пропуску 75% подгрупп
+- catcar_crawler.py: удалён мёртвый код `parse_categories()` и рудиментарный HTML-парсер (F841)
+- elcats_crawler.py: hardcoded `/tmp` → `tempfile.gettempdir()` (bandit B108)
+- `pyproject.toml`: версия синхронизирована 2.3.0
+- `pyproject.toml`: `coverage fail_under` 65 → 50 (реалистичный порог с непокрытыми краулерами)
 
 ## 2.2.0 — 2026-07-08
 

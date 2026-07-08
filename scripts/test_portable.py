@@ -1454,6 +1454,130 @@ class TestMermaidMdbookPreprocessor(unittest.TestCase):
 
 
 # ══════════════════════════════════════════════════════════════════
+# CATCAR CRAWLER
+# ══════════════════════════════════════════════════════════════════
+class TestCatcarCrawler(unittest.TestCase):
+    """Smoke-тесты для catcar_crawler.py (кодирование, декодирование, парсинг)"""
+
+    maxDiff = None
+
+    def setUp(self):
+        from catcar_crawler import decode_l, encode_l, parse_groups, parse_parts
+        self.decode_l = decode_l
+        self.encode_l = encode_l
+        self.parse_groups = parse_groups
+        self.parse_parts = parse_parts
+
+    def test_encode_decode_roundtrip(self):
+        """Проверка encode→decode даёт те же параметры"""
+        params = {
+            "st": "40",
+            "sts": {"10": "Модель", "20": "Symbol-Thalia", "30": "LU3R", "40": "Механические узлы"},
+            "cat_id": "M",
+        }
+        l_val = self.encode_l(**params)
+        decoded = self.decode_l(l_val)
+        self.assertEqual(decoded.get("st"), "40")
+        self.assertEqual(decoded.get("cat_id"), "M")
+
+    def test_encode_with_group_and_subgroup(self):
+        """encode_l с grp_id и subGrp_id"""
+        l_val = self.encode_l(
+            st="50",
+            sts={"10": "Модель", "50": "10 Двигатель"},
+            cat_id="M", grp_id="10", subGrp_id="10A",
+        )
+        decoded = self.decode_l(l_val)
+        self.assertEqual(decoded.get("grp_id"), "10")
+        self.assertEqual(decoded.get("subGrp_id"), "10A")
+
+    def test_decode_with_url_encoded_input(self):
+        """decode_l обрабатывает URL-encoded %3D"""
+        # Эмуляция URL-encoded l-параметра с %3D вместо =
+        import base64
+        import urllib.parse
+        raw = 'st==40||sts=={"10":"Модель"}||cat_id==M'
+        encoded = urllib.parse.quote(base64.b64encode(raw.encode()).decode(), safe='')
+        decoded = self.decode_l(encoded)
+        self.assertEqual(decoded.get("st"), "40")
+        self.assertEqual(decoded.get("cat_id"), "M")
+
+    def test_parse_groups_empty_html(self):
+        """parse_groups на пустом HTML возвращает []"""
+        groups = self.parse_groups("<html></html>")
+        self.assertEqual(groups, [])
+
+    def test_parse_parts_empty_html(self):
+        """parse_parts на пустом HTML возвращает []"""
+        parts = self.parse_parts("<html></html>")
+        self.assertEqual(parts, [])
+
+    def test_parse_groups_with_real_html(self):
+        """parse_groups корректно находит группы в реальном HTML"""
+        html = """
+        <div class="rowblocks hr-bottom" name="10">
+            <div class="blocks vertical-align">
+                <div class="left_image">
+                    <span class="blocks__title">10 Двигатель</span>
+                </div>
+            </div>
+            <div class="blocks"><div>
+                <a class="blocks__item" href="http://catcar.info/renault/?l=c3Q9PTUwfHxzdHM9PXsiMTAiOiLQnNC+0LTQtdC70YwiLCIyMCI6IlN5bWJvbC1UaGFsaWEiLCIzMCI6IkxVM1IiLCI0MCI6ItCc0LXRhdCw0L3QuNGH0LXRgdC60LjQtSDRg9C30LvRiyIsIjUwIjoiMTAg0JTQstC40LPQsNGC0LXQu9GMIC8g0JTQstC40LPQsNGC0LXQu9GMINCyINGB0LHQvtGA0LUifXx8bm9wcnM9PTE0MzV8fGJyYW5kPT1SZW5hdWx0fHxub3ByPT0xNDM1fHx0eXBlPT1MVTNSfHxjYXRfaWQ9PU18fGltZz09fHxncnBfaWQ9PTEwfHxzdWJHcnBfaWQ9PTEwQQ==">
+                    <span class="blocks__img">
+                        <img src="http://ci.catcar.info/renault_2017_01/vignette/10A.png" alt="Двигатель в сборе" title="Двигатель в сборе"/>
+                    </span>
+                    <span class="blocks__title">Двигатель в сборе</span>
+                </a>
+            </div></div>
+        </div>
+        """
+        groups = self.parse_groups(html)
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0]["grp_id"], "10")
+        self.assertEqual(len(groups[0]["subgroups"]), 1)
+        self.assertEqual(groups[0]["subgroups"][0]["subGrp_id"], "10A")
+
+    def test_parse_parts_with_real_html(self):
+        """parse_parts извлекает OEM-номера из HTML-таблицы"""
+        html = """
+        <table>
+            <tr><td>1</td><td>7701472317</td><td></td><td>ДВИГАТЕЛЬ K4J 712</td><td>Тип КПП = МКП</td></tr>
+            <tr><td>2</td><td>7700107864</td><td></td><td>ПАТРУБОК ВОЗД. ФИЛ</td><td></td></tr>
+        </table>
+        """
+        parts = self.parse_parts(html)
+        self.assertEqual(len(parts), 2)
+        self.assertEqual(parts[0]["oem"], "7701472317")
+        self.assertEqual(parts[1]["oem"], "7700107864")
+        self.assertEqual(parts[0]["name"], "ДВИГАТЕЛЬ K4J 712")
+        self.assertEqual(parts[0]["position"], "1")
+
+    def test_parse_parts_skips_header_row(self):
+        """parse_parts пропускает строку-заголовок таблицы"""
+        html = """
+        <table>
+            <tr><td>Код</td><td>Номер</td><td>Замены</td><td>Название</td><td>Дополнительная информация</td></tr>
+            <tr><td>1</td><td>7701472317</td><td></td><td>ДВИГАТЕЛЬ</td><td></td></tr>
+        </table>
+        """
+        parts = self.parse_parts(html)
+        self.assertEqual(len(parts), 1)
+        self.assertEqual(parts[0]["oem"], "7701472317")
+
+    def test_parse_parts_invalid_oem_skipped(self):
+        """parse_parts пропускает не-цифровые OEM"""
+        html = """
+        <table>
+            <tr><td>1</td><td>7701472317</td><td></td><td>ДВИГАТЕЛЬ</td><td></td></tr>
+            <tr><td>2</td><td>INVALID</td><td></td><td>НЕ OEM</td><td></td></tr>
+        </table>
+        """
+        parts = self.parse_parts(html)
+        self.assertEqual(len(parts), 1)
+        self.assertEqual(parts[0]["oem"], "7701472317")
+
+
+# ══════════════════════════════════════════════════════════════════
 # ЗАПУСК
 # ══════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
