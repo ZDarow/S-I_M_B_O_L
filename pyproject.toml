@@ -4,7 +4,7 @@ build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
 name = "reno-symbol-manual"
-version = "2.1.0"
+version = "2.2.0"
 description = "Утилиты сборки Руководства по ремонту Renault Symbol"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -75,7 +75,7 @@ omit = ["scripts/test_*.py"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 55
+fail_under = 65
 
 [tool.bandit]
 exclude_dirs = ["scripts/test_*.py"]

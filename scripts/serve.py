@@ -13,10 +13,12 @@ Zero-Dependency HTTP-сервер для портативной версии
   python3 scripts/serve.py --no-browser       # без открытия браузера
 """
 import argparse
+import functools
 import json
 import logging
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import threading
@@ -62,26 +64,22 @@ MIME_TYPES = {
 
 
 # ─── Загрузка OEM-каталога ──────────────────────────────────────
-OEM_CATALOG = None
 OEM_CATALOG_PATH = SCRIPT_DIR / "oem_catalog.json"
 
 
 def _reset_oem_catalog():
     """Сбросить кеш OEM-каталога (для тестов)."""
-    global OEM_CATALOG
-    OEM_CATALOG = None
+    _load_oem_catalog.cache_clear()
 
 
+@functools.lru_cache(maxsize=1)
 def _load_oem_catalog():
-    """Загрузить и нормализовать OEM-каталог из JSON (ленивая загрузка).
+    """Загрузить и нормализовать OEM-каталог из JSON (ленивая загрузка, thread-safe).
 
     Поддерживает два формата:
     - Плоский список: [{name, oem, analogs, engines}, ...]
     - С категориями: [{category, parts: [{name, oem, ...}, ...]}, ...]
     """
-    global OEM_CATALOG
-    if OEM_CATALOG is not None:
-        return OEM_CATALOG
     try:
         if OEM_CATALOG_PATH.exists():
             with open(OEM_CATALOG_PATH, encoding="utf-8") as f:
@@ -95,19 +93,14 @@ def _load_oem_catalog():
                         for part in group.get("parts", []):
                             part["category"] = category
                             flat.append(part)
-                    OEM_CATALOG = flat
-                else:
-                    OEM_CATALOG = raw
-            else:
-                OEM_CATALOG = raw
-            logger.info("OEM-каталог загружен: %d записей", len(OEM_CATALOG))
-        else:
-            OEM_CATALOG = []
-            logger.warning("OEM-каталог не найден: %s", OEM_CATALOG_PATH)
+                    return flat
+                return raw
+            return raw if isinstance(raw, list) else []
+        logger.warning("OEM-каталог не найден: %s", OEM_CATALOG_PATH)
+        return []
     except Exception as exc:
-        OEM_CATALOG = []
         logger.error("Ошибка загрузки OEM-каталога: %s", exc)
-    return OEM_CATALOG
+        return []
 
 
 def _search_oem(query: str, max_results: int = 50) -> list:
@@ -135,11 +128,20 @@ def _search_oem(query: str, max_results: int = 50) -> list:
     return results[:max_results]
 
 
+CSP_HEADER = (
+    "default-src 'self'; "
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    "font-src 'self' https://fonts.gstatic.com; "
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+    "img-src 'self' data:; "
+)
+
+
 class PortableHandler(SimpleHTTPRequestHandler):
     """Кастомный обработчик с русскоязычными index, MIME-типами и OEM API."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, directory=None, **kwargs):
+        super().__init__(*args, directory=directory, **kwargs)
 
     def guess_type(self, path):
         ext = os.path.splitext(path)[1].lower()
@@ -161,36 +163,48 @@ class PortableHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/oem-catalog.json":
             self._serve_oem_catalog()
             return
+
+        # Защита от path traversal
+        normalized = urllib.parse.urldefrag(self.path)[0]
+        normalized = urllib.parse.urlunparse(parsed._replace(params='', query=''))
+        if '..' in normalized or normalized.startswith('/..'):
+            self.send_error(404, "Not Found")
+            return
+
         super().do_GET()
+
+    def _send_json(self, data: dict | list, cache_seconds: int = 0):
+        """Отправить JSON-ответ с едиными заголовками."""
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-Security-Policy", CSP_HEADER)
+        if cache_seconds:
+            self.send_header("Cache-Control", f"max-age={cache_seconds}")
+        else:
+            self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(
+            json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+        )
 
     def _handle_oem_search(self, query: str):
         """Эндпоинт /api/oem-search?q=... — поиск по OEM-каталогу."""
         results = _search_oem(query)
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Cache-Control", "no-cache")
-        self.end_headers()
-        self.wfile.write(json.dumps({
+        self._send_json({
             "query": query,
             "count": len(results),
             "results": results,
-        }, ensure_ascii=False, indent=2).encode("utf-8"))
+        })
 
     def _serve_oem_catalog(self):
         """Эндпоинт /api/oem-catalog.json — полный каталог."""
         catalog = _load_oem_catalog()
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Cache-Control", "max-age=3600")
-        self.end_headers()
-        self.wfile.write(json.dumps(catalog, ensure_ascii=False, indent=2).encode("utf-8"))
+        self._send_json(catalog, cache_seconds=3600)
 
 
 def find_available_port(start: int = DEFAULT_PORT) -> int:
     """Найти свободный порт, начиная с start."""
-    import socket
     for port in range(start, start + 100):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             if s.connect_ex(("127.0.0.1", port)) != 0:
@@ -272,10 +286,9 @@ def main():
     port = find_available_port(args.port)
     host = "127.0.0.1"
 
-    server = HTTPServer((host, port), PortableHandler)
-
-    # Меняем рабочую директорию на HTML-вывод
-    os.chdir(html_dir)
+    # Передаём директорию через functools.partial вместо os.chdir
+    handler = functools.partial(PortableHandler, directory=str(html_dir))
+    server = HTTPServer((host, port), handler)
 
     url = f"http://{host}:{port}/"
 

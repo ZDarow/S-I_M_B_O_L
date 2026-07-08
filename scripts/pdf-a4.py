@@ -13,16 +13,28 @@ import sys
 import tempfile
 from pathlib import Path
 
-from pikepdf import Pdf, Name, Stream
-
 logger = logging.getLogger(__name__)
 
 LETTER_W, LETTER_H = 612.0, 792.0
 A4_W, A4_H = 595.276, 841.890  # 210mm × 297mm
 
 
+def _get_pikepdf():
+    """Ленивый импорт pikepdf (опциональная зависимость)."""
+    try:
+        from pikepdf import Pdf, Name, Stream
+        return Pdf, Name, Stream
+    except ImportError:
+        return None, None, None
+
+
 def letter_to_a4(in_path: str, out_path: str) -> bool:
     """Сконвертировать Letter PDF в A4 с атомарной записью."""
+    Pdf, Name, Stream = _get_pikepdf()
+    if Pdf is None:
+        logger.error("pikepdf не установлен. Установите: pip install pikepdf")
+        return False
+
     if not os.path.exists(in_path):
         logger.error("Input not found: %s", in_path)
         return False
@@ -30,7 +42,11 @@ def letter_to_a4(in_path: str, out_path: str) -> bool:
     scale = A4_W / LETTER_W  # 0.972
     offset_y = (A4_H - LETTER_H * scale) / 2
 
-    pdf = Pdf.open(in_path, allow_overwriting_input=True)
+    try:
+        pdf = Pdf.open(in_path, allow_overwriting_input=True)
+    except Exception as exc:
+        logger.error("Не удалось открыть PDF: %s", exc)
+        return False
     changed = 0
     for page in pdf.pages:
         media = page.MediaBox
@@ -83,23 +99,26 @@ def letter_to_a4(in_path: str, out_path: str) -> bool:
 
     try:
         pdf.save(tmp_path, compress_streams=True)
-        pdf.close()
-        shutil.move(tmp_path, out_path)  # атомарная замена
     except Exception:
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
-        pdf.close()
         raise
+    finally:
+        pdf.close()
 
-    # Verify
-    pdf2 = Pdf.open(out_path)
-    p = pdf2.pages[0]
-    w = float(p.MediaBox[2]) / 72 * 25.4
-    h = float(p.MediaBox[3]) / 72 * 25.4
-    pages = len(pdf2.pages)
-    size = os.path.getsize(out_path) / 1024 / 1024
-    logger.info("✅ PDF: %d pages, %.0f×%.0f mm, %.1f MB", pages, w, h, size)
-    pdf2.close()
+    shutil.move(tmp_path, out_path)  # атомарная замена
+
+    # Верификация (некритична, ошибка не прерывает конвертацию)
+    try:
+        with Pdf.open(out_path) as pdf2:
+            p = pdf2.pages[0]
+            w = float(p.MediaBox[2]) / 72 * 25.4
+            h = float(p.MediaBox[3]) / 72 * 25.4
+            pages = len(pdf2.pages)
+            size = os.path.getsize(out_path) / 1024 / 1024
+            logger.info("✅ PDF: %d pages, %.0f×%.0f mm, %.1f MB", pages, w, h, size)
+    except Exception:
+        logger.warning("Верификация PDF не удалась, но конвертация завершена")
     return True
 
 
@@ -110,6 +129,14 @@ def main():
         stream=sys.stderr,
     )
 
+    # Обработка --help вручную (argparse не используется для совместимости)
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Использование: python3 pdf-a4.py [input.pdf] [output.pdf]")
+        print()
+        print("Конвертирует Letter PDF (612x792) в A4 (595x842).")
+        print("Если файлы не указаны, использует book/book/pdf/output.pdf")
+        return 0
+
     proj_root = Path(__file__).resolve().parent.parent
     in_pdf = proj_root / "book" / "book" / "pdf" / "output.pdf"
     out_pdf = in_pdf
@@ -119,11 +146,12 @@ def main():
     if len(sys.argv) > 2:
         out_pdf = Path(sys.argv[2])
 
-    letter_to_a4(str(in_pdf), str(out_pdf))
+    success = letter_to_a4(str(in_pdf), str(out_pdf))
     # Если out_pdf != in_pdf, копируем обратно
-    if out_pdf != in_pdf:
+    if success and out_pdf != in_pdf:
         shutil.copy2(str(out_pdf), str(in_pdf))
+    return 0 if success else 1
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())

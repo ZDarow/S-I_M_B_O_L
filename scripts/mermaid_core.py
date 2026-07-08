@@ -55,50 +55,46 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
         logger.error("mmdc не найден. Установите: npm install @mermaid-js/mermaid-cli")
         return False
 
-    for attempt in range(1, MAX_RETRIES + 1):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".mmd",
-                                         delete=False, encoding="utf-8") as tmp:
-            tmp.write(mermaid_source)
-            tmp_path = tmp.name
+    # Создаём временный файл один раз, вне цикла retry
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".mmd",
+                                     delete=False, encoding="utf-8") as tmp:
+        tmp.write(mermaid_source)
+        tmp_path = tmp.name
 
-        try:
-            r = subprocess.run(
-                [mmdc, "-i", tmp_path, "-o", str(output),
-                 "-b", "transparent", "-w", "1200"],
-                capture_output=True, text=True, timeout=MMDC_TIMEOUT,
-            )
-            if r.returncode != 0:
-                logger.warning(
-                    "Попытка %d/%d: mmdc вернул код %d: %s",
-                    attempt, MAX_RETRIES, r.returncode, r.stderr[:200],
-                )
-                if attempt < MAX_RETRIES:
-                    continue
-                return False
-            ok = output.exists() and output.stat().st_size >= MIN_SVG_SIZE
-            if not ok and attempt < MAX_RETRIES:
-                logger.warning(
-                    "Попытка %d/%d: mmdc создал некорректный SVG",
-                    attempt, MAX_RETRIES,
-                )
-                continue
-            return ok
-        except subprocess.TimeoutExpired:
-            logger.warning(
-                "Попытка %d/%d: mmdc timeout (%ds)",
-                attempt, MAX_RETRIES, MMDC_TIMEOUT,
-            )
-            if attempt >= MAX_RETRIES:
-                return False
-        except OSError as e:
-            logger.warning("Попытка %d/%d: Ошибка mmdc: %s", attempt, MAX_RETRIES, e)
-            if attempt >= MAX_RETRIES:
-                return False
-        finally:
+    try:
+        for attempt in range(1, MAX_RETRIES + 1):
             try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
+                r = subprocess.run(
+                    [mmdc, "-i", tmp_path, "-o", str(output),
+                     "-b", "transparent", "-w", "1200"],
+                    capture_output=True, text=True, timeout=MMDC_TIMEOUT,
+                )
+                if r.returncode != 0:
+                    logger.warning(
+                        "Попытка %d/%d: mmdc вернул код %d: %s",
+                        attempt, MAX_RETRIES, r.returncode, r.stderr[:200],
+                    )
+                    continue
+                ok = output.exists() and output.stat().st_size >= MIN_SVG_SIZE
+                if not ok:
+                    logger.warning(
+                        "Попытка %d/%d: mmdc создал некорректный SVG",
+                        attempt, MAX_RETRIES,
+                    )
+                    continue
+                return ok
+            except subprocess.TimeoutExpired:
+                logger.warning(
+                    "Попытка %d/%d: mmdc timeout (%ds)",
+                    attempt, MAX_RETRIES, MMDC_TIMEOUT,
+                )
+            except OSError as e:
+                logger.warning("Попытка %d/%d: Ошибка mmdc: %s", attempt, MAX_RETRIES, e)
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
 
     return False
 
@@ -106,3 +102,17 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
 def hash_mermaid(source: str) -> str:
     """SHA256 хеш mermaid-источника (первые 16 символов)."""
     return hashlib.sha256(source.encode()).hexdigest()[:16]
+
+
+def walk_sections(data, callback):
+    """Обойти структуру mdBook Chapter и вызвать callback(chapter) для каждого."""
+    if isinstance(data, dict):
+        if "Chapter" in data:
+            ch = data["Chapter"]
+            callback(ch)
+            if "sub_items" in ch:
+                for sub in ch["sub_items"]:
+                    walk_sections(sub, callback)
+    elif isinstance(data, list):
+        for item in data:
+            walk_sections(item, callback)
