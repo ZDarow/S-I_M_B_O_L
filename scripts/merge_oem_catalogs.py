@@ -69,7 +69,7 @@ def load_catalog(path: Path, source_name: str) -> list[dict[str, Any]]:
         else:
             parts = data
     elif isinstance(data, dict):
-        parts = data.get("parts", data.get("oems", []))
+        parts = data.get("parts") or data.get("oems") or []
     else:
         logger.error("Неизвестный формат в %s", path)
         return []
@@ -95,9 +95,8 @@ def extract_oem(part: dict[str, Any]) -> str:
 
 def merge_catalogs(output_path: Path) -> dict[str, Any]:
     """Слить все каталоги в один master-справочник с дедупликацией по OEM."""
-    all_parts: list[dict[str, Any]] = []
+    parts_by_oem: dict[str, dict[str, Any]] = {}
     source_stats: dict[str, int] = {}
-    oem_set: set[str] = set()
 
     for source_name, path in SOURCES.items():
         parts = load_catalog(path, source_name)
@@ -108,33 +107,26 @@ def merge_catalogs(output_path: Path) -> dict[str, Any]:
             if not oem:
                 continue
 
-            # Убираем старый OEM и добавляем пометку источника
-            clean_part = {
-                "oem": oem,
-                "name": part.get("name", part.get("description", part.get("title", ""))),
-                "source_parts": [source_name],
-            }
-
-            # Категория/группа, если есть
-            for key in ("category", "group", "subgroup", "grp_name", "parts_group"):
-                val = part.get(key)
-                if val:
-                    clean_part[key] = val
-                    break
-
-            if oem in oem_set:
-                # Находим существующую запись и добавляем источник
-                for existing in all_parts:
-                    if existing["oem"] == oem:
-                        if source_name not in existing["source_parts"]:
-                            existing["source_parts"].append(source_name)
-                        break
+            if oem in parts_by_oem:
+                existing = parts_by_oem[oem]
+                if source_name not in existing["source_parts"]:
+                    existing["source_parts"].append(source_name)
             else:
-                oem_set.add(oem)
-                all_parts.append(clean_part)
+                clean_part: dict[str, Any] = {
+                    "oem": oem,
+                    "name": part.get("name", part.get("description", part.get("title", ""))),
+                    "source_parts": [source_name],
+                }
+                # Категория/группа, если есть
+                for key in ("category", "group", "subgroup", "grp_name", "parts_group"):
+                    val = part.get(key)
+                    if val:
+                        clean_part[key] = val
+                        break
+                parts_by_oem[oem] = clean_part
 
     # Сортируем по OEM
-    all_parts.sort(key=lambda p: p["oem"])
+    all_parts = sorted(parts_by_oem.values(), key=lambda p: p["oem"])
 
     catalog: dict[str, Any] = {
         "name": "Renault Symbol / Thalia — Master OEM Catalog",

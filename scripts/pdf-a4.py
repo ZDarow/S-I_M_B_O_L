@@ -6,6 +6,7 @@ Uses pikepdf to scale content and resize pages.
 Безопасность: использует атомарную запись через временный файл,
 чтобы не повредить исходный PDF при сбое.
 """
+import argparse
 import logging
 import os
 import shutil
@@ -43,7 +44,7 @@ def letter_to_a4(in_path: str, out_path: str) -> bool:
     offset_y = (A4_H - LETTER_H * scale) / 2
 
     try:
-        pdf = Pdf.open(in_path, allow_overwriting_input=True)
+        pdf = Pdf.open(in_path)
     except Exception as exc:
         logger.error("Не удалось открыть PDF: %s", exc)
         return False
@@ -129,25 +130,24 @@ def main():
         stream=sys.stderr,
     )
 
-    # Обработка --help вручную (argparse не используется для совместимости)
-    if "--help" in sys.argv or "-h" in sys.argv:
-        print("Использование: python3 pdf-a4.py [input.pdf] [output.pdf]")
-        print()
-        print("Конвертирует Letter PDF (612x792) в A4 (595x842).")
-        print("Если файлы не указаны, использует book/book/pdf/output.pdf")
-        return 0
-
     proj_root = Path(__file__).resolve().parent.parent
-    in_pdf = proj_root / "book" / "book" / "pdf" / "output.pdf"
-    out_pdf = in_pdf
+    default_pdf = proj_root / "book" / "book" / "pdf" / "output.pdf"
 
-    if len(sys.argv) > 1:
-        in_pdf = Path(sys.argv[1])
-    if len(sys.argv) > 2:
-        out_pdf = Path(sys.argv[2])
+    parser = argparse.ArgumentParser(
+        description="Конвертирует Letter PDF (612x792) в A4 (595x842).",
+        epilog="Если файлы не указаны, используется book/book/pdf/output.pdf",
+    )
+    parser.add_argument("input", nargs="?", type=Path, default=default_pdf,
+                        help="Входной PDF-файл (Letter)")
+    parser.add_argument("output", nargs="?", type=Path, default=None,
+                        help="Выходной PDF-файл (A4), по умолч. — замена входного")
+    args = parser.parse_args()
+
+    in_pdf = args.input
+    out_pdf = args.output if args.output is not None else in_pdf
 
     success = letter_to_a4(str(in_pdf), str(out_pdf))
-    # Если out_pdf != in_pdf, копируем обратно
+    # Если нужен in-place (out_pdf временный), копируем обратно
     if success and out_pdf != in_pdf:
         shutil.copy2(str(out_pdf), str(in_pdf))
     return 0 if success else 1
