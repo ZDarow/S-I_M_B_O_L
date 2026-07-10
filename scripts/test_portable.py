@@ -1578,6 +1578,141 @@ class TestCatcarCrawler(unittest.TestCase):
 
 
 # ══════════════════════════════════════════════════════════════════
+# ELCATS CRAWLER
+# ══════════════════════════════════════════════════════════════════
+class TestElcatsCrawler(unittest.TestCase):
+    """Smoke-тесты для elcats_crawler.py (парсинг, main)"""
+
+    maxDiff = None
+
+    def setUp(self):
+        from elcats_crawler import parse_units, parse_callback_response, _save_results, main as elcats_main
+        self.parse_units = parse_units
+        self.parse_callback_response = parse_callback_response
+        self._save_results = _save_results
+        self.elcats_main = elcats_main
+
+    def test_main_help_succeeds(self):
+        """elcats_crawler.main() с --help через subprocess возвращает 0"""
+        import subprocess
+        import sys
+        result = subprocess.run(
+            [sys.executable, "scripts/elcats_crawler.py", "--help"],
+            capture_output=True, text=True, timeout=5,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("usage:", result.stdout.lower())
+
+    def test_parse_units_empty_html(self):
+        """parse_units на пустом HTML возвращает []"""
+        units = self.parse_units("<html></html>")
+        self.assertEqual(units, [])
+
+    def test_parse_units_with_submit_pattern(self):
+        """parse_units находит unit GUID в submit-паттерне"""
+        html = """
+        <a href="javascript:__doPostBack('ctl00$MainContent$UnitList$ctrl1$UnitLink','')"
+           onclick="submit('1792b579-3be7-4ec0-ad76-f70e952158f1','550e8400-e29b-41d4-a716-446655440000')"
+           title="Двигатель K4J 1.4 16V">K4J</a>
+        """
+        units = self.parse_units(html)
+        self.assertEqual(len(units), 1)
+        self.assertEqual(units[0]["guid"], "550e8400-e29b-41d4-a716-446655440000")
+
+    def test_parse_units_deduplicates(self):
+        """parse_units не добавляет дубликаты GUID"""
+        html = """
+        <a onclick="submit('1792b579-3be7-4ec0-ad76-f70e952158f1','550e8400-e29b-41d4-a716-446655440000')" title="First">A</a>
+        <a onclick="submit('1792b579-3be7-4ec0-ad76-f70e952158f1','550e8400-e29b-41d4-a716-446655440000')" title="Second">B</a>
+        """
+        units = self.parse_units(html)
+        self.assertEqual(len(units), 1)
+
+    def test_parse_units_uses_imageunit_fallback(self):
+        """parse_units без submit находит через ImageUnitHandler"""
+        html = '<img src="ImageUnitHandler.ashx?Unit=550e8400-e29b-41d4-a716-446655440000">'
+        units = self.parse_units(html)
+        self.assertEqual(len(units), 1)
+        self.assertEqual(units[0]["guid"], "550e8400-e29b-41d4-a716-446655440000")
+
+    def test_parse_callback_response_empty(self):
+        """parse_callback_response на пустом ответе возвращает []"""
+        parts = self.parse_callback_response("")
+        self.assertEqual(parts, [])
+
+    def test_parse_callback_response_with_prefix(self):
+        """parse_callback_response удаляет префикс 0|"""
+        parts = self.parse_callback_response("0|")
+        self.assertEqual(parts, [])
+
+    def test_parse_callback_response_with_real_data(self):
+        """parse_callback_response извлекает code_key и description"""
+        response = """0|<table>
+        <tr>
+            <td>1</td>
+            <td><img src="/Codes.ashx?Key=abc123" alt="code"></td>
+            <td style="text-align:left">ДВИГАТЕЛЬ K4J 712</td>
+            <td>Тип КПП = МКП</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td><img src="/Codes.ashx?Key=def456" alt="code"></td>
+            <td style="text-align:left">ПАТРУБОК ВОЗД. ФИЛ</td>
+            <td></td>
+        </tr>
+        </table>"""
+        parts = self.parse_callback_response(response)
+        self.assertEqual(len(parts), 2)
+        self.assertEqual(parts[0]["code_key"], "abc123")
+        self.assertEqual(parts[0]["description"], "ДВИГАТЕЛЬ K4J 712")
+        self.assertEqual(parts[1]["code_key"], "def456")
+        self.assertEqual(parts[1]["description"], "ПАТРУБОК ВОЗД. ФИЛ")
+
+    def test_parse_callback_response_skips_no_info(self):
+        """parse_callback_response пропускает 'Нет информации'"""
+        response = """0|<table>
+        <tr>
+            <td>1</td>
+            <td><img src="Codes.ashx?Key=abc123"></td>
+            <td>Нет информации</td>
+        </tr>
+        </table>"""
+        parts = self.parse_callback_response(response)
+        self.assertEqual(len(parts), 0)
+
+    def test_parse_callback_response_marks_alternative(self):
+        """parse_callback_response помечает is_alternative=True"""
+        response = """0|<table>
+        <tr>
+            <td>1</td>
+            <td><img src="Codes.ashx?Key=abc123"></td>
+            <td>Альтернативное предложение</td>
+            <td style="text-align:left">ДВИГАТЕЛЬ</td>
+        </tr>
+        </table>"""
+        parts = self.parse_callback_response(response)
+        self.assertEqual(len(parts), 1)
+        self.assertTrue(parts[0]["is_alternative"])
+
+    def test_save_results_creates_file(self):
+        """_save_results пишет JSON-файл"""
+        import json
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as f:
+            path = Path(f.name)
+        try:
+            self._save_results(path, [
+                {"oem": "7701472317", "code_key": "abc", "description": "ДВИГАТЕЛЬ"},
+            ], {"grp1"}, total_oems=1)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(data["statistics"]["total_oems"], 1)
+            self.assertEqual(len(data["parts"]), 1)
+            self.assertEqual(data["parts"][0]["oem"], "7701472317")
+        finally:
+            path.unlink(missing_ok=True)
+
+
+# ══════════════════════════════════════════════════════════════════
 # ЗАПУСК
 # ══════════════════════════════════════════════════════════════════
 if __name__ == "__main__":

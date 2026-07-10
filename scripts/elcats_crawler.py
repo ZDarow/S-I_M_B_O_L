@@ -43,7 +43,7 @@ MAX_POSITIONS = 20  # макс номер позиции на Parts.aspx
 RESUME_FILE = Path(tempfile.gettempdir()) / "elcats_progress.json"
 
 # ─── Структура каталога ──────────────────────────────────────────
-CATALOG_TREE = {
+CATALOG_TREE: dict[str, Any] = {
     "modelGuid": MODEL_GUID,
     "columns": [
         {
@@ -618,7 +618,7 @@ def fetch_unit_page(subgroup_guid: str) -> str | None:
 
 def parse_units(html: str) -> list[dict[str, str]]:
     """Извлечь Unit GUID'ы и их заголовки из Unit.aspx."""
-    units = []
+    units: list[dict[str, str]] = []
     # Ищем submit('model', 'unit_guid') - для Parts.aspx
     for m in re.finditer(
         r"submit\('([a-f0-9\-]+)','([a-f0-9\-]+)'\)",
@@ -681,7 +681,7 @@ def callback_parts(viewstate: str, vsg: str, ve: str, unit_guid: str, pos: str) 
         return None
 
 
-def parse_callback_response(response: str) -> list[dict[str, str]]:
+def parse_callback_response(response: str) -> list[dict[str, Any]]:
     """Извлечь коды деталей из ответа callback'а.
 
     Ответ: 0|<table>...</table>
@@ -710,6 +710,9 @@ def parse_callback_response(response: str) -> list[dict[str, str]]:
         for cell in cells:
             clean = re.sub(r"<[^>]+>", "", cell).strip()
             clean = clean.replace("&nbsp;", " ").replace("&lt;", "<").replace("&gt;", ">")
+            # Пропускаем позиционный номер (чисто цифровой)
+            if clean.isdigit():
+                continue
             if clean and clean != "Цена" and not clean.startswith("Альтернативное"):
                 description = clean
                 break
