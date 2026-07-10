@@ -19,6 +19,7 @@ Desktop.ini
 
 # Python
 __pycache__/
+.mypy_cache/
 *.pyc
 *.pyo
 *.egg-info/
