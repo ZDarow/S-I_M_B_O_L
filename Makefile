@@ -65,8 +65,9 @@ sitemap:
 	python3 $(SCRIPT_DIR)/sitemap.py --source $(HTML_DIR) 2>/dev/null \
 		|| echo "⚠️  sitemap skipped"
 
-## Пост-обработка: 404, PDF копия
+## Пост-обработка: sw.js, 404, PDF копия
 post-process:
+	cp -n book/theme/sw.js $(HTML_DIR)/theme/sw.js 2>/dev/null || true
 	cp -n $(SCRIPT_DIR)/404.html $(HTML_DIR)/404.html 2>/dev/null || true
 	cp $(PDF_DIR)/output.pdf $(HTML_DIR)/reno-symbol.pdf 2>/dev/null || true
 

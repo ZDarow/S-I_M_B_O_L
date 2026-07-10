@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.4.0 — 2026-07-10
+
+### Added
+- **Единый master-каталог OEM**: слияние 3 источников (manual + elcats + catcar)
+- **`scripts/merge_oem_catalogs.py`**: скрипт дедупликации, статистика пересечений
+- **`scripts/renault_master_catalog.json`**: 1762 уникальных OEM (331 в 2 источниках)
+- **+11 тестов elcats_crawler** (парсинг, callback, save, main help)
+- **mypy**: добавлен в CI (quality job) и pyproject.toml
+- **`crawl` optional-deps** в pyproject.toml (requests, bs4, lxml, Pillow)
+
+### Fixed
+- elcats_crawler.py: `parse_callback_response` — пропуск цифровых ячеек (позиций) при поиске описания (баг «1» вместо названия)
+- elcats_crawler.py: типовые аннотации (mypy strict compat)
+- sitemap.py: `Optional[str]` / `Optional[Path]` вместо `= None` (mypy)
+- CI: установка `beautifulsoup4`, `lxml` для тестов краулеров
+- coverage fail_under возвращён на 65% (достигнут)
+
+### Changed
+- Общее покрытие: **65%** (+6 п.п., было 59%)
+- Всего тестов: **115** (+11, было 104)
+
 ## 2.3.0 — 2026-07-08
 
 ### Added

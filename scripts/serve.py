@@ -22,6 +22,7 @@ import socket
 import subprocess
 import sys
 import threading
+import time
 import urllib.parse
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -164,10 +165,15 @@ class PortableHandler(SimpleHTTPRequestHandler):
             self._serve_oem_catalog()
             return
 
-        # Защита от path traversal
-        normalized = urllib.parse.urldefrag(self.path)[0]
-        normalized = urllib.parse.urlunparse(parsed._replace(params='', query=''))
-        if '..' in normalized or normalized.startswith('/..'):
+        # Защита от path traversal (включая URL-encoded %2e%2e):
+        #   1. URL-декодируем путь
+        #   2. Джойним с базовой директорией
+        #   3. Нормализуем через Path.resolve()
+        #   4. Проверяем, что результат — внутри разрешённой директории
+        decoded_path = urllib.parse.unquote(parsed.path)
+        base_dir = Path(self.directory).resolve()
+        requested = (base_dir / decoded_path.lstrip("/")).resolve()
+        if base_dir not in requested.parents and requested != base_dir:
             self.send_error(404, "Not Found")
             return
 
@@ -212,12 +218,34 @@ def find_available_port(start: int = DEFAULT_PORT) -> int:
     return start  # fallback
 
 
-def open_browser(url: str, delay: float = 0.5):
-    """Открыть браузер после задержки (чтобы сервер успел стартовать)."""
+def _in_vscode() -> bool:
+    """Проверить, запущен ли сервер внутри VS Code.
+
+    Переменные TERM_PROGRAM=vscode или VSCODE_INJECTION=1
+    устанавливаются VS Code при запуске встроенного терминала.
+    """
+    return (
+        os.environ.get("TERM_PROGRAM") == "vscode"
+        or "VSCODE_INJECTION" in os.environ
+    )
+
+
+def open_browser(url: str, delay: float = 0.5, vscode: bool = False):
+    """Открыть браузер после задержки (чтобы сервер успел стартовать).
+
+    Если vscode=True или сервер запущен внутри VS Code, открывает
+    в интегрированном браузере через vscode:// URI.
+
+    В обычном режиме открывает системный браузер через webbrowser.open().
+    """
     def _open():
-        import time
         time.sleep(delay)
-        webbrowser.open(url)
+        if vscode or _in_vscode():
+            # VS Code Integrated Browser через vscode:// URI
+            vscode_uri = f"vscode://vscode.open?url={urllib.parse.quote(url)}"
+            webbrowser.open(vscode_uri)
+        else:
+            webbrowser.open(url)
     threading.Thread(target=_open, daemon=True).start()
 
 
@@ -240,7 +268,33 @@ def try_build(html_dir: Path) -> bool:
         print(f"❌ Ошибка сборки:\n{result.stderr}", file=sys.stderr)
         return False
     print("✅ Сборка завершена")
+
+    # Пост-обработка: копируем дополнительные файлы
+    _copy_build_artifacts(html_dir)
+
     return html_dir.exists() and (html_dir / "index.html").exists()
+
+
+def _copy_build_artifacts(html_dir: Path) -> None:
+    """Скопировать дополнительные файлы в директорию сборки.
+
+    mdBook не копирует произвольные файлы из theme/ — выполняем это вручную.
+    """
+    theme_dir = PROJECT_ROOT / "book" / "theme"
+    out_theme_dir = html_dir / "theme"
+    out_theme_dir.mkdir(parents=True, exist_ok=True)
+
+    # Service Worker для офлайн-доступа
+    sw_src = theme_dir / "sw.js"
+    if sw_src.exists():
+        shutil.copy2(sw_src, out_theme_dir / "sw.js")
+
+    # 404 страница
+    _ = html_dir / "404.html"
+    if not _.exists():
+        not_found_src = PROJECT_ROOT / "scripts" / "404.html"
+        if not_found_src.exists():
+            shutil.copy2(not_found_src, _)
 
 
 def main():
@@ -265,6 +319,9 @@ def main():
                         help="Директория с HTML (по умолч. book/book/html)")
     parser.add_argument("--no-browser", action="store_true",
                         help="Не открывать браузер автоматически")
+    parser.add_argument("--vscode", action="store_true",
+                        help="Открыть во встроенном браузере VS Code "
+                             "(автоопределяется, если не указан)")
     parser.add_argument("--verbose", action="store_true",
                         help="Подробные логи запросов")
     args = parser.parse_args()
@@ -305,7 +362,7 @@ def main():
     print()
 
     if not args.no_browser:
-        open_browser(url)
+        open_browser(url, vscode=args.vscode)
 
     try:
         server.serve_forever()

@@ -58,6 +58,11 @@ jobs:
           pip3 install bandit
           bandit -r scripts/ -ll -f txt --skip B101,B301,B303,B314,B108
 
+      - name: Python type checking (mypy)
+        run: |
+          pip3 install mypy
+          mypy scripts/ --config-file pyproject.toml
+
       - name: Python unit tests + coverage
         run: |
           pip3 install pytest pytest-cov coverage beautifulsoup4 lxml pikepdf

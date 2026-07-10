@@ -12,6 +12,7 @@ import sys
 import tarfile
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 
@@ -481,6 +482,40 @@ class TestServe(unittest.TestCase):
 
         result = open_browser("http://localhost:8080/", delay=0.1)
         self.assertIsNone(result)
+
+    def test_in_vscode_default_false(self) -> None:
+        """_in_vscode возвращает False без переменных VS Code"""
+        from unittest.mock import patch
+        from scripts.serve import _in_vscode
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(_in_vscode())
+
+    def test_in_vscode_with_term_program(self) -> None:
+        """_in_vscode возвращает True при TERM_PROGRAM=vscode"""
+        from unittest.mock import patch
+        from scripts.serve import _in_vscode
+        with patch.dict(os.environ, {"TERM_PROGRAM": "vscode"}, clear=True):
+            self.assertTrue(_in_vscode())
+
+    def test_in_vscode_with_injection_var(self) -> None:
+        """_in_vscode возвращает True при VSCODE_INJECTION=1"""
+        from unittest.mock import patch
+        from scripts.serve import _in_vscode
+        with patch.dict(os.environ, {"VSCODE_INJECTION": "1"}, clear=True):
+            self.assertTrue(_in_vscode())
+
+    def test_open_browser_vscode_uri(self) -> None:
+        """open_browser с vscode=True использует vscode:// URI"""
+        from unittest.mock import patch
+        from scripts.serve import open_browser
+        with patch("scripts.serve.webbrowser.open") as mock_open:
+            open_browser("http://localhost:8080/", delay=0.01, vscode=True)
+            import time
+            time.sleep(0.05)  # ждём daemon-поток
+            self.assertTrue(mock_open.called)
+            uri = mock_open.call_args[0][0]
+            self.assertIn("vscode://vscode.open", uri)
+            self.assertIn("http%3A//localhost%3A8080/", uri)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1575,6 +1610,319 @@ class TestCatcarCrawler(unittest.TestCase):
         parts = self.parse_parts(html)
         self.assertEqual(len(parts), 1)
         self.assertEqual(parts[0]["oem"], "7701472317")
+
+
+# ══════════════════════════════════════════════════════════════════
+# ELCATS CRAWLER
+# ══════════════════════════════════════════════════════════════════
+class TestElcatsCrawler(unittest.TestCase):
+    """Smoke-тесты для elcats_crawler.py (парсинг, main)"""
+
+    maxDiff = None
+
+    def setUp(self):
+        from elcats_crawler import parse_units, parse_callback_response, _save_results, main as elcats_main
+        self.parse_units = parse_units
+        self.parse_callback_response = parse_callback_response
+        self._save_results = _save_results
+        self.elcats_main = elcats_main
+
+    def test_main_help_succeeds(self):
+        """elcats_crawler.main() с --help через subprocess возвращает 0"""
+        import subprocess
+        import sys
+        result = subprocess.run(
+            [sys.executable, "scripts/elcats_crawler.py", "--help"],
+            capture_output=True, text=True, timeout=5,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("usage:", result.stdout.lower())
+
+    def test_parse_units_empty_html(self):
+        """parse_units на пустом HTML возвращает []"""
+        units = self.parse_units("<html></html>")
+        self.assertEqual(units, [])
+
+    def test_parse_units_with_submit_pattern(self):
+        """parse_units находит unit GUID в submit-паттерне"""
+        html = """
+        <a href="javascript:__doPostBack('ctl00$MainContent$UnitList$ctrl1$UnitLink','')"
+           onclick="submit('1792b579-3be7-4ec0-ad76-f70e952158f1','550e8400-e29b-41d4-a716-446655440000')"
+           title="Двигатель K4J 1.4 16V">K4J</a>
+        """
+        units = self.parse_units(html)
+        self.assertEqual(len(units), 1)
+        self.assertEqual(units[0]["guid"], "550e8400-e29b-41d4-a716-446655440000")
+
+    def test_parse_units_deduplicates(self):
+        """parse_units не добавляет дубликаты GUID"""
+        html = """
+        <a onclick="submit('1792b579-3be7-4ec0-ad76-f70e952158f1','550e8400-e29b-41d4-a716-446655440000')" title="First">A</a>
+        <a onclick="submit('1792b579-3be7-4ec0-ad76-f70e952158f1','550e8400-e29b-41d4-a716-446655440000')" title="Second">B</a>
+        """
+        units = self.parse_units(html)
+        self.assertEqual(len(units), 1)
+
+    def test_parse_units_uses_imageunit_fallback(self):
+        """parse_units без submit находит через ImageUnitHandler"""
+        html = '<img src="ImageUnitHandler.ashx?Unit=550e8400-e29b-41d4-a716-446655440000">'
+        units = self.parse_units(html)
+        self.assertEqual(len(units), 1)
+        self.assertEqual(units[0]["guid"], "550e8400-e29b-41d4-a716-446655440000")
+
+    def test_parse_callback_response_empty(self):
+        """parse_callback_response на пустом ответе возвращает []"""
+        parts = self.parse_callback_response("")
+        self.assertEqual(parts, [])
+
+    def test_parse_callback_response_with_prefix(self):
+        """parse_callback_response удаляет префикс 0|"""
+        parts = self.parse_callback_response("0|")
+        self.assertEqual(parts, [])
+
+    def test_parse_callback_response_with_real_data(self):
+        """parse_callback_response извлекает code_key и description"""
+        response = """0|<table>
+        <tr>
+            <td>1</td>
+            <td><img src="/Codes.ashx?Key=abc123" alt="code"></td>
+            <td style="text-align:left">ДВИГАТЕЛЬ K4J 712</td>
+            <td>Тип КПП = МКП</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td><img src="/Codes.ashx?Key=def456" alt="code"></td>
+            <td style="text-align:left">ПАТРУБОК ВОЗД. ФИЛ</td>
+            <td></td>
+        </tr>
+        </table>"""
+        parts = self.parse_callback_response(response)
+        self.assertEqual(len(parts), 2)
+        self.assertEqual(parts[0]["code_key"], "abc123")
+        self.assertEqual(parts[0]["description"], "ДВИГАТЕЛЬ K4J 712")
+        self.assertEqual(parts[1]["code_key"], "def456")
+        self.assertEqual(parts[1]["description"], "ПАТРУБОК ВОЗД. ФИЛ")
+
+    def test_parse_callback_response_skips_no_info(self):
+        """parse_callback_response пропускает 'Нет информации'"""
+        response = """0|<table>
+        <tr>
+            <td>1</td>
+            <td><img src="Codes.ashx?Key=abc123"></td>
+            <td>Нет информации</td>
+        </tr>
+        </table>"""
+        parts = self.parse_callback_response(response)
+        self.assertEqual(len(parts), 0)
+
+    def test_parse_callback_response_marks_alternative(self):
+        """parse_callback_response помечает is_alternative=True"""
+        response = """0|<table>
+        <tr>
+            <td>1</td>
+            <td><img src="Codes.ashx?Key=abc123"></td>
+            <td>Альтернативное предложение</td>
+            <td style="text-align:left">ДВИГАТЕЛЬ</td>
+        </tr>
+        </table>"""
+        parts = self.parse_callback_response(response)
+        self.assertEqual(len(parts), 1)
+        self.assertTrue(parts[0]["is_alternative"])
+
+    def test_save_results_creates_file(self):
+        """_save_results пишет JSON-файл"""
+        import json
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as f:
+            path = Path(f.name)
+        try:
+            self._save_results(path, [
+                {"oem": "7701472317", "code_key": "abc", "description": "ДВИГАТЕЛЬ"},
+            ], {"grp1"}, total_oems=1)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(data["statistics"]["total_oems"], 1)
+            self.assertEqual(len(data["parts"]), 1)
+            self.assertEqual(data["parts"][0]["oem"], "7701472317")
+        finally:
+            path.unlink(missing_ok=True)
+
+
+# ══════════════════════════════════════════════════════════════════
+# MERGE OEM CATALOGS
+# ══════════════════════════════════════════════════════════════════
+class TestMergeOemCatalogs(unittest.TestCase):
+    """Тесты слияния OEM-каталогов"""
+
+    maxDiff = None
+
+    def setUp(self) -> None:
+        self.tmpdir = Path(tempfile.mkdtemp(prefix="merge_oem_"))
+        # Свежий импорт модуля (сброс кеша)
+        if "scripts.merge_oem_catalogs" in sys.modules:
+            del sys.modules["scripts.merge_oem_catalogs"]
+        from scripts import merge_oem_catalogs
+        self.mod = merge_oem_catalogs
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def _make_catalog(self, filename: str, data: object) -> Path:
+        """Создать JSON-каталог во временной папке."""
+        path = self.tmpdir / filename
+        path.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        return path
+
+    # ── extract_oem ───────────────────────────────────────────────
+
+    def test_extract_oem_from_oem_field(self) -> None:
+        """oem из поля 'oem'."""
+        self.assertEqual(self.mod.extract_oem({"oem": "7701472317"}), "7701472317")
+
+    def test_extract_oem_from_number_field(self) -> None:
+        """oem из поля 'number'."""
+        self.assertEqual(self.mod.extract_oem({"number": "8200421359"}), "8200421359")
+
+    def test_extract_oem_from_code_field(self) -> None:
+        """oem из поля 'code'."""
+        self.assertEqual(self.mod.extract_oem({"code": "6001549368"}), "6001549368")
+
+    def test_extract_oem_cleans_spaces_and_dashes(self) -> None:
+        """Очистка пробелов и дефисов."""
+        self.assertEqual(
+            self.mod.extract_oem({"oem": " 77-01-472-317 "}),
+            "7701472317",
+        )
+
+    def test_extract_oem_missing_returns_empty(self) -> None:
+        """Без oem/number/code — пустая строка."""
+        self.assertEqual(self.mod.extract_oem({"name": "Bolt"}), "")
+
+    # ── load_catalog ──────────────────────────────────────────────
+
+    def test_load_catalog_flat_list(self) -> None:
+        """Плоский список — возвращается как есть."""
+        cat = self._make_catalog("src.json", [{"oem": "A"}, {"oem": "B"}])
+        result = self.mod.load_catalog(cat, "test")
+        self.assertEqual(result, [{"oem": "A"}, {"oem": "B"}])
+
+    def test_load_catalog_dict_with_parts(self) -> None:
+        """dict с ключом parts — извлекается список."""
+        cat = self._make_catalog("src.json", {"parts": [{"oem": "A"}]})
+        result = self.mod.load_catalog(cat, "test")
+        self.assertEqual(result, [{"oem": "A"}])
+
+    def test_load_catalog_dict_with_oems(self) -> None:
+        """dict с ключом oems — извлекается список."""
+        cat = self._make_catalog("src.json", {"oems": [{"oem": "B"}]})
+        result = self.mod.load_catalog(cat, "test")
+        self.assertEqual(result, [{"oem": "B"}])
+
+    def test_load_catalog_list_of_categories(self) -> None:
+        """Список категорий с вложенными parts — разворачивается с category."""
+        data = [
+            {"name": "Engine", "parts": [{"oem": "A"}, {"oem": "B"}]},
+            {"name": "Gearbox", "parts": [{"oem": "C"}]},
+        ]
+        cat = self._make_catalog("src.json", data)
+        result = self.mod.load_catalog(cat, "test")
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0]["category"], "Engine")
+        self.assertEqual(result[2]["category"], "Gearbox")
+
+    def test_load_catalog_missing_file(self) -> None:
+        """Отсутствующий файл — пустой список + warning."""
+        result = self.mod.load_catalog(self.tmpdir / "nonexistent.json", "test")
+        self.assertEqual(result, [])
+
+    def test_load_catalog_bad_json(self) -> None:
+        """Битый JSON — пустой список + error."""
+        bad = self.tmpdir / "bad.json"
+        bad.write_text("{bad json}", encoding="utf-8")
+        result = self.mod.load_catalog(bad, "test")
+        self.assertEqual(result, [])
+
+    def test_load_catalog_parts_not_list(self) -> None:
+        """parts не список — пустой результат."""
+        cat = self._make_catalog("src.json", {"parts": "not_a_list"})
+        result = self.mod.load_catalog(cat, "test")
+        self.assertEqual(result, [])
+
+    # ── merge_catalogs ────────────────────────────────────────────
+
+    def test_merge_catalogs_deduplicates_by_oem(self) -> None:
+        """Дубликаты OEM схлопываются, source_parts пополняется."""
+        s1 = self._make_catalog("s1.json", [{"oem": "A", "name": "Part A"}])
+        s2 = self._make_catalog("s2.json", [{"oem": "A", "name": "Part A"}])
+        self.mod.SOURCES = {"s1": s1, "s2": s2}
+        out = self.tmpdir / "out.json"
+        result = self.mod.merge_catalogs(out)
+        self.assertEqual(result["statistics"]["total_unique_oems"], 1)
+        self.assertEqual(
+            result["parts"][0]["source_parts"], ["s1", "s2"],
+        )
+
+    def test_merge_catalogs_multiple_oems(self) -> None:
+        """Разные OEM — все сохраняются."""
+        src = self._make_catalog("src.json", [
+            {"oem": "A", "name": "Part A"},
+            {"oem": "B", "name": "Part B"},
+        ])
+        self.mod.SOURCES = {"s": src}
+        result = self.mod.merge_catalogs(self.tmpdir / "out.json")
+        self.assertEqual(result["statistics"]["total_unique_oems"], 2)
+
+    def test_merge_catalogs_no_oem_skipped(self) -> None:
+        """Детали без OEM — пропускаются."""
+        src = self._make_catalog("src.json", [
+            {"oem": "A", "name": "Part A"},
+            {"name": "No OEM"},
+        ])
+        self.mod.SOURCES = {"s": src}
+        result = self.mod.merge_catalogs(self.tmpdir / "out.json")
+        self.assertEqual(result["statistics"]["total_unique_oems"], 1)
+
+    def test_merge_catalogs_empty_sources(self) -> None:
+        """Все источники пусты — пустой каталог."""
+        src = self._make_catalog("s1.json", [])
+        self.mod.SOURCES = {"s1": src}
+        result = self.mod.merge_catalogs(self.tmpdir / "out.json")
+        self.assertEqual(result["statistics"]["total_unique_oems"], 0)
+        self.assertEqual(result["parts"], [])
+
+    def test_merge_catalogs_writes_file(self) -> None:
+        """merge_catalogs записывает JSON на диск."""
+        src = self._make_catalog("src.json", [{"oem": "A", "name": "Part A"}])
+        self.mod.SOURCES = {"s": src}
+        out = self.tmpdir / "out.json"
+        self.mod.merge_catalogs(out)
+        self.assertTrue(out.exists())
+        data = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual(data["statistics"]["total_unique_oems"], 1)
+
+    def test_merge_catalogs_statistics(self) -> None:
+        """Проверка статистики: 1, 2, 3 источника."""
+        s1 = self._make_catalog("s1.json", [{"oem": "A"}, {"oem": "B"}])
+        s2 = self._make_catalog("s2.json", [{"oem": "A"}, {"oem": "C"}])
+        s3 = self._make_catalog("s3.json", [{"oem": "A"}])
+        self.mod.SOURCES = {"s1": s1, "s2": s2, "s3": s3}
+        result = self.mod.merge_catalogs(self.tmpdir / "out.json")
+        stats = result["statistics"]
+        self.assertEqual(stats["total_unique_oems"], 3)
+        self.assertEqual(stats["oems_found_in_1_source"], 2)  # B, C
+        self.assertEqual(stats["oems_found_in_2_sources"], 0)
+        self.assertEqual(stats["oems_found_in_all_3_sources"], 1)  # A
+
+    def test_merge_catalogs_uses_category_fallback(self) -> None:
+        """Пробует category → group → subgroup → grp_name → parts_group."""
+        src = self._make_catalog("src.json", [
+            {"oem": "A", "name": "X", "subgroup": "Engine"},
+        ])
+        self.mod.SOURCES = {"s": src}
+        result = self.mod.merge_catalogs(self.tmpdir / "out.json")
+        self.assertEqual(result["parts"][0].get("subgroup"), "Engine")
 
 
 # ══════════════════════════════════════════════════════════════════

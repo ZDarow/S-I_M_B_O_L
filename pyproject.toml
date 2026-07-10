@@ -54,6 +54,15 @@ crawl = [
   "Pillow>=10",
 ]
 
+[tool.mypy]
+python_version = "3.10"
+strict = false
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+exclude = ["scripts/test_.*"]
+
 [tool.setuptools.packages.find]
 where = ["scripts"]
 include = ["*"]
@@ -85,7 +94,7 @@ omit = ["scripts/test_*.py"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 50
+fail_under = 65
 
 [tool.bandit]
 exclude_dirs = ["scripts/test_*.py"]

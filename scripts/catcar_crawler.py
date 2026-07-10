@@ -24,6 +24,8 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup
 
+from _crawler_common import get_session
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -55,23 +57,6 @@ BASE_PARAMS: dict[str, Any] = {
     "grp_id": "37",
     "subGrp_id": "37A",
 }
-
-# ─── HTTP-сессия ───────────────────────────────────────────────────
-_session: requests.Session | None = None
-
-
-def get_session() -> requests.Session:
-    global _session
-    if _session is None:
-        _session = requests.Session()
-        _session.headers.update({
-            "User-Agent": (
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            ),
-        })
-    return _session
-
 
 # ─── Кодирование l-параметра ─────────────────────────────────────
 def encode_l(st: str, sts: dict, cat_id: str, grp_id: str = "",
@@ -275,7 +260,8 @@ def crawl_catalog(output_path: Path, test_mode: bool = False,
                     logger.debug("    Деталей не найдено")
                     # Отмечаем как обработанную, чтобы не перезапрашивать
                     processed.add(key)
-                    RESUME_FILE.write_text(json.dumps(list(processed)))
+                    if len(processed) % 5 == 0:
+                        RESUME_FILE.write_text(json.dumps(list(processed)))
                     continue
 
                 for part in parts:
@@ -299,10 +285,13 @@ def crawl_catalog(output_path: Path, test_mode: bool = False,
                         part["position"], part["oem"], part["name"][:50],
                     )
 
-                # Сохраняем прогресс
+                # Сохраняем прогресс (раз в 5 подгрупп для уменьшения I/O)
                 processed.add(key)
-                RESUME_FILE.write_text(json.dumps(list(processed)))
+                if len(processed) % 5 == 0:
+                    RESUME_FILE.write_text(json.dumps(list(processed)))
 
+    # Финальное сохранение прогресса
+    RESUME_FILE.write_text(json.dumps(list(processed)))
     _save_results(output_path, results, processed, total_oems)
     return total_oems
 
@@ -355,8 +344,8 @@ def main() -> int:
     if args.delay is not None:
         DELAY = args.delay
 
-    total = crawl_catalog(args.output, test_mode=args.test, resume=args.resume)
-    return 0 if total > 0 else 0
+    crawl_catalog(args.output, test_mode=args.test, resume=args.resume)
+    return 0
 
 
 if __name__ == "__main__":
