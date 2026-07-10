@@ -32,16 +32,26 @@ dev = [
   "coverage>=7",
   "flake8>=7",
   "bandit>=1.8",
+  "beautifulsoup4>=4",
+  "lxml>=5",
 ]
 test = [
   "pytest>=8",
   "pytest-cov>=6",
   "coverage>=7",
+  "beautifulsoup4>=4",
+  "lxml>=5",
 ]
 lint = [
   "ruff>=0.9",
   "flake8>=7",
   "bandit>=1.8",
+]
+crawl = [
+  "requests>=2",
+  "beautifulsoup4>=4",
+  "lxml>=5",
+  "Pillow>=10",
 ]
 
 [tool.setuptools.packages.find]

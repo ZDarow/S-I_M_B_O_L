@@ -60,7 +60,7 @@ jobs:
 
       - name: Python unit tests + coverage
         run: |
-          pip3 install pytest pytest-cov coverage
+          pip3 install pytest pytest-cov coverage beautifulsoup4 lxml pikepdf
           pytest scripts/test_portable.py -v --tb=short
           coverage run -m pytest scripts/test_portable.py -v
           coverage report --show-missing
