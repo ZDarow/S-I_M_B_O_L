@@ -19,6 +19,7 @@ Desktop.ini
 
 # Python
 __pycache__/
+.mypy_cache/
 *.pyc
 *.pyo
 *.egg-info/
@@ -60,3 +61,6 @@ gh-pages/
 !book/src/**/*.pdf
 *.bak
 .coverage
+
+# CD-ROM data (Renault Symbol repair manual, not part of source)
+/Renault Symbol/

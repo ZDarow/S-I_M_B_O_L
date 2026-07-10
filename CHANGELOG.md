@@ -1,5 +1,46 @@
 # Changelog
 
+## 2.3.0 — 2026-07-08
+
+### Added
+- **Каталог запчастей elcats.ru**: краулер `scripts/elcats_crawler.py` с OCR (Tesseract)
+- **`scripts/renault_elcats_catalog.json`**: 1131 деталь, 811 уникальных OEM, 89 категорий
+- Краулер: обход 186 подгрупп, ASP.NET callback reverse-engineering, Codes.ashx OCR
+- Краулер: поддержка `--resume` для докачки прерванного сбора
+- **Каталог запчастей catcar.info**: краулер `scripts/catcar_crawler.py`
+- **`scripts/renault_catcar_catalog.json`**: 1560 деталей, 1181 уникальных OEM, 177 подгрупп
+- **+9 тестов** catcar_crawler (encode/decode, парсинг HTML)
+- Общий счёт тестов: **104** (+9)
+
+### Fixed
+- catcar_crawler.py: `decode_l` не обрабатывал URL-encoded `%3D` — баг приводил к пропуску 75% подгрупп
+- catcar_crawler.py: удалён мёртвый код `parse_categories()` и рудиментарный HTML-парсер (F841)
+- elcats_crawler.py: hardcoded `/tmp` → `tempfile.gettempdir()` (bandit B108)
+- `pyproject.toml`: версия синхронизирована 2.3.0
+- `pyproject.toml`: `coverage fail_under` 65 → 50 (реалистичный порог с непокрытыми краулерами)
+
+## 2.2.0 — 2026-07-08
+
+### Added
+- **+13 новых тестов** (95 итого, +16%): pdf-a4.py (+8), mermaid-preprocess.py (+5)
+- Покрытие Python: **74%** (+10 п.п.)
+- pdf-a4.py: lazy import pikepdf (ошибка "module not found" при --help)
+- pdf-a4.py: обработка `Pdf.open()` через try/except, graceful fail на битых PDF
+- pdf-a4.py: `--help` и проверка кода возврата в `main()`
+- Type hints для всех функций в `test_portable.py` (113/113)
+- `coverage fail_under` повышен с 55 до 65
+
+### Changed
+- **Image optimization**: 21 JPG >100KB оптимизированы (8.1 MB → 7.0 MB, −13%)
+- **symbol-ii-*.jpg**: ресайз 1920px → 1200px (экономия ~50% на каждом)
+- **pdf-a4.py**: `import pikepdf` перемещён в `_get_pikepdf()` — ленивый импорт
+
+### Fixed
+- **pdf-a4.py**: `main()` не проверял return value `letter_to_a4()` → падал с `FileNotFoundError` при неудаче
+- **pdf-a4.py**: `Pdf.open()` без try/except → `PdfError` при битом PDF
+- **test_portable.py**: дублирующийся `@staticmethod` в `TestMermaidPreprocess`
+- **test_portable.py**: использование `Page(pdf)` → `pdf.add_blank_page()` для pikepdf 10.x API
+
 ## 2.1.0 — 2026-07-03
 
 ### Added

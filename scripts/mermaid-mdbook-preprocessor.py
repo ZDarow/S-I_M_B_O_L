@@ -18,7 +18,7 @@ import os
 import sys
 from pathlib import Path
 
-from mermaid_core import MERMAID_RE, hash_mermaid, render_svg
+from mermaid_core import MERMAID_RE, hash_mermaid, render_svg, walk_sections
 
 logger = logging.getLogger(__name__)
 
@@ -30,25 +30,18 @@ def collect_pending(book_sections, cache_dir) -> dict:
     """Собрать хеши mermaid-блоков без кеша."""
     pending = {}
 
-    def walk(data):
-        if isinstance(data, dict):
-            if "Chapter" in data:
-                ch = data["Chapter"]
-                if "content" in ch and isinstance(ch["content"], str):
-                    for m in MERMAID_RE.finditer(ch["content"]):
-                        source = m.group(1).strip()
-                        if not source or len(source) > MAX_BLOCK_LEN:
-                            continue
-                        h = hash_mermaid(source)
-                        if not (cache_dir / f"{h}.svg").exists():
-                            pending[h] = source
-                if "sub_items" in ch:
-                    for sub in ch["sub_items"]:
-                        walk(sub)
-        elif isinstance(data, list):
-            for item in data:
-                walk(item)
-    walk(book_sections)
+    def collect(chapter):
+        content = chapter.get("content", "")
+        if isinstance(content, str):
+            for m in MERMAID_RE.finditer(content):
+                source = m.group(1).strip()
+                if not source or len(source) > MAX_BLOCK_LEN:
+                    continue
+                h = hash_mermaid(source)
+                if not (cache_dir / f"{h}.svg").exists():
+                    pending[h] = source
+
+    walk_sections(book_sections, collect)
     return pending
 
 
@@ -65,19 +58,12 @@ def replace_in_book(book_sections, cache_dir, src_dir):
             return f"![Диаграмма](../{rel})"
         return m.group(0)
 
-    def walk(data):
-        if isinstance(data, dict):
-            if "Chapter" in data:
-                ch = data["Chapter"]
-                if "content" in ch and isinstance(ch["content"], str):
-                    ch["content"] = MERMAID_RE.sub(replacer, ch["content"])
-                if "sub_items" in ch:
-                    for sub in ch["sub_items"]:
-                        walk(sub)
-        elif isinstance(data, list):
-            for item in data:
-                walk(item)
-    walk(book_sections)
+    def replace(chapter):
+        content = chapter.get("content", "")
+        if isinstance(content, str):
+            chapter["content"] = MERMAID_RE.sub(replacer, content)
+
+    walk_sections(book_sections, replace)
 
 
 def main():

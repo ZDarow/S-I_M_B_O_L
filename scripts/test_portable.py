@@ -400,85 +400,73 @@ class TestServe(unittest.TestCase):
     def test_search_oem_empty_query(self) -> None:
         """_search_oem('') возвращает весь каталог (до лимита)"""
         from unittest.mock import patch
-        from scripts.serve import _search_oem, _reset_oem_catalog
+        from scripts.serve import _search_oem
 
-        _reset_oem_catalog()
         mock_catalog = [{"name": f"Part {i}", "oem": f"OEM{i}"} for i in range(60)]
-        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+        with patch("scripts.serve._load_oem_catalog", return_value=mock_catalog):
             result = _search_oem("")
         self.assertEqual(len(result), 50)  # max_results
-        _reset_oem_catalog()
 
     def test_search_oem_short_query(self) -> None:
         """_search_oem('a') с коротким запросом возвращает весь каталог"""
         from unittest.mock import patch
-        from scripts.serve import _search_oem, _reset_oem_catalog
+        from scripts.serve import _search_oem
 
-        _reset_oem_catalog()
         mock_catalog = [{"name": "Part", "oem": "OEM1"}]
-        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+        with patch("scripts.serve._load_oem_catalog", return_value=mock_catalog):
             result = _search_oem("a")
         self.assertEqual(len(result), 1)
-        _reset_oem_catalog()
 
     def test_search_oem_by_name(self) -> None:
         """_search_oem ищет по названию"""
         from unittest.mock import patch
-        from scripts.serve import _search_oem, _reset_oem_catalog
+        from scripts.serve import _search_oem
 
-        _reset_oem_catalog()
         mock_catalog = [
             {"name": "Фильтр масляный", "oem": "7700274177"},
             {"name": "Фильтр воздушный", "oem": "172024135R"},
             {"name": "Свеча зажигания", "oem": "7700101234"},
         ]
-        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+        with patch("scripts.serve._load_oem_catalog", return_value=mock_catalog):
             result = _search_oem("фильтр")
         self.assertEqual(len(result), 2)
-        _reset_oem_catalog()
 
     def test_search_oem_by_oem_number(self) -> None:
         """_search_oem ищет по OEM-номеру"""
         from unittest.mock import patch
-        from scripts.serve import _search_oem, _reset_oem_catalog
+        from scripts.serve import _search_oem
 
-        _reset_oem_catalog()
         mock_catalog = [
             {"name": "Фильтр", "oem": "7700274177"},
             {"name": "Свеча", "oem": "7700101234"},
         ]
-        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+        with patch("scripts.serve._load_oem_catalog", return_value=mock_catalog):
             result = _search_oem("7700")
         self.assertEqual(len(result), 2)
-        _reset_oem_catalog()
 
     def test_search_oem_by_analog(self) -> None:
         """_search_oem ищет по аналогу"""
         from unittest.mock import patch
-        from scripts.serve import _search_oem, _reset_oem_catalog
+        from scripts.serve import _search_oem
 
-        _reset_oem_catalog()
         mock_catalog = [
             {"name": "Фильтр", "oem": "OE1", "analogs": "MANN W610"},
             {"name": "Свеча", "oem": "OE2", "analogs": "NGK BKR6E"},
         ]
-        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+        with patch("scripts.serve._load_oem_catalog", return_value=mock_catalog):
             result = _search_oem("mann")
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["name"], "Фильтр")
-        _reset_oem_catalog()
 
     def test_search_oem_no_results(self) -> None:
         """_search_oem возвращает [] при отсутствии совпадений"""
         from unittest.mock import patch
-        from scripts.serve import _search_oem, _reset_oem_catalog
+        from scripts.serve import _search_oem
 
-        _reset_oem_catalog()
         mock_catalog = [{"name": "Фильтр", "oem": "7700"}]
-        with patch("scripts.serve.OEM_CATALOG", mock_catalog):
+        with patch("scripts.serve._load_oem_catalog", return_value=mock_catalog):
             result = _search_oem("ZZZZZZ")
         self.assertEqual(result, [])
-        _reset_oem_catalog()
 
     def test_open_browser_starts_thread(self) -> None:
         """open_browser запускает daemon-поток (не падает)"""
@@ -758,7 +746,7 @@ class TestMermaidPreprocess(unittest.TestCase):
     """Тесты препроцессора Mermaid"""
 
     @staticmethod
-    def _import_preprocess():
+    def _import_preprocess() -> object:
         """Импортирует mermaid-preprocess.py (имя с дефисами)"""
         import importlib.util
         spec = importlib.util.spec_from_file_location(
@@ -926,6 +914,69 @@ class TestMermaidPreprocess(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0)
 
+    def test_process_file_render_failure_logs_warning(self) -> None:
+        """process_file логирует предупреждение при ошибке рендера (не падает)"""
+        from unittest.mock import patch
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "render_fail.md"
+        md.write_text("```mermaid\ngraph TD;\nA-->B;\n```\n", encoding="utf-8")
+
+        with patch.object(mod, "render_svg", return_value=False):
+            changes = mod.process_file(md, self.cache_dir)
+        self.assertEqual(changes, 0)  # блок не заменён
+        # Файл не должен измениться
+        self.assertIn("```mermaid", md.read_text(encoding="utf-8"))
+
+    def test_process_file_already_replaced(self) -> None:
+        """process_file не заменяет уже заменённые блоки (нет ```mermaid)"""
+        mod = self._import_preprocess()
+
+        md = self.src_dir / "already.md"
+        md.write_text("text\n![Диаграмма](img/mermaid/abc.svg)\nend", encoding="utf-8")
+
+        changes = mod.process_file(md, self.cache_dir)
+        self.assertEqual(changes, 0)
+
+    def test_main_render_only_creates_cache_dir(self) -> None:
+        """main() с --render-only создаёт директорию кеша (если mmdc нет — ошибка)"""
+        import subprocess
+
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "mermaid-preprocess.py"), "--render-only"],
+            cwd=self.tmpdir, capture_output=True, text=True, timeout=10,
+        )
+        # mmdc скорее всего нет — ждём ненулевой код
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("mmdc", result.stderr)
+
+    def test_main_no_mmdc_exits_with_error(self) -> None:
+        """main() выходит с ошибкой если mmdc не найден"""
+        import subprocess
+        import shutil
+
+        # Убеждаемся, что mmdc нет в PATH
+        if shutil.which("mmdc") is not None:
+            self.skipTest("mmdc установлен, тест требует его отсутствия")
+
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "mermaid-preprocess.py")],
+            cwd=self.tmpdir, capture_output=True, text=True, timeout=10,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("mmdc", result.stderr)
+
+    def test_main_help_succeeds(self) -> None:
+        """main() с --help возвращает 0"""
+        import subprocess
+
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "mermaid-preprocess.py"), "--help"],
+            capture_output=True, text=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Mermaid", result.stdout)
+
 
 class TestServeMain(unittest.TestCase):
     """Тесты main() функции serve.py"""
@@ -991,7 +1042,8 @@ class TestServeHandler(unittest.TestCase):
     base = ""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
+        import functools
         import threading
         from http.server import HTTPServer
         from scripts.serve import PortableHandler, find_available_port
@@ -1009,21 +1061,21 @@ class TestServeHandler(unittest.TestCase):
             "<html><body>SUB PAGE</body></html>", encoding="utf-8")
 
         cls.port = find_available_port(18850)
-        os.chdir(cls.html_dir)
-        cls.server = HTTPServer(("127.0.0.1", cls.port), PortableHandler)
+        handler = functools.partial(PortableHandler, directory=str(cls.html_dir))
+        cls.server = HTTPServer(("127.0.0.1", cls.port), handler)
         cls.server.allow_reuse_address = True
         t = threading.Thread(target=cls.server.serve_forever, daemon=True)
         t.start()
         cls.base = f"http://127.0.0.1:{cls.port}"
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         if cls.server:
             cls.server.shutdown()
             cls.server.server_close()
         shutil.rmtree(cls.tmpdir, ignore_errors=True)
 
-    def _get(self, path: str):
+    def _get(self, path: str) -> None:
         """Выполнить GET запрос и вернуть (code, body)."""
         import urllib.request
         import urllib.error
@@ -1033,19 +1085,19 @@ class TestServeHandler(unittest.TestCase):
         except urllib.error.HTTPError as e:
             return e.code, e.read().decode("utf-8")
 
-    def test_get_root_returns_index(self):
+    def test_get_root_returns_index(self) -> None:
         """GET / возвращает index.html"""
         code, body = self._get("/")
         self.assertEqual(code, 200)
         self.assertIn("INDEX", body)
 
-    def test_get_subdir_html_file(self):
+    def test_get_subdir_html_file(self) -> None:
         """GET /sub/page.html возвращает HTML"""
         code, body = self._get("/sub/page.html")
         self.assertEqual(code, 200)
         self.assertIn("SUB PAGE", body)
 
-    def test_get_svg_returns_svg_mime(self):
+    def test_get_svg_returns_svg_mime(self) -> None:
         """GET /test.svg возвращает SVG с image/svg+xml"""
         import urllib.request
         with urllib.request.urlopen(f"{self.base}/test.svg", timeout=3) as resp:  # nosec B310: test URL
@@ -1053,12 +1105,12 @@ class TestServeHandler(unittest.TestCase):
             content_type = resp.headers.get("Content-Type", "")
             self.assertIn("image/svg+xml", content_type)
 
-    def test_get_nonexistent_returns_404(self):
+    def test_get_nonexistent_returns_404(self) -> None:
         """GET /nonexistent.html возвращает 404"""
         code, body = self._get("/nonexistent.html")
         self.assertEqual(code, 404)
 
-    def test_get_oem_search_json(self):
+    def test_get_oem_search_json(self) -> None:
         """GET /api/oem-search?q=7700274177 возвращает JSON"""
         import json
         from scripts.serve import _reset_oem_catalog
@@ -1069,7 +1121,7 @@ class TestServeHandler(unittest.TestCase):
         self.assertIn("query", data)
         self.assertIn("results", data)
 
-    def test_get_oem_catalog_json(self):
+    def test_get_oem_catalog_json(self) -> None:
         """GET /api/oem-catalog.json возвращает полный каталог"""
         import json
         from scripts.serve import _reset_oem_catalog
@@ -1087,7 +1139,7 @@ class TestPdfA4(unittest.TestCase):
     """Тесты конвертера Letter → A4"""
 
     @staticmethod
-    def _import_pdf_a4():
+    def _import_pdf_a4() -> object | None:
         """Импортирует pdf-a4.py (имя с дефисами), возвращает None если pikepdf нет"""
         import importlib.util
         try:
@@ -1118,24 +1170,25 @@ class TestPdfA4(unittest.TestCase):
         result = mod.letter_to_a4("/nonexistent/input.pdf", str(self.tmpdir / "out.pdf"))
         self.assertFalse(result)
 
+    @staticmethod
+    def _make_letter_pdf(path: Path, mod, num_pages: int = 1) -> None:
+        """Создать Letter-size PDF с указанным числом страниц."""
+        from pikepdf import Pdf
+        pdf = Pdf.new()
+        for _ in range(num_pages):
+            page = pdf.add_blank_page()
+            page.MediaBox = [0, 0, mod.LETTER_W, mod.LETTER_H]
+        pdf.save(str(path))
+        pdf.close()
+
     def test_letter_to_a4_converts_letter_to_a4(self) -> None:
         """letter_to_a4 конвертирует Letter PDF в A4"""
         mod = self._import_pdf_a4()
         if mod is None:
             self.skipTest("pikepdf не установлен")
-        try:
-            from pikepdf import Pdf, Page
-        except ImportError:
-            self.skipTest("pikepdf не установлен")
 
-        # Создаём Letter PDF
         in_pdf = self.tmpdir / "letter.pdf"
-        pdf = Pdf.new()
-        page = Page(pdf)
-        page.MediaBox = [0, 0, mod.LETTER_W, mod.LETTER_H]
-        pdf.pages.append(page)
-        pdf.save(str(in_pdf))
-        pdf.close()
+        self._make_letter_pdf(in_pdf, mod)
 
         out_pdf = self.tmpdir / "output.pdf"
         result = mod.letter_to_a4(str(in_pdf), str(out_pdf))
@@ -1143,6 +1196,7 @@ class TestPdfA4(unittest.TestCase):
         self.assertTrue(out_pdf.exists())
 
         # Проверяем A4 размеры
+        from pikepdf import Pdf
         pdf2 = Pdf.open(str(out_pdf))
         mb = pdf2.pages[0].MediaBox
         w = float(mb[2]) - float(mb[0])
@@ -1152,6 +1206,133 @@ class TestPdfA4(unittest.TestCase):
         self.assertAlmostEqual(w, mod.A4_W, delta=5)
         self.assertAlmostEqual(h, mod.A4_H, delta=5)
 
+    def test_letter_to_a4_handles_already_a4(self) -> None:
+        """letter_to_a4 не меняет A4 PDF (нет Letter-страниц)"""
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+
+        from pikepdf import Pdf
+        in_pdf = self.tmpdir / "a4.pdf"
+        pdf = Pdf.new()
+        page = pdf.add_blank_page()
+        page.MediaBox = [0, 0, mod.A4_W, mod.A4_H]
+        pdf.save(str(in_pdf))
+        pdf.close()
+
+        out_pdf = self.tmpdir / "output.pdf"
+        result = mod.letter_to_a4(str(in_pdf), str(out_pdf))
+        self.assertTrue(result)
+        self.assertTrue(out_pdf.exists())
+
+    def test_letter_to_a4_multiple_pages(self) -> None:
+        """letter_to_a4 конвертирует многостраничный Letter PDF"""
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+
+        in_pdf = self.tmpdir / "multi.pdf"
+        self._make_letter_pdf(in_pdf, mod, num_pages=3)
+
+        from pikepdf import Pdf
+        out_pdf = self.tmpdir / "output.pdf"
+        result = mod.letter_to_a4(str(in_pdf), str(out_pdf))
+        self.assertTrue(result)
+
+        # Проверяем, что все страницы сконвертированы
+        pdf2 = Pdf.open(str(out_pdf))
+        self.assertEqual(len(pdf2.pages), 3)
+        for p in pdf2.pages:
+            w = float(p.MediaBox[2]) - float(p.MediaBox[0])
+            self.assertAlmostEqual(w, mod.A4_W, delta=5)
+        pdf2.close()
+
+    def test_letter_to_a4_cropbox_also_converted(self) -> None:
+        """letter_to_a4 обновляет CropBox если он совпадает с Letter"""
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+
+        from pikepdf import Pdf
+        in_pdf = self.tmpdir / "crop.pdf"
+        pdf = Pdf.new()
+        page = pdf.add_blank_page()
+        page.MediaBox = [0, 0, mod.LETTER_W, mod.LETTER_H]
+        page.CropBox = [0, 0, mod.LETTER_W, mod.LETTER_H]
+        pdf.save(str(in_pdf))
+        pdf.close()
+
+        out_pdf = self.tmpdir / "output.pdf"
+        mod.letter_to_a4(str(in_pdf), str(out_pdf))
+
+        pdf2 = Pdf.open(str(out_pdf))
+        crop = pdf2.pages[0].CropBox
+        cw = float(crop[2]) - float(crop[0])
+        self.assertAlmostEqual(cw, mod.A4_W, delta=5)
+        pdf2.close()
+
+    def test_letter_to_a4_with_content_stream(self) -> None:
+        """letter_to_a4 обрабатывает страницу с content stream"""
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+
+        from pikepdf import Pdf, Stream
+        in_pdf = self.tmpdir / "content.pdf"
+        pdf = Pdf.new()
+        page = pdf.add_blank_page()
+        page.MediaBox = [0, 0, mod.LETTER_W, mod.LETTER_H]
+        page.Contents = Stream(pdf, b"q\n1 0 0 1 0 0 cm\nQ\n")
+        pdf.save(str(in_pdf))
+        pdf.close()
+
+        out_pdf = self.tmpdir / "output.pdf"
+        result = mod.letter_to_a4(str(in_pdf), str(out_pdf))
+        self.assertTrue(result)
+
+    def test_main_help_succeeds(self) -> None:
+        """pdf-a4.py --help возвращает 0"""
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "pdf-a4.py"), "--help"],
+            capture_output=True, text=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 0)
+
+    def test_main_missing_pdf_exits_with_error(self) -> None:
+        """pdf-a4.py с несуществующим файлом завершается с ненулевым кодом"""
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, str(TESTS_DIR / "pdf-a4.py"),
+             "/nonexistent/input.pdf", str(self.tmpdir / "out.pdf")],
+            capture_output=True, text=True, timeout=10,
+        )
+        self.assertNotEqual(result.returncode, 0)
+
+    def test_letter_to_a4_no_pikepdf_returns_false(self) -> None:
+        """letter_to_a4 возвращает False если pikepdf не установлен (через _get_pikepdf)"""
+        from unittest.mock import patch
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+
+        with patch.object(mod, "_get_pikepdf", return_value=(None, None, None)):
+            result = mod.letter_to_a4("/some/input.pdf", "/some/output.pdf")
+        self.assertFalse(result)
+
+    def test_letter_to_a4_invalid_pdf_returns_false(self) -> None:
+        """letter_to_a4 возвращает False для невалидного PDF"""
+        mod = self._import_pdf_a4()
+        if mod is None:
+            self.skipTest("pikepdf не установлен")
+
+        bad_pdf = self.tmpdir / "bad.pdf"
+        bad_pdf.write_bytes(b"not a valid pdf file at all")
+        out_pdf = self.tmpdir / "result.pdf"
+
+        result = mod.letter_to_a4(str(bad_pdf), str(out_pdf))
+        self.assertFalse(result)
+
 
 # ══════════════════════════════════════════════════════════════════
 # MERMAID MDBOOK PREPROCESSOR
@@ -1160,7 +1341,7 @@ class TestMermaidMdbookPreprocessor(unittest.TestCase):
     """Тесты mdBook preprocessor для Mermaid"""
 
     @staticmethod
-    def _import_preprocessor():
+    def _import_preprocessor() -> object:
         """Импортирует mermaid-mdbook-preprocessor.py (имя с дефисами)"""
         import importlib.util
         spec = importlib.util.spec_from_file_location(
@@ -1270,6 +1451,130 @@ class TestMermaidMdbookPreprocessor(unittest.TestCase):
             capture_output=True, text=True, timeout=5,
         )
         self.assertEqual(result.stdout.strip(), "true")
+
+
+# ══════════════════════════════════════════════════════════════════
+# CATCAR CRAWLER
+# ══════════════════════════════════════════════════════════════════
+class TestCatcarCrawler(unittest.TestCase):
+    """Smoke-тесты для catcar_crawler.py (кодирование, декодирование, парсинг)"""
+
+    maxDiff = None
+
+    def setUp(self):
+        from catcar_crawler import decode_l, encode_l, parse_groups, parse_parts
+        self.decode_l = decode_l
+        self.encode_l = encode_l
+        self.parse_groups = parse_groups
+        self.parse_parts = parse_parts
+
+    def test_encode_decode_roundtrip(self):
+        """Проверка encode→decode даёт те же параметры"""
+        params = {
+            "st": "40",
+            "sts": {"10": "Модель", "20": "Symbol-Thalia", "30": "LU3R", "40": "Механические узлы"},
+            "cat_id": "M",
+        }
+        l_val = self.encode_l(**params)
+        decoded = self.decode_l(l_val)
+        self.assertEqual(decoded.get("st"), "40")
+        self.assertEqual(decoded.get("cat_id"), "M")
+
+    def test_encode_with_group_and_subgroup(self):
+        """encode_l с grp_id и subGrp_id"""
+        l_val = self.encode_l(
+            st="50",
+            sts={"10": "Модель", "50": "10 Двигатель"},
+            cat_id="M", grp_id="10", subGrp_id="10A",
+        )
+        decoded = self.decode_l(l_val)
+        self.assertEqual(decoded.get("grp_id"), "10")
+        self.assertEqual(decoded.get("subGrp_id"), "10A")
+
+    def test_decode_with_url_encoded_input(self):
+        """decode_l обрабатывает URL-encoded %3D"""
+        # Эмуляция URL-encoded l-параметра с %3D вместо =
+        import base64
+        import urllib.parse
+        raw = 'st==40||sts=={"10":"Модель"}||cat_id==M'
+        encoded = urllib.parse.quote(base64.b64encode(raw.encode()).decode(), safe='')
+        decoded = self.decode_l(encoded)
+        self.assertEqual(decoded.get("st"), "40")
+        self.assertEqual(decoded.get("cat_id"), "M")
+
+    def test_parse_groups_empty_html(self):
+        """parse_groups на пустом HTML возвращает []"""
+        groups = self.parse_groups("<html></html>")
+        self.assertEqual(groups, [])
+
+    def test_parse_parts_empty_html(self):
+        """parse_parts на пустом HTML возвращает []"""
+        parts = self.parse_parts("<html></html>")
+        self.assertEqual(parts, [])
+
+    def test_parse_groups_with_real_html(self):
+        """parse_groups корректно находит группы в реальном HTML"""
+        html = """
+        <div class="rowblocks hr-bottom" name="10">
+            <div class="blocks vertical-align">
+                <div class="left_image">
+                    <span class="blocks__title">10 Двигатель</span>
+                </div>
+            </div>
+            <div class="blocks"><div>
+                <a class="blocks__item" href="http://catcar.info/renault/?l=c3Q9PTUwfHxzdHM9PXsiMTAiOiLQnNC+0LTQtdC70YwiLCIyMCI6IlN5bWJvbC1UaGFsaWEiLCIzMCI6IkxVM1IiLCI0MCI6ItCc0LXRhdCw0L3QuNGH0LXRgdC60LjQtSDRg9C30LvRiyIsIjUwIjoiMTAg0JTQstC40LPQsNGC0LXQu9GMIC8g0JTQstC40LPQsNGC0LXQu9GMINCyINGB0LHQvtGA0LUifXx8bm9wcnM9PTE0MzV8fGJyYW5kPT1SZW5hdWx0fHxub3ByPT0xNDM1fHx0eXBlPT1MVTNSfHxjYXRfaWQ9PU18fGltZz09fHxncnBfaWQ9PTEwfHxzdWJHcnBfaWQ9PTEwQQ==">
+                    <span class="blocks__img">
+                        <img src="http://ci.catcar.info/renault_2017_01/vignette/10A.png" alt="Двигатель в сборе" title="Двигатель в сборе"/>
+                    </span>
+                    <span class="blocks__title">Двигатель в сборе</span>
+                </a>
+            </div></div>
+        </div>
+        """
+        groups = self.parse_groups(html)
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0]["grp_id"], "10")
+        self.assertEqual(len(groups[0]["subgroups"]), 1)
+        self.assertEqual(groups[0]["subgroups"][0]["subGrp_id"], "10A")
+
+    def test_parse_parts_with_real_html(self):
+        """parse_parts извлекает OEM-номера из HTML-таблицы"""
+        html = """
+        <table>
+            <tr><td>1</td><td>7701472317</td><td></td><td>ДВИГАТЕЛЬ K4J 712</td><td>Тип КПП = МКП</td></tr>
+            <tr><td>2</td><td>7700107864</td><td></td><td>ПАТРУБОК ВОЗД. ФИЛ</td><td></td></tr>
+        </table>
+        """
+        parts = self.parse_parts(html)
+        self.assertEqual(len(parts), 2)
+        self.assertEqual(parts[0]["oem"], "7701472317")
+        self.assertEqual(parts[1]["oem"], "7700107864")
+        self.assertEqual(parts[0]["name"], "ДВИГАТЕЛЬ K4J 712")
+        self.assertEqual(parts[0]["position"], "1")
+
+    def test_parse_parts_skips_header_row(self):
+        """parse_parts пропускает строку-заголовок таблицы"""
+        html = """
+        <table>
+            <tr><td>Код</td><td>Номер</td><td>Замены</td><td>Название</td><td>Дополнительная информация</td></tr>
+            <tr><td>1</td><td>7701472317</td><td></td><td>ДВИГАТЕЛЬ</td><td></td></tr>
+        </table>
+        """
+        parts = self.parse_parts(html)
+        self.assertEqual(len(parts), 1)
+        self.assertEqual(parts[0]["oem"], "7701472317")
+
+    def test_parse_parts_invalid_oem_skipped(self):
+        """parse_parts пропускает не-цифровые OEM"""
+        html = """
+        <table>
+            <tr><td>1</td><td>7701472317</td><td></td><td>ДВИГАТЕЛЬ</td><td></td></tr>
+            <tr><td>2</td><td>INVALID</td><td></td><td>НЕ OEM</td><td></td></tr>
+        </table>
+        """
+        parts = self.parse_parts(html)
+        self.assertEqual(len(parts), 1)
+        self.assertEqual(parts[0]["oem"], "7701472317")
 
 
 # ══════════════════════════════════════════════════════════════════

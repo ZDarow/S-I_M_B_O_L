@@ -9,6 +9,12 @@ const CACHE_NAME = 'reno-symbol-v1';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
+  '/css/general.css',
+  '/css/chrome.css',
+  '/css/variables.css',
+  '/css/print.css',
+  '/js/dtc-search.js',
+  '/js/service-tracker.js',
 ];
 
 const ASSET_EXTENSIONS = [
