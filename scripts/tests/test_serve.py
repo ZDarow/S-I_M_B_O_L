@@ -444,7 +444,7 @@ class TestServeHandler(unittest.TestCase):
             cls.server.server_close()
         shutil.rmtree(cls.tmpdir, ignore_errors=True)
 
-    def _get(self, path: str) -> None:
+    def _get(self, path: str) -> tuple[int, str]:
         """Выполнить GET запрос и вернуть (code, body)."""
         import urllib.request
         import urllib.error
