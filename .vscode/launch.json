@@ -1,0 +1,496 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // ═══════════════════════════════════════════════════════════
+        //  Запуск приложений
+        // ═══════════════════════════════════════════════════════════
+        {
+            "name": "Serve: HTTP-сервер",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.serve",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "--port", "8080",
+                "--log-level", "INFO"
+            ],
+            "presentation": {
+                "group": "launch",
+                "order": 1
+            }
+        },
+        {
+            "name": "Serve: HTTP-сервер (VS Code браузер)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.serve",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts",
+                "TERM_PROGRAM": "vscode"
+            },
+            "args": [
+                "--port", "8080",
+                "--log-level", "INFO"
+            ],
+            "presentation": {
+                "group": "launch",
+                "order": 2
+            }
+        },
+        {
+            "name": "Сборка: упаковка портативной версии",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.bundle_portable",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "--no-build",
+                "--no-archive",
+                "--output", "${workspaceFolder}/portable"
+            ],
+            "presentation": {
+                "group": "launch",
+                "order": 3
+            }
+        },
+        {
+            "name": "Mermaid: препроцессор (рендер SVG)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.mermaid_preprocess",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts",
+                "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+            },
+            "args": [
+                "--render-only"
+            ],
+            "presentation": {
+                "group": "launch",
+                "order": 4
+            }
+        },
+        {
+            "name": "Mermaid: препроцессор (замена в .md)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.mermaid_preprocess",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts",
+                "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+            },
+            "presentation": {
+                "group": "launch",
+                "order": 5
+            }
+        },
+        {
+            "name": "Генерация: SVG-иллюстрации",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.generate_illustrations",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "presentation": {
+                "group": "launch",
+                "order": 6
+            }
+        },
+        {
+            "name": "Генерация: sitemap.xml",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.sitemap",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "--source", "${workspaceFolder}/book/book/html"
+            ],
+            "presentation": {
+                "group": "launch",
+                "order": 7
+            }
+        },
+        {
+            "name": "PDF: конвертация Letter→A4",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.pdf_a4",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "presentation": {
+                "group": "launch",
+                "order": 8
+            }
+        },
+        {
+            "name": "Каталоги: слияние OEM (catcar + elcats)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.merge_oem_catalogs",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "--output", "${workspaceFolder}/scripts/renault_master_catalog.json"
+            ],
+            "presentation": {
+                "group": "launch",
+                "order": 9
+            }
+        },
+        {
+            "name": "Каталоги: краулер catcar.info",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.catcar_crawler",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "presentation": {
+                "group": "launch",
+                "order": 10
+            }
+        },
+        {
+            "name": "Каталоги: краулер elcats.ru",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.elcats_crawler",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "presentation": {
+                "group": "launch",
+                "order": 11
+            }
+        },
+        {
+            "name": "Python: Текущий файл",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "presentation": {
+                "group": "launch",
+                "order": 20
+            }
+        },
+        {
+            "name": "Python: Отладка модуля...",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "${input:pythonModule}",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": "${input:moduleArgs}",
+            "presentation": {
+                "group": "launch",
+                "order": 21
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Тестирование
+        // ═══════════════════════════════════════════════════════════
+        {
+            "name": "Тесты: все (pytest)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "scripts/test_portable.py",
+                "-v",
+                "--tb=long",
+                "--no-header"
+            ],
+            "presentation": {
+                "group": "tests",
+                "order": 1
+            }
+        },
+        {
+            "name": "Тесты: с покрытием",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "scripts/test_portable.py",
+                "-v",
+                "--cov=scripts",
+                "--cov-report=term-missing",
+                "--tb=short"
+            ],
+            "presentation": {
+                "group": "tests",
+                "order": 2
+            }
+        },
+        {
+            "name": "Тесты: текущий файл",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "${file}",
+                "-v",
+                "--tb=long",
+                "--no-header"
+            ],
+            "presentation": {
+                "group": "tests",
+                "order": 3
+            }
+        },
+        {
+            "name": "Тесты: по фильтру (-k)...",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "scripts/test_portable.py",
+                "-v",
+                "--tb=long",
+                "-k", "${input:testPattern}"
+            ],
+            "presentation": {
+                "group": "tests",
+                "order": 4
+            }
+        },
+        {
+            "name": "Тесты: отладка текущего теста (под курсором)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/scripts"
+            },
+            "args": [
+                "${file}",
+                "-v",
+                "--tb=long",
+                "--no-header",
+                "-k", "${fileBasenameNoExtension}::${selectedText}"
+            ],
+            "presentation": {
+                "group": "tests",
+                "order": 5
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Линтеры
+        // ═══════════════════════════════════════════════════════════
+        {
+            "name": "Линтер: Ruff",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "ruff",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "check",
+                "scripts/"
+            ],
+            "presentation": {
+                "group": "lint",
+                "order": 1
+            }
+        },
+        {
+            "name": "Линтер: mypy (типизация)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "mypy",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "scripts/",
+                "--config-file", "pyproject.toml"
+            ],
+            "presentation": {
+                "group": "lint",
+                "order": 2
+            }
+        },
+        {
+            "name": "Линтер: Bandit (безопасность)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "bandit",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-r", "scripts/",
+                "-ll",
+                "-f", "txt",
+                "--skip", "B101,B301,B303,B314,B108"
+            ],
+            "presentation": {
+                "group": "lint",
+                "order": 3
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Браузер
+        // ═══════════════════════════════════════════════════════════
+        {
+            "name": "Открыть localhost:8080",
+            "type": "editor-browser",
+            "request": "launch",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}",
+            "presentation": {
+                "group": "browser",
+                "order": 1
+            }
+        }
+    ],
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Inputs (динамические запросы при запуске)
+    // ═══════════════════════════════════════════════════════════════
+    "inputs": [
+        {
+            "id": "testPattern",
+            "type": "promptString",
+            "description": "Шаблон фильтра тестов (значение -k для pytest)",
+            "default": "test_serve"
+        },
+        {
+            "id": "pythonModule",
+            "type": "promptString",
+            "description": "Имя Python-модуля для отладки (например: scripts.serve, scripts.pdf_a4)",
+            "default": "scripts.serve"
+        },
+        {
+            "id": "moduleArgs",
+            "type": "promptString",
+            "description": "Аргументы командной строки (через пробел)",
+            "default": ""
+        }
+    ],
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Compounds (композитные запуски)
+    // ═══════════════════════════════════════════════════════════════
+    "compounds": [
+        {
+            "name": "Сервер + Браузер",
+            "configurations": [
+                "Serve: HTTP-сервер",
+                "Открыть localhost:8080"
+            ],
+            "stopAll": true,
+            "presentation": {
+                "group": "compounds",
+                "order": 1
+            }
+        },
+        {
+            "name": "Проверка качества (lint + mypy + bandit)",
+            "configurations": [
+                "Линтер: Ruff",
+                "Линтер: mypy (типизация)",
+                "Линтер: Bandit (безопасность)"
+            ],
+            "presentation": {
+                "group": "compounds",
+                "order": 2
+            }
+        },
+        {
+            "name": "Все тесты (pytest + покрытие)",
+            "configurations": [
+                "Тесты: все (pytest)",
+                "Тесты: с покрытием"
+            ],
+            "preLaunchTask": "Линтер: ruff",
+            "presentation": {
+                "group": "compounds",
+                "order": 3
+            }
+        }
+    ]
+}

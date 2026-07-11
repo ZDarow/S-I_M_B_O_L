@@ -33,6 +33,7 @@ dist/
 build/
 
 # Env
+.venv/
 .env
 .env.local
 *.mermaid-backup.
