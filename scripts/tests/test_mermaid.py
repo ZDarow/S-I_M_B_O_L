@@ -8,6 +8,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from typing import Any
 from pathlib import Path
 
 
@@ -146,7 +147,7 @@ class TestMermaidPreprocess(unittest.TestCase):
     """Тесты препроцессора Mermaid"""
 
     @staticmethod
-    def _import_preprocess() -> object:
+    def _import_preprocess() -> Any:
         """Импортирует mermaid-preprocess.py (имя с дефисами)"""
         import importlib.util
 
@@ -407,7 +408,7 @@ class TestMermaidMdbookPreprocessor(unittest.TestCase):
     """Тесты mdBook preprocessor для Mermaid"""
 
     @staticmethod
-    def _import_preprocessor() -> object:
+    def _import_preprocessor() -> Any:
         """Импортирует mermaid-mdbook-preprocessor.py (имя с дефисами)"""
         import importlib.util
 

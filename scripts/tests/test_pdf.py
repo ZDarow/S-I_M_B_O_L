@@ -7,6 +7,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from typing import Any
 from pathlib import Path
 
 
@@ -22,7 +23,7 @@ class TestPdfA4(unittest.TestCase):
     """Тесты конвертера Letter → A4"""
 
     @staticmethod
-    def _import_pdf_a4() -> object | None:
+    def _import_pdf_a4() -> Any:
         """Импортирует pdf-a4.py (имя с дефисами), возвращает None если pikepdf нет"""
         import importlib.util
 
