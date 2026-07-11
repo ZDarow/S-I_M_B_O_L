@@ -16,7 +16,7 @@
   --bg-sidebar: #f0f2f5;
   --fg-primary: #1a1a2e;
   --fg-secondary: #555555;
-  --fg-muted: #888888;
+  --fg-muted: #666666;  /* WCAG AA: #666 на #fff = 5.0:1 */
   --accent: var(--renault-orange);
   --accent-hover: var(--renault-orange-dark);
   --border: #ddd;
@@ -27,6 +27,32 @@
   --success: #2e7d32;
   --warning: #e65100;
   --info: #0277bd;
+  /* Admonition theme colours (overridden by .theme-* classes) */
+  --admon-note-bg: rgba(2, 119, 189, 0.08);
+  --admon-note-border: var(--info);
+  --admon-warning-bg: rgba(230, 81, 0, 0.08);
+  --admon-warning-border: var(--warning);
+  --admon-success-bg: rgba(46, 125, 50, 0.08);
+  --admon-success-border: var(--success);
+  --admon-danger-bg: rgba(244, 67, 54, 0.04);
+  --admon-danger-border: #f44336;
+  --admon-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.05), 0 0 0.1rem rgba(0, 0, 0, 0.1);
+  /* Widget theme colours (used by dtc-search.js and service-tracker.js) */
+  --widget-header-bg: #e65100;
+  --widget-header-text: #fff;
+  --widget-search-bg: #f5f5f5;
+  --widget-input-border: #ddd;
+  --widget-input-bg: #fff;
+  --widget-input-text: #1a1a2e;
+  --widget-tab-bg: #fff;
+  --widget-tab-text: #333;
+  --widget-tab-hover: #ffe0b2;
+  --widget-tab-active-bg: #e65100;
+  --widget-tab-active-text: #fff;
+  --widget-item-hover: #fff3e0;
+  --widget-detail-bg: #fafafa;
+  --widget-empty-color: #666;
+  --widget-loading-color: #666;
 }
 
 /* --- Тёмная тема (принудительно через класс .coal) --- */
@@ -36,7 +62,7 @@
   --bg-sidebar: #161b22;
   --fg-primary: #e6edf3;
   --fg-secondary: #8b949e;
-  --fg-muted: #6e7681;
+  --fg-muted: #555555;  /* WCAG AA на #161b22 ~5.5:1 */
   --accent: #ff6b00;
   --accent-hover: #ff8533;
   --border: #30363d;
@@ -47,6 +73,28 @@
   --success: #3fb950;
   --warning: #d29922;
   --info: #58a6ff;
+  /* Admonition theme colours — coal */
+  --admon-note-bg: rgba(33, 150, 243, 0.15);
+  --admon-note-border: #42a5f5;
+  --admon-warning-bg: rgba(255, 152, 0, 0.15);
+  --admon-warning-border: #ffa726;
+  --admon-success-bg: rgba(76, 175, 80, 0.15);
+  --admon-success-border: #66bb6a;
+  --admon-danger-bg: rgba(244, 67, 54, 0.15);
+  --admon-danger-border: #ef5350;
+  --admon-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.4), 0 0 0.1rem rgba(0, 0, 0, 0.5);
+  /* Widget theme colours — coal */
+  --widget-search-bg: #333;
+  --widget-input-border: #555;
+  --widget-input-bg: #444;
+  --widget-input-text: #eee;
+  --widget-tab-bg: #444;
+  --widget-tab-text: #ddd;
+  --widget-tab-hover: #664;
+  --widget-item-hover: #3a3020;
+  --widget-detail-bg: #2a2a2a;
+  --widget-empty-color: #aaa;
+  --widget-loading-color: #aaa;
 }
 
 /* --- Адаптация mdBook-темы ayu к бренду --- */
@@ -226,7 +274,7 @@ body {
 }
 
 .content table thead {
-  background: var(--accent);
+  background: var(--accent, #e65100);
   color: #fff;
 }
 
@@ -261,32 +309,104 @@ body {
   border: none;
 }
 
-/* --- Блоки предупреждений (admonition) --- */
+/* --- Блоки предупреждений (admonition) — CSS-only, без препроцессора --- */
 .admonition {
   border-radius: 6px;
   border-left: 4px solid;
   margin: 1.5rem 0;
   padding: 0.8rem 1rem;
+  page-break-inside: avoid;
+  box-shadow: var(--admon-shadow);
 }
 
-.admonition.note {
-  background: rgba(2,119,189,0.08);
-  border-color: var(--info);
+.admonition .admonition-title {
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.admonition .admonition-title:empty {
+  display: none;
+}
+
+/* Light theme — цвета и фоны */
+.admonition.note,
+.admonition.info {
+  background: var(--admon-note-bg);
+  border-color: var(--admon-note-border);
 }
 
 .admonition.warning {
-  background: rgba(230,81,0,0.08);
-  border-color: var(--warning);
+  background: var(--admon-warning-bg);
+  border-color: var(--admon-warning-border);
 }
 
-.admonition.success {
-  background: rgba(46,125,50,0.08);
-  border-color: var(--success);
+.admonition.success,
+.admonition.tip {
+  background: var(--admon-success-bg);
+  border-color: var(--admon-success-border);
 }
 
-.admonition-title {
-  font-weight: 700;
-  margin-bottom: 0.4rem;
+.admonition.danger {
+  background: var(--admon-danger-bg);
+  border-color: var(--admon-danger-border);
+}
+
+/* Тёмная тема: ayu */
+.theme-ayu .admonition {
+  box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.3), 0 0 0.1rem rgba(0, 0, 0, 0.4);
+}
+.theme-ayu .admonition .admonition-title {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.theme-ayu .admonition.note,
+.theme-ayu .admonition.info {
+  border-color: #42a5f5;
+  background-color: rgba(33, 150, 243, 0.12);
+}
+.theme-ayu .admonition.warning {
+  border-color: #ffa726;
+  background-color: rgba(255, 152, 0, 0.12);
+}
+.theme-ayu .admonition.success,
+.theme-ayu .admonition.tip {
+  border-color: #66bb6a;
+  background-color: rgba(76, 175, 80, 0.12);
+}
+.theme-ayu .admonition.danger {
+  border-color: #ef5350;
+  background-color: rgba(244, 67, 54, 0.12);
+}
+
+/* Тёмная тема: coal (navy) */
+.theme-coal .admonition {
+  box-shadow: var(--admon-shadow);
+}
+.theme-coal .admonition .admonition-title {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+.theme-coal .admonition.note,
+.theme-coal .admonition.info {
+  border-color: var(--admon-note-border);
+  background-color: var(--admon-note-bg);
+}
+.theme-coal .admonition.warning {
+  border-color: var(--admon-warning-border);
+  background-color: var(--admon-warning-bg);
+}
+.theme-coal .admonition.success,
+.theme-coal .admonition.tip {
+  border-color: var(--admon-success-border);
+  background-color: var(--admon-success-bg);
+}
+.theme-coal .admonition.danger {
+  border-color: var(--admon-danger-border);
+  background-color: var(--admon-danger-bg);
+}
+
+@media print {
+  .admonition {
+    box-shadow: none;
+  }
 }
 
 /* --- Изображения --- */
@@ -313,6 +433,12 @@ details summary {
   color: var(--accent);
   padding: 0.3rem 0;
   outline: none;
+}
+
+details summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 details summary::-webkit-details-marker {
@@ -447,52 +573,98 @@ footer {
 }
 
 /* --- Мобильная оптимизация JS-виджетов (DTC поиск, планировщик ТО) --- */
-@media (max-width: 600px) {
+/* Mobile-first: стили для мобильных применяются по умолчанию */
+.dtc-widget .dtc-search-wrap {
+  flex-direction: column;
+}
+.dtc-widget .dtc-results {
+  max-height: 400px;
+  font-size: 0.9em;
+}
+.dtc-widget .dtc-item {
+  padding: 0.5em 0.6em;
+}
+.dtc-widget .dtc-item-detail {
+  font-size: 0.85em;
+}
+.dtc-widget .dtc-tab {
+  font-size: 0.78em;
+  padding: 0.3em 0.5em;
+}
+
+.service-widget .sw-field {
+  min-width: 100%;
+}
+.service-widget .sw-field input {
+  font-size: 16px;  /* предотвращает зум на iOS */
+}
+.service-widget .sw-card-header {
+  flex-wrap: wrap;
+  gap: 0.3em;
+  font-size: 0.9em;
+}
+.service-widget .sw-card-km {
+  font-size: 0.85em;
+}
+.service-widget .sw-stat-item {
+  min-width: calc(50% - 0.5em);
+}
+.service-widget .sw-stat-num {
+  font-size: 1.1em;
+}
+
+/* Мобильные таблицы — скролл вместо сжатия */
+.content table {
+  font-size: 0.85em;
+}
+.content table td,
+.content table th {
+  padding: 4px 6px;
+}
+
+/* Desktop: возвращаем исходные стили для широких экранов */
+@media (min-width: 601px) {
   .dtc-widget .dtc-search-wrap {
-    flex-direction: column;
+    flex-direction: row;
   }
   .dtc-widget .dtc-results {
-    max-height: 400px;
-    font-size: 0.9em;
+    max-height: 600px;
+    font-size: 1em;
   }
   .dtc-widget .dtc-item {
-    padding: 0.5em 0.6em;
+    padding: 0.8em 1em;
   }
   .dtc-widget .dtc-item-detail {
-    font-size: 0.85em;
+    font-size: 0.9em;
   }
   .dtc-widget .dtc-tab {
-    font-size: 0.78em;
-    padding: 0.3em 0.5em;
+    font-size: 0.85em;
+    padding: 0.4em 0.8em;
   }
 
   .service-widget .sw-field {
-    min-width: 100%;
-  }
-  .service-widget .sw-field input {
-    font-size: 16px;  /* предотвращает зум на iOS */
+    min-width: 140px;
   }
   .service-widget .sw-card-header {
-    flex-wrap: wrap;
-    gap: 0.3em;
-    font-size: 0.9em;
+    flex-wrap: nowrap;
+    font-size: 1em;
   }
   .service-widget .sw-card-km {
-    font-size: 0.85em;
+    font-size: 1em;
   }
   .service-widget .sw-stat-item {
-    min-width: calc(50% - 0.5em);
+    min-width: 100px;
   }
   .service-widget .sw-stat-num {
-    font-size: 1.1em;
+    font-size: 1.3em;
   }
 
-  /* Мобильные таблицы — скролл вместо сжатия */
   .content table {
-    font-size: 0.85em;
+    font-size: 0.9rem;
   }
   .content table td,
   .content table th {
-    padding: 4px 6px;
+    padding: 0.5rem 0.8rem;
   }
 }
+

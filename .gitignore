@@ -10,7 +10,13 @@ Desktop.ini
 *.swp
 *.swo
 *~
+# Editor files — личные настройки VS Code не отслеживаются
 .vscode/
+!.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
 .idea/
 *.suo
 *.ntvs*

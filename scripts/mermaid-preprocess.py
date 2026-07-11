@@ -15,6 +15,7 @@
   3. Заменяет блоки на markdown-ссылки
   4. Все изменения в .md файлах можно откатить через --restore
 """
+
 import logging
 import os
 import sys
@@ -27,7 +28,8 @@ logger = logging.getLogger(__name__)
 BOOK_DIR = Path("book")
 SRC_DIR = BOOK_DIR / "src"
 CACHE_DIR = SRC_DIR / "img" / "mermaid"
-BACKUP_PREFIX = ".mermaid-backup."
+BACKUP_PREFIX = ".bak"
+# Суффикс для бэкап-файлов mermaid (добавляется к расширению .md через with_suffix)
 
 
 def process_file(md_path: Path, cache_dir: Path) -> int:
@@ -84,12 +86,12 @@ def restore_file(md_path: Path) -> bool:
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(
-        description="Mermaid-препроцессор для mdbook")
-    parser.add_argument("--restore", action="store_true",
-                        help="Восстановить .md файлы из бэкапов")
-    parser.add_argument("--render-only", action="store_true",
-                        help="Только рендерить SVG, не заменять блоки")
+
+    parser = argparse.ArgumentParser(description="Mermaid-препроцессор для mdbook")
+    parser.add_argument("--restore", action="store_true", help="Восстановить .md файлы из бэкапов")
+    parser.add_argument(
+        "--render-only", action="store_true", help="Только рендерить SVG, не заменять блоки"
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -108,7 +110,7 @@ def main():
             if restore_file(md_path):
                 restored += 1
         logger.info("  Восстановлено: %d файлов", restored)
-        # Удаление оставшихся бэкапов
+        # Удаление оставшихся бэкапов (файлы вида *.md.bak)
         for bak in src_dir.rglob(f"*{BACKUP_PREFIX}"):
             bak.unlink()
         return
@@ -117,7 +119,9 @@ def main():
     mmdc = find_mmdc()
     if not mmdc:
         logger.error("mmdc не найден. Установите: npm install @mermaid-js/mermaid-cli")
-        logger.error("  Или: PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium npm install @mermaid-js/mermaid-cli")
+        logger.error(
+            "  Или: PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium npm install @mermaid-js/mermaid-cli"
+        )
         sys.exit(1)
 
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -153,7 +157,10 @@ def main():
     total_svg = len(list(cache_dir.glob("*.svg")))
     logger.info(
         "\nГотово: %d файлов, %d замен, %d SVG в кеше (%s)",
-        total_files, total_changes, total_svg, cache_dir,
+        total_files,
+        total_changes,
+        total_svg,
+        cache_dir,
     )
 
 

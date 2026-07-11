@@ -67,8 +67,7 @@ sitemap:
 
 ## Пост-обработка: sw.js, 404, PDF копия
 post-process:
-	cp -n book/theme/sw.js $(HTML_DIR)/theme/sw.js 2>/dev/null || true
-	cp -n $(SCRIPT_DIR)/404.html $(HTML_DIR)/404.html 2>/dev/null || true
+	python3 -c "from scripts._copy_artifacts import copy_build_artifacts; from pathlib import Path; copy_build_artifacts(Path('$(HTML_DIR)'))" 2>/dev/null || true
 	cp $(PDF_DIR)/output.pdf $(HTML_DIR)/reno-symbol.pdf 2>/dev/null || true
 
 ## Полная сборка книги (Mermaid → HTML → PDF → пост-обработка)

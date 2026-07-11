@@ -11,7 +11,7 @@ git-repository-url = "https://github.com/ZDarow/S-I_M_B_O_L"
 default-theme = "light"
 preferred-dark-theme = "coal"
 site-url = "https://zdarow.github.io/S-I_M_B_O_L/"
-additional-css = ["./theme/admonitions.css", "./theme/css/renault.css"]
+additional-css = ["./theme/css/renault.css"]
 additional-js = ["./theme/js/dtc-search.js", "./theme/js/service-tracker.js"]
 
 [output.html.search]

@@ -12,6 +12,7 @@ Zero-Dependency HTTP-сервер для портативной версии
   python3 scripts/serve.py --port 8080        # кастомный порт
   python3 scripts/serve.py --no-browser       # без открытия браузера
 """
+
 import argparse
 import functools
 import json
@@ -120,11 +121,16 @@ def _search_oem(query: str, max_results: int = 50) -> list:
             analogs = item.get("analogs", "")
             engines = item.get("engines", "").lower()
             category = item.get("category", "").lower()
-            if (q in name.lower() or
-                q in oem_num or
-                q in engines or
-                q in category or
-                any(q in a.lower().replace(" ", "") for a in (analogs if isinstance(analogs, list) else [analogs]))):
+            if (
+                q in name.lower()
+                or q in oem_num
+                or q in engines
+                or q in category
+                or any(
+                    q in a.lower().replace(" ", "")
+                    for a in (analogs if isinstance(analogs, list) else [analogs])
+                )
+            ):
                 results.append(item)
     return results[:max_results]
 
@@ -135,14 +141,15 @@ CSP_HEADER = (
     "font-src 'self' https://fonts.gstatic.com; "
     "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
     "img-src 'self' data:; "
+    "object-src 'none'; "
+    "frame-ancestors 'none'; "
+    "base-uri 'self'; "
+    "form-action 'none'; "
 )
 
 
 class PortableHandler(SimpleHTTPRequestHandler):
     """Кастомный обработчик с русскоязычными index, MIME-типами и OEM API."""
-
-    def __init__(self, *args, directory=None, **kwargs):
-        super().__init__(*args, directory=directory, **kwargs)
 
     def guess_type(self, path):
         ext = os.path.splitext(path)[1].lower()
@@ -190,18 +197,18 @@ class PortableHandler(SimpleHTTPRequestHandler):
         else:
             self.send_header("Cache-Control", "no-cache")
         self.end_headers()
-        self.wfile.write(
-            json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
-        )
+        self.wfile.write(json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8"))
 
     def _handle_oem_search(self, query: str):
         """Эндпоинт /api/oem-search?q=... — поиск по OEM-каталогу."""
         results = _search_oem(query)
-        self._send_json({
-            "query": query,
-            "count": len(results),
-            "results": results,
-        })
+        self._send_json(
+            {
+                "query": query,
+                "count": len(results),
+                "results": results,
+            }
+        )
 
     def _serve_oem_catalog(self):
         """Эндпоинт /api/oem-catalog.json — полный каталог."""
@@ -224,10 +231,7 @@ def _in_vscode() -> bool:
     Переменные TERM_PROGRAM=vscode или VSCODE_INJECTION=1
     устанавливаются VS Code при запуске встроенного терминала.
     """
-    return (
-        os.environ.get("TERM_PROGRAM") == "vscode"
-        or "VSCODE_INJECTION" in os.environ
-    )
+    return os.environ.get("TERM_PROGRAM") == "vscode" or "VSCODE_INJECTION" in os.environ
 
 
 def open_browser(url: str, delay: float = 0.5, vscode: bool = False):
@@ -238,6 +242,7 @@ def open_browser(url: str, delay: float = 0.5, vscode: bool = False):
 
     В обычном режиме открывает системный браузер через webbrowser.open().
     """
+
     def _open():
         time.sleep(delay)
         if vscode or _in_vscode():
@@ -246,6 +251,7 @@ def open_browser(url: str, delay: float = 0.5, vscode: bool = False):
             webbrowser.open(vscode_uri)
         else:
             webbrowser.open(url)
+
     threading.Thread(target=_open, daemon=True).start()
 
 
@@ -262,7 +268,9 @@ def try_build(html_dir: Path) -> bool:
     print("📖 Книга не собрана. Запускаю сборку...")
     result = subprocess.run(
         [mdbook, "build", str(PROJECT_ROOT / "book")],
-        cwd=PROJECT_ROOT, capture_output=True, text=True,
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
         print(f"❌ Ошибка сборки:\n{result.stderr}", file=sys.stderr)
@@ -276,25 +284,14 @@ def try_build(html_dir: Path) -> bool:
 
 
 def _copy_build_artifacts(html_dir: Path) -> None:
-    """Скопировать дополнительные файлы в директорию сборки.
-
-    mdBook не копирует произвольные файлы из theme/ — выполняем это вручную.
-    """
-    theme_dir = PROJECT_ROOT / "book" / "theme"
-    out_theme_dir = html_dir / "theme"
-    out_theme_dir.mkdir(parents=True, exist_ok=True)
-
-    # Service Worker для офлайн-доступа
-    sw_src = theme_dir / "sw.js"
-    if sw_src.exists():
-        shutil.copy2(sw_src, out_theme_dir / "sw.js")
-
-    # 404 страница
-    _ = html_dir / "404.html"
-    if not _.exists():
-        not_found_src = PROJECT_ROOT / "scripts" / "404.html"
-        if not_found_src.exists():
-            shutil.copy2(not_found_src, _)
+    """Скопировать дополнительные файлы в директорию сборки (делегирует _copy_artifacts)."""
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location("_copy_artifacts", SCRIPT_DIR / "_copy_artifacts.py")
+    assert _spec is not None, "Не найден _copy_artifacts.py"
+    assert _spec.loader is not None, "Loader не инициализирован"
+    _mod = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_mod)
+    _mod.copy_build_artifacts(html_dir, PROJECT_ROOT)
 
 
 def main():
@@ -310,24 +307,33 @@ def main():
             "  python3 %(prog)s --verbose              # подробные логи"
         ),
     )
-    parser.add_argument("--port", type=int, default=DEFAULT_PORT,
-                        help=f"Порт сервера (по умолч. {DEFAULT_PORT})")
-    parser.add_argument("--log-level", default="WARNING",
-                        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-                        help="Уровень логирования")
-    parser.add_argument("--dir", type=Path, default=DEFAULT_HTML_DIR,
-                        help="Директория с HTML (по умолч. book/book/html)")
-    parser.add_argument("--no-browser", action="store_true",
-                        help="Не открывать браузер автоматически")
-    parser.add_argument("--vscode", action="store_true",
-                        help="Открыть во встроенном браузере VS Code "
-                             "(автоопределяется, если не указан)")
-    parser.add_argument("--verbose", action="store_true",
-                        help="Подробные логи запросов")
+    parser.add_argument(
+        "--port", type=int, default=DEFAULT_PORT, help=f"Порт сервера (по умолч. {DEFAULT_PORT})"
+    )
+    parser.add_argument(
+        "--log-level",
+        default="WARNING",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Уровень логирования",
+    )
+    parser.add_argument(
+        "--dir",
+        type=Path,
+        default=DEFAULT_HTML_DIR,
+        help="Директория с HTML (по умолч. book/book/html)",
+    )
+    parser.add_argument(
+        "--no-browser", action="store_true", help="Не открывать браузер автоматически"
+    )
+    parser.add_argument(
+        "--vscode",
+        action="store_true",
+        help="Открыть во встроенном браузере VS Code (автоопределяется, если не указан)",
+    )
+    parser.add_argument("--verbose", action="store_true", help="Подробные логи запросов")
     args = parser.parse_args()
 
-    logging.basicConfig(level=getattr(logging, args.log_level),
-                        format="%(levelname)s: %(message)s")
+    logging.basicConfig(level=getattr(logging, args.log_level), format="%(levelname)s: %(message)s")
     if args.verbose:
         os.environ["SERVE_VERBOSE"] = "1"
 

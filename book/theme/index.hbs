@@ -15,11 +15,29 @@
         <!-- Custom HTML head -->
         {{> head}}
 
+        <!-- JSON-LD Structured Data (Schema.org TechArticle) -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "{{ title }}",
+          "description": "{{ description }}",
+          "author": { "@type": "Person", "name": "{{ author }}" },
+          "inLanguage": "{{ language }}",
+          "about": { "@type": "Vehicle", "manufacturer": "Renault", "model": "Symbol" },
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ site_url }}"
+          }
+        }
+        </script>
+
         <meta name="description" content="{{ description }}">
         <meta name="yandex-verification" content="60d8eef340d23018" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#1565c0">
         <link rel="manifest" href="{{ path_to_root }}theme/manifest.json">
+        <link rel="canonical" href="{{ site_url }}">
 
         <!-- Open Graph / Social -->
         <meta property="og:title" content="Руководство по ремонту Renault Symbol">
@@ -77,12 +95,12 @@
         {{/if}}
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="{{ resource "toc.js" }}"></script>
+        <script defer src="{{ resource "toc.js" }}"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
-        <div id="mdbook-help-popup">
-            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+        <div id="mdbook-help-popup" role="dialog" aria-modal="true" aria-labelledby="mdbook-help-title">
+            <h2 id="mdbook-help-title" class="mdbook-help-title">Keyboard shortcuts</h2>
             <div>
                 <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
                 {{#if search_enabled}}
@@ -339,7 +357,9 @@
 
         <script src="{{ resource "clipboard.min.js" }}"></script>
         <script src="{{ resource "highlight.js" }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"
+                integrity="sha384-T/0lMUdJpd2S1ZHtRiofG3htU3xPCrFVeAQ1UUE2TJwlEJSV5NUwn30kP28n238E"
+                crossorigin="anonymous"></script>
         <script src="{{ resource "book.js" }}"></script>
 
         <!-- Custom JS scripts -->
@@ -381,6 +401,15 @@
         {{/if}}
 
     </div>
+
+    <!-- Lazy loading для изображений (прогрессивное улучшение) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.content img:not([loading])').forEach(function(img) {
+                img.loading = 'lazy';
+            });
+        });
+    </script>
 
     <!-- PWA: Service Worker -->
     <script>
