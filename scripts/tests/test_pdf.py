@@ -32,6 +32,8 @@ class TestPdfA4(unittest.TestCase):
                 PROJECT_ROOT / "pdf-a4.py",
                 submodule_search_locations=[],
             )
+            assert spec is not None, "Не найден pdf-a4.py"
+            assert spec.loader is not None
             mod = importlib.util.module_from_spec(spec)
             sys.modules["pdf_a4"] = mod
             spec.loader.exec_module(mod)
