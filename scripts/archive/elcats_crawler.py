@@ -45,7 +45,10 @@ MAX_POSITIONS = 20  # макс номер позиции на Parts.aspx
 RESUME_FILE = Path(tempfile.gettempdir()) / "elcats_progress.json"
 
 # ─── Структура каталога (загружается из JSON) ─────────────────
-CATALOG_TREE_PATH = Path(__file__).resolve().parent / "data" / "elcats_catalog_tree.json"
+_THIS_DIR = Path(__file__).resolve().parent
+# Поддержка работы из scripts/archive/ (данные в scripts/data/)
+_DATA_DIR = _THIS_DIR.parent / "data" if _THIS_DIR.name == "archive" else _THIS_DIR / "data"
+CATALOG_TREE_PATH = _DATA_DIR / "elcats_catalog_tree.json"
 try:
     with open(CATALOG_TREE_PATH, encoding="utf-8") as _f:
         CATALOG_TREE: dict[str, Any] = json.load(_f)

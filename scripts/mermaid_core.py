@@ -7,17 +7,19 @@
   - render_svg()     — рендер одного mermaid-блока в SVG
   - MERMAID_RE       — регулярное выражение для поиска ```mermaid блоков
 """
+
 import hashlib
 import logging
 import os
 import re
 import subprocess
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-MERMAID_RE = re.compile(r'```mermaid\s*\n(.*?)```', re.DOTALL)
+MERMAID_RE = re.compile(r"```mermaid\s*\n(.*?)```", re.DOTALL)
 MIN_SVG_SIZE = 50
 MMDC_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -56,8 +58,9 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
         return False
 
     # Создаём временный файл один раз, вне цикла retry
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".mmd",
-                                     delete=False, encoding="utf-8") as tmp:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".mmd", delete=False, encoding="utf-8"
+    ) as tmp:
         tmp.write(mermaid_source)
         tmp_path = tmp.name
 
@@ -65,28 +68,35 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 r = subprocess.run(
-                    [mmdc, "-i", tmp_path, "-o", str(output),
-                     "-b", "transparent", "-w", "1200"],
-                    capture_output=True, text=True, timeout=MMDC_TIMEOUT,
+                    [mmdc, "-i", tmp_path, "-o", str(output), "-b", "transparent", "-w", "1200"],
+                    capture_output=True,
+                    text=True,
+                    timeout=MMDC_TIMEOUT,
                 )
                 if r.returncode != 0:
                     logger.warning(
                         "Попытка %d/%d: mmdc вернул код %d: %s",
-                        attempt, MAX_RETRIES, r.returncode, r.stderr[:200],
+                        attempt,
+                        MAX_RETRIES,
+                        r.returncode,
+                        r.stderr[:200],
                     )
                     continue
                 ok = output.exists() and output.stat().st_size >= MIN_SVG_SIZE
                 if not ok:
                     logger.warning(
                         "Попытка %d/%d: mmdc создал некорректный SVG",
-                        attempt, MAX_RETRIES,
+                        attempt,
+                        MAX_RETRIES,
                     )
                     continue
                 return ok
             except subprocess.TimeoutExpired:
                 logger.warning(
                     "Попытка %d/%d: mmdc timeout (%ds)",
-                    attempt, MAX_RETRIES, MMDC_TIMEOUT,
+                    attempt,
+                    MAX_RETRIES,
+                    MMDC_TIMEOUT,
                 )
             except OSError as e:
                 logger.warning("Попытка %d/%d: Ошибка mmdc: %s", attempt, MAX_RETRIES, e)
@@ -104,7 +114,7 @@ def hash_mermaid(source: str) -> str:
     return hashlib.sha256(source.encode()).hexdigest()[:16]
 
 
-def walk_sections(data, callback):
+def walk_sections(data: dict | list, callback: Callable[[dict], None]) -> None:
     """Обойти структуру mdBook Chapter и вызвать callback(chapter) для каждого."""
     if isinstance(data, dict):
         if "Chapter" in data:

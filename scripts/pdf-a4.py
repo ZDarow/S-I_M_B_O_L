@@ -6,6 +6,7 @@ Uses pikepdf to scale content and resize pages.
 Безопасность: использует атомарную запись через временный файл,
 чтобы не повредить исходный PDF при сбое.
 """
+
 import argparse
 import logging
 import os
@@ -24,6 +25,7 @@ def _get_pikepdf():
     """Ленивый импорт pikepdf (опциональная зависимость)."""
     try:
         from pikepdf import Pdf, Name, Stream
+
         return Pdf, Name, Stream
     except ImportError:
         return None, None, None
@@ -93,9 +95,7 @@ def letter_to_a4(in_path: str, out_path: str) -> bool:
 
     # Атомарная запись через временный файл
     tmp_dir = os.path.dirname(out_path) or "."
-    with tempfile.NamedTemporaryFile(
-        delete=False, dir=tmp_dir, suffix=".pdf"
-    ) as tmp:
+    with tempfile.NamedTemporaryFile(delete=False, dir=tmp_dir, suffix=".pdf") as tmp:
         tmp_path = tmp.name
 
     try:
@@ -137,19 +137,22 @@ def main():
         description="Конвертирует Letter PDF (612x792) в A4 (595x842).",
         epilog="Если файлы не указаны, используется book/book/pdf/output.pdf",
     )
-    parser.add_argument("input", nargs="?", type=Path, default=default_pdf,
-                        help="Входной PDF-файл (Letter)")
-    parser.add_argument("output", nargs="?", type=Path, default=None,
-                        help="Выходной PDF-файл (A4), по умолч. — замена входного")
+    parser.add_argument(
+        "input", nargs="?", type=Path, default=default_pdf, help="Входной PDF-файл (Letter)"
+    )
+    parser.add_argument(
+        "output",
+        nargs="?",
+        type=Path,
+        default=None,
+        help="Выходной PDF-файл (A4), по умолч. — замена входного",
+    )
     args = parser.parse_args()
 
     in_pdf = args.input
     out_pdf = args.output if args.output is not None else in_pdf
 
     success = letter_to_a4(str(in_pdf), str(out_pdf))
-    # Если нужен in-place (out_pdf временный), копируем обратно
-    if success and out_pdf != in_pdf:
-        shutil.copy2(str(out_pdf), str(in_pdf))
     return 0 if success else 1
 
 

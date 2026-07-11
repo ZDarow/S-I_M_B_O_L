@@ -4,7 +4,7 @@
  * Стратегия: Cache-First для статики, Network-First для страниц
  */
 
-const CACHE_NAME = 'reno-symbol-v1';
+const CACHE_NAME = 'reno-symbol-v2';
 
 const PRECACHE_URLS = [
   '/',
@@ -32,9 +32,15 @@ self.addEventListener('install', event => {
   );
   // Активировать сразу, не ждать закрытия вкладок
   self.skipWaiting();
+  // Уведомить страницу об установке (для логирования)
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({ type: 'SW_INSTALLING' });
+    });
+  });
 });
 
-// Активация — очистка старых кешей
+// Активация — очистка старых кешей, уведомление клиентов
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -42,7 +48,22 @@ self.addEventListener('activate', event => {
         keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       );
     }).then(() => self.clients.claim())
+    .then(() => {
+      // Уведомить все вкладки об обновлении SW
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'SW_UPDATED' });
+        });
+      });
+    })
   );
+});
+
+// Обработка сообщений от клиентов
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Запрос — Cache-First для ассетов, Stale-While-Revalidate для страниц

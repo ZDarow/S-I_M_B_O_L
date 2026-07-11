@@ -88,16 +88,12 @@ def bundle_portable(
     shutil.copy2(SERVE_SCRIPT, output_dir / "serve.py")
     (output_dir / "serve.py").chmod(0o755)
 
-    # Копируем дополнительные файлы (sw.js для офлайн, 404.html)
-    theme_dir = PROJECT_ROOT / "book" / "theme"
-    out_theme = output_dir / "theme"
-    out_theme.mkdir(parents=True, exist_ok=True)
-    for extra in ["sw.js", "404.html"]:
-        src = theme_dir / extra
-        if not src.exists():
-            src = SCRIPT_DIR / extra
-        if src.exists():
-            shutil.copy2(src, out_theme / extra if extra == "sw.js" else output_dir / extra)
+    # Копируем дополнительные файлы (артефакты сборки)
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location("_copy_artifacts", SCRIPT_DIR / "_copy_artifacts.py")
+    _mod = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_mod)
+    _mod.copy_build_artifacts(output_dir, PROJECT_ROOT)
 
     # Копируем README
     readme_src = SCRIPT_DIR / "portable-readme.txt"
