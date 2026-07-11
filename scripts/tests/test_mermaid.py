@@ -155,6 +155,8 @@ class TestMermaidPreprocess(unittest.TestCase):
             PROJECT_ROOT / "mermaid-preprocess.py",
             submodule_search_locations=[],
         )
+        assert spec is not None, "Не найден mermaid-preprocess.py"
+        assert spec.loader is not None
         mod = importlib.util.module_from_spec(spec)
         sys.modules["mermaid_preprocess"] = mod
         spec.loader.exec_module(mod)
@@ -414,6 +416,8 @@ class TestMermaidMdbookPreprocessor(unittest.TestCase):
             PROJECT_ROOT / "mermaid-mdbook-preprocessor.py",
             submodule_search_locations=[],
         )
+        assert spec is not None, "Не найден mermaid-mdbook-preprocessor.py"
+        assert spec.loader is not None
         mod = importlib.util.module_from_spec(spec)
         sys.modules["mermaid_mdbook_preprocessor"] = mod
         spec.loader.exec_module(mod)
