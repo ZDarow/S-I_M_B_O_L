@@ -1,0 +1,805 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        // ═══════════════════════════════════════════════════════════
+        //  Сборка
+        // ═══════════════════════════════════════════════════════════
+
+        // ── mdBook (основная сборка HTML) ─────────────────────────
+        {
+            "label": "Сборка: HTML (mdBook)",
+            "type": "shell",
+            "command": "mdbook",
+            "args": [
+                "build",
+                "${workspaceFolder}/book"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "owner": "mdbook",
+                "severity": "error",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^\\s*-->\\s+(.+):(\\d+):(\\d+)\\s*$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+
+        // ── Полная сборка (make build) ────────────────────────────
+        {
+            "label": "Сборка: полная (make build)",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-C", "${workspaceFolder}",
+                "build"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+
+        // ── Полная сборка (make build-pdf) ────────────────────────
+        {
+            "label": "Сборка: с PDF (make build-pdf)",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-C", "${workspaceFolder}",
+                "build-pdf"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+
+        // ── Портативная версия ────────────────────────────────────
+        {
+            "label": "Сборка: портативная версия",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/scripts/bundle_portable.py",
+                "--no-build"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "${workspaceFolder}/scripts/bundle_portable.py",
+                    "--no-build"
+                ]
+            },
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── Очистка ───────────────────────────────────────────────
+        {
+            "label": "Сборка: очистка (make clean)",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-C", "${workspaceFolder}",
+                "clean"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Запуск / Dev-сервер
+        // ═══════════════════════════════════════════════════════════
+
+        // ── HTTP-сервер (dev) ─────────────────────────────────────
+        {
+            "label": "Запуск: HTTP-сервер (dev)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/scripts/serve.py",
+                "--port", "8080",
+                "--log-level", "INFO"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "${workspaceFolder}/scripts/serve.py",
+                    "--port", "8080",
+                    "--log-level", "INFO"
+                ]
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": ".*",
+                        "file": 1
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*Starting server.*$",
+                    "endsPattern": "^.*Shutting down.*$"
+                }
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+
+        // ── mdBook serve (livereload) ─────────────────────────────
+        {
+            "label": "Запуск: mdBook serve (livereload)",
+            "type": "shell",
+            "command": "mdbook",
+            "args": [
+                "serve",
+                "${workspaceFolder}/book",
+                "--open",
+                "--hostname", "0.0.0.0",
+                "--port", "3000"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": ".*",
+                        "file": 1
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.* Serving on:.*$",
+                    "endsPattern": "^.*$"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Тестирование
+        // ═══════════════════════════════════════════════════════════
+
+        // ── Все тесты ─────────────────────────────────────────────
+        {
+            "label": "Тесты: все (pytest)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m", "pytest",
+                "${workspaceFolder}/scripts/test_portable.py",
+                "-v",
+                "--tb=short",
+                "--no-header"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "-m", "pytest",
+                    "${workspaceFolder}/scripts/test_portable.py",
+                    "-v",
+                    "--tb=short",
+                    "--no-header"
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "owner": "python",
+                "severity": "error",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^FAILED\\s+(.+?\\.py).*\\s+-\\s+(.+)$",
+                    "file": 1,
+                    "message": 2
+                }
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── Тесты с покрытием ─────────────────────────────────────
+        {
+            "label": "Тесты: с покрытием (coverage)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m", "pytest",
+                "${workspaceFolder}/scripts/test_portable.py",
+                "-v",
+                "--tb=short",
+                "--cov=${workspaceFolder}/scripts",
+                "--cov-report=term-missing"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "-m", "pytest",
+                    "${workspaceFolder}/scripts/test_portable.py",
+                    "-v",
+                    "--tb=short",
+                    "--cov=${workspaceFolder}/scripts",
+                    "--cov-report=term-missing"
+                ]
+            },
+            "group": "test",
+            "problemMatcher": {
+                "owner": "python",
+                "severity": "error",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^FAILED\\s+(.+?\\.py).*\\s+-\\s+(.+)$",
+                    "file": 1,
+                    "message": 2
+                }
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── Тесты по фильтру ──────────────────────────────────────
+        {
+            "label": "Тесты: по фильтру (-k)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m", "pytest",
+                "${workspaceFolder}/scripts/test_portable.py",
+                "-v",
+                "--tb=long",
+                "-k", "${input:testPattern}"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "-m", "pytest",
+                    "${workspaceFolder}/scripts/test_portable.py",
+                    "-v",
+                    "--tb=long",
+                    "-k", "${input:testPattern}"
+                ]
+            },
+            "group": "test",
+            "problemMatcher": {
+                "owner": "python",
+                "severity": "error",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^FAILED\\s+(.+?\\.py).*\\s+-\\s+(.+)$",
+                    "file": 1,
+                    "message": 2
+                }
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Линтинг
+        // ═══════════════════════════════════════════════════════════
+
+        // ── ruff check ────────────────────────────────────────────
+        {
+            "label": "Линтер: ruff check",
+            "type": "shell",
+            "command": "ruff",
+            "args": [
+                "check",
+                "${workspaceFolder}/scripts/"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": {
+                "owner": "ruff",
+                "severity": "warning",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": [
+                    {
+                        "regexp": "^(.*\\.py):(\\d+):(\\d+):\\s+(\\S+)\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                ]
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── ruff format --check ───────────────────────────────────
+        {
+            "label": "Линтер: ruff format (проверка)",
+            "type": "shell",
+            "command": "ruff",
+            "args": [
+                "format",
+                "${workspaceFolder}/scripts/",
+                "--check",
+                "--diff"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── mypy ──────────────────────────────────────────────────
+        {
+            "label": "Линтер: mypy",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m", "mypy",
+                "${workspaceFolder}/scripts/",
+                "--config-file", "${workspaceFolder}/pyproject.toml"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "-m", "mypy",
+                    "${workspaceFolder}/scripts/",
+                    "--config-file", "${workspaceFolder}/pyproject.toml"
+                ]
+            },
+            "problemMatcher": {
+                "owner": "mypy",
+                "severity": "error",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": [
+                    {
+                        "regexp": "^(.*\\.py):(\\d+):\\s+(error|warning):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "severity": 3,
+                        "message": 4
+                    }
+                ]
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── bandit ────────────────────────────────────────────────
+        {
+            "label": "Линтер: bandit",
+            "type": "shell",
+            "command": "bandit",
+            "args": [
+                "-r", "${workspaceFolder}/scripts/",
+                "-ll",
+                "-f", "txt",
+                "--skip", "B101,B301,B303,B314,B108"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── markdownlint ──────────────────────────────────────────
+        {
+            "label": "Линтер: markdownlint",
+            "type": "shell",
+            "command": "markdownlint",
+            "args": [
+                "${workspaceFolder}/book/src/**/*.md",
+                "--disable", "MD003,MD004,MD007,MD012,MD013,MD022,MD024,MD025,MD026,MD029,MD031,MD032,MD033,MD036,MD040,MD042,MD046,MD049,MD051,MD055,MD056,MD058,MD060",
+                "--ignore", "${workspaceFolder}/book/book"
+            ],
+            "problemMatcher": {
+                "owner": "markdownlint",
+                "severity": "warning",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": [
+                    {
+                        "regexp": "^(.*\\.md):(\\d+):\\s+(\\S+)\\s+(MD\\S+)\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "severity": 3,
+                        "code": 4,
+                        "message": 5
+                    }
+                ]
+            },
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated",
+                "showReuseMessage": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Форматирование
+        // ═══════════════════════════════════════════════════════════
+
+        // ── ruff format ───────────────────────────────────────────
+        {
+            "label": "Формат: ruff format",
+            "type": "shell",
+            "command": "ruff",
+            "args": [
+                "format",
+                "${workspaceFolder}/scripts/"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── ruff format (проверка) ────────────────────────────────
+        {
+            "label": "Формат: ruff format --check",
+            "type": "shell",
+            "command": "ruff",
+            "args": [
+                "format",
+                "${workspaceFolder}/scripts/",
+                "--check"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Mermaid
+        // ═══════════════════════════════════════════════════════════
+
+        // ── Рендер SVG (кеш) ──────────────────────────────────────
+        {
+            "label": "Mermaid: рендер SVG (кеш)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/scripts/mermaid-preprocess.py",
+                "--render-only"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "${workspaceFolder}/scripts/mermaid-preprocess.py",
+                    "--render-only"
+                ]
+            },
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts",
+                    "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── Замена в .md ──────────────────────────────────────────
+        {
+            "label": "Mermaid: замена SVG в .md + сборка",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/scripts/mermaid-preprocess.py"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "${workspaceFolder}/scripts/mermaid-preprocess.py"
+                ]
+            },
+            "dependsOn": ["Mermaid: рендер SVG (кеш)"],
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts",
+                    "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ── Восстановление ────────────────────────────────────────
+        {
+            "label": "Mermaid: восстановить .md из бэкапов",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/scripts/mermaid-preprocess.py",
+                "--restore"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "${workspaceFolder}/scripts/mermaid-preprocess.py",
+                    "--restore"
+                ]
+            },
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Генерация
+        // ═══════════════════════════════════════════════════════════
+
+        // ── sitemap.xml ───────────────────────────────────────────
+        {
+            "label": "Генерация: sitemap.xml",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/scripts/sitemap.py",
+                "--source", "${workspaceFolder}/book/book/html"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "${workspaceFolder}/scripts/sitemap.py",
+                    "--source", "${workspaceFolder}/book/book/html"
+                ]
+            },
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated",
+                "showReuseMessage": true
+            }
+        },
+
+        // ── SVG-иллюстрации ───────────────────────────────────────
+        {
+            "label": "Генерация: SVG-иллюстрации",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/scripts/generate_illustrations.py"
+            ],
+            "windows": {
+                "command": "python",
+                "args": [
+                    "${workspaceFolder}/scripts/generate_illustrations.py"
+                ]
+            },
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/scripts"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Качество / CI
+        // ═══════════════════════════════════════════════════════════
+
+        // ── Все линтеры параллельно ──────────────────────────────
+        {
+            "label": "Качество: все линтеры (ruff + mypy + bandit)",
+            "type": "shell",
+            "dependsOn": [
+                "Линтер: ruff check",
+                "Линтер: mypy",
+                "Линтер: bandit"
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true,
+                "group": "quality"
+            }
+        },
+
+        // ── CI-валидация (make validate) ─────────────────────────
+        {
+            "label": "Качество: CI-валидация (make validate)",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-C", "${workspaceFolder}",
+                "validate"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+
+        // ── Полный CI (тесты + линтеры) ──────────────────────────
+        {
+            "label": "Качество: полный CI (тесты + линтеры)",
+            "type": "shell",
+            "dependsOn": [
+                "Качество: все линтеры (ruff + mypy + bandit)",
+                "Тесты: с покрытием (coverage)"
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        //  Утилиты
+        // ═══════════════════════════════════════════════════════════
+
+        // ── Статистика ────────────────────────────────────────────
+        {
+            "label": "Утилиты: статистика проекта",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-C", "${workspaceFolder}",
+                "stats"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        }
+    ],
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Inputs (переменные, запрашиваемые при запуске задачи)
+    // ═══════════════════════════════════════════════════════════════
+    "inputs": [
+        {
+            "id": "testPattern",
+            "type": "promptString",
+            "description": "Шаблон фильтра тестов (значение -k для pytest)",
+            "default": "test_serve"
+        }
+    ]
+}

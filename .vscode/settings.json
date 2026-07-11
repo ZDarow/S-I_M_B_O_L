@@ -1,0 +1,231 @@
+{
+    // ═══════════════════════════════════════════════════════════════
+    //  Python
+    // ═══════════════════════════════════════════════════════════════
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/scripts"
+    ],
+
+    // ── Тестирование (pytest) ─────────────────────────────────────
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.pytestArgs": [
+        "scripts",
+        "-v",
+        "--tb=short",
+        "--no-header"
+    ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Форматтер (Ruff)
+    // ═══════════════════════════════════════════════════════════════
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+        }
+    },
+
+    // ── Ruff (нативный сервер) ────────────────────────────────────
+    // Настройки lint/format читаются из pyproject.toml:
+    //   [tool.ruff]        → line-length, target-version
+    //   [tool.ruff.lint]   → select, ignore
+    //   [tool.ruff.format] → quote-style
+    "ruff.enable": true,
+    "ruff.importStrategy": "fromEnvironment",
+    "ruff.configurationPreference": "filesystemFirst",
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Markdown
+    // ═══════════════════════════════════════════════════════════════
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+        "editor.formatOnSave": true,
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 100,
+        "editor.quickSuggestions": {
+            "comments": "on",
+            "strings": "on",
+            "other": "on"
+        }
+    },
+
+    // ── markdownlint ──────────────────────────────────────────────
+    "markdownlint.config": {
+        "MD013": false,    // line length — разрешена (техническая文档)
+        "MD033": false,    // inline HTML — нужен для mdBook
+        "MD041": false,    // first line heading — разрешён
+        "MD046": false     // code block style — разрешён
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    //  YAML / TOML / JSON / Docker
+    // ═══════════════════════════════════════════════════════════════
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml",
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true
+    },
+
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml",
+        "editor.formatOnSave": true
+    },
+
+    "[dockerfile]": {
+        "editor.defaultFormatter": "ms-azuretools.vscode-docker",
+        "editor.formatOnSave": true
+    },
+
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Shell / Makefile
+    // ═══════════════════════════════════════════════════════════════
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format",
+        "editor.formatOnSave": true
+    },
+    "[makefile]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4
+    },
+    "[ignore]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Редактор
+    // ═══════════════════════════════════════════════════════════════
+    "editor.rulers": [100],
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.renderWhitespace": "boundary",
+    "editor.linkedEditing": true,
+    "editor.minimap.enabled": false,
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    },
+    "breadcrumbs.enabled": true,
+    "workbench.tree.indent": 16,
+
+    // ── Файлы ─────────────────────────────────────────────────────
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.encoding": "utf8",
+    "files.eol": "\n",
+    "files.associations": {
+        "*.hbs": "handlebars",
+        "*.env.*": "dotenv",
+        "Makefile": "makefile",
+        "Dockerfile.*": "dockerfile",
+        ".pre-commit-config.yaml": "yaml"
+    },
+
+    // ── Исключения ────────────────────────────────────────────────
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.mypy_cache": true,
+        "**/.pytest_cache": true,
+        "**/.ruff_cache": true,
+        "**/node_modules": true,
+        "book/book/": true,
+        "**/*.egg-info": true
+    },
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/book/book/**": true,
+        "**/portable/**": true,
+        "**/node_modules/**": true,
+        "**/__pycache__/**": true,
+        "**/.venv/**": true
+    },
+
+    // ── Поиск ─────────────────────────────────────────────────────
+    "search.exclude": {
+        "**/__pycache__": true,
+        "**/.mypy_cache": true,
+        "**/.pytest_cache": true,
+        "**/.ruff_cache": true,
+        "**/node_modules": true,
+        "**/.venv": true,
+        "book/book/": true,
+        "portable/": true,
+        "Renault Symbol/": true,
+        "**/*.svg": true,
+        "**/*.pdf": true
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Spell checker
+    // ═══════════════════════════════════════════════════════════════
+    "cSpell.language": "en,ru",
+    "cSpell.words": [
+        "admonitions",
+        "catcar",
+        "dtc",
+        "elcats",
+        "hunspell",
+        "lychee",
+        "mdbook",
+        "mermaid",
+        "pikepdf",
+        "Puppeteer",
+        "pydantic",
+        "pytest",
+        "setuptools",
+        "sitemap"
+    ],
+
+    // ═══════════════════════════════════════════════════════════════
+    //  mdBook
+    // ═══════════════════════════════════════════════════════════════
+    "mdbook.buildDir": "book/book",
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Терминал (кроссплатформенный)
+    // ═══════════════════════════════════════════════════════════════
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.defaultProfile.windows": "pwsh",
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}/scripts"
+    },
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "${workspaceFolder}/scripts"
+    },
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}/scripts"
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Прочее
+    // ═══════════════════════════════════════════════════════════════
+    "npm.packageManager": "npm",
+    "debugpy.showPythonVersion": false
+}
