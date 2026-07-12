@@ -30,7 +30,6 @@ dev = [
   "pytest>=8",
   "pytest-cov>=6",
   "coverage>=7",
-  "flake8>=7",
   "bandit>=1.8",
   "beautifulsoup4>=4",
   "lxml>=5",
@@ -44,8 +43,8 @@ test = [
 ]
 lint = [
   "ruff>=0.9",
-  "flake8>=7",
   "bandit>=1.8",
+  "mypy>=1.14",
 ]
 crawl = [
   "requests>=2",
@@ -61,7 +60,7 @@ warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 ignore_missing_imports = true
-exclude = ["scripts/test_.*"]
+exclude = ["scripts/test_.*", "scripts/archive/"]
 
 [tool.setuptools.packages.find]
 where = ["scripts"]
@@ -97,5 +96,4 @@ show_missing = true
 fail_under = 65
 
 [tool.bandit]
-exclude_dirs = ["scripts/test_*.py"]
-skips = ["B101", "B301", "B303", "B314", "B108"]
+exclude_dirs = ["scripts/test_*.py", "scripts/archive/*"]

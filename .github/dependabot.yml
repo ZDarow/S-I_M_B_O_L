@@ -26,9 +26,12 @@ updates:
       - "ci"
 
   - package-ecosystem: "pip"
-    directory: "/scripts"
+    directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Moscow"
     open-pull-requests-limit: 3
     labels:
       - "dependencies"

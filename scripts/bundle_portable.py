@@ -89,13 +89,8 @@ def bundle_portable(
     (output_dir / "serve.py").chmod(0o755)
 
     # Копируем дополнительные файлы (артефакты сборки)
-    import importlib.util
-    _spec = importlib.util.spec_from_file_location("_copy_artifacts", SCRIPT_DIR / "_copy_artifacts.py")
-    assert _spec is not None, "Не найден _copy_artifacts.py"
-    assert _spec.loader is not None, "Loader не инициализирован"
-    _mod = importlib.util.module_from_spec(_spec)
-    _spec.loader.exec_module(_mod)
-    _mod.copy_build_artifacts(output_dir, PROJECT_ROOT)
+    from _copy_artifacts import copy_build_artifacts  # noqa: E402
+    copy_build_artifacts(output_dir, PROJECT_ROOT)
 
     # Копируем README
     readme_src = SCRIPT_DIR / "portable-readme.txt"
