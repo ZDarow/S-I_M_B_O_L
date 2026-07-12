@@ -32,11 +32,11 @@ def find_mmdc() -> str | None:
         Path("../node_modules/.bin/mmdc"),
     ]
     for c in candidates:
-        if c.is_file():
+        if c.is_file() and os.access(c, os.X_OK):
             return str(c.resolve())
     for p in os.environ.get("PATH", "").split(os.pathsep):
         mmdc = Path(p) / "mmdc"
-        if mmdc.is_file():
+        if mmdc.is_file() and os.access(mmdc, os.X_OK):
             return str(mmdc)
     return None
 
@@ -111,7 +111,7 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
 
 def hash_mermaid(source: str) -> str:
     """SHA256 хеш mermaid-источника (первые 16 символов)."""
-    return hashlib.sha256(source.encode()).hexdigest()[:16]
+    return hashlib.sha256(source.encode()).hexdigest()[:16]  # nosec: B303 — не криптография, а кеширование SVG
 
 
 def walk_sections(data: dict | list, callback: Callable[[dict], None]) -> None:

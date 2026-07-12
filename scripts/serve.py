@@ -285,13 +285,12 @@ def try_build(html_dir: Path) -> bool:
 
 def _copy_build_artifacts(html_dir: Path) -> None:
     """Скопировать дополнительные файлы в директорию сборки (делегирует _copy_artifacts)."""
-    import importlib.util
-    _spec = importlib.util.spec_from_file_location("_copy_artifacts", SCRIPT_DIR / "_copy_artifacts.py")
-    assert _spec is not None, "Не найден _copy_artifacts.py"
-    assert _spec.loader is not None, "Loader не инициализирован"
-    _mod = importlib.util.module_from_spec(_spec)
-    _spec.loader.exec_module(_mod)
-    _mod.copy_build_artifacts(html_dir, PROJECT_ROOT)
+    try:
+        from _copy_artifacts import copy_build_artifacts
+    except ImportError:
+        logger.warning("_copy_artifacts не найден, пропускаю")
+        return
+    copy_build_artifacts(html_dir, PROJECT_ROOT)
 
 
 def main():
