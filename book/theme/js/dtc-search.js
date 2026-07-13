@@ -3,7 +3,7 @@
  * Данные загружаются из data/dtc-codes.json
  * Полностью автономный виджет, не требует внешних зависимостей
  */
-(function() {
+(function () {
   'use strict';
 
   // ─── Экранирование HTML (защита от XSS) ───────────────────────
@@ -33,31 +33,44 @@
 
   // ─── Загрузка данных ──────────────────────────────────────────
   /** URL для загрузки JSON с DTC-кодами (относительный) */
-  const DATA_URL = (typeof path_to_root !== 'undefined' ? path_to_root : '') + 'data/dtc-codes.json';
+  const DATA_URL =
+    (typeof path_to_root !== 'undefined' ? path_to_root : '') + 'data/dtc-codes.json';
 
   /** Загрузить базу DTC-кодов из JSON */
   async function loadDtcData() {
     try {
       const response = await fetch(DATA_URL);
-      if (!response.ok) throw new Error('HTTP ' + response.status);
+      if (!response.ok) {throw new Error('HTTP ' + response.status);}
       DTC_DB = await response.json();
       return true;
     } catch (err) {
       console.warn('DTC: Не удалось загрузить ' + DATA_URL, err);
       // Fallback: встроенный минимум
       DTC_DB = [
-        { code: 'P0170', system: 'engine', cat: 'Топливо/воздух',
+        {
+          code: 'P0170',
+          system: 'engine',
+          cat: 'Топливо/воздух',
           desc: 'Коррекция смеси — выход за пределы',
           cause: 'Подсос воздуха, неисправность лямбда-зонда',
-          fix: 'Диагностика топливной системы' },
-        { code: 'P0300', system: 'engine', cat: 'Зажигание',
+          fix: 'Диагностика топливной системы',
+        },
+        {
+          code: 'P0300',
+          system: 'engine',
+          cat: 'Зажигание',
           desc: 'Случайные / множественные пропуски зажигания',
           cause: 'Свечи, катушка, компрессия',
-          fix: 'Комплексная диагностика' },
-        { code: 'C0001', system: 'abs', cat: 'ABS',
+          fix: 'Комплексная диагностика',
+        },
+        {
+          code: 'C0001',
+          system: 'abs',
+          cat: 'ABS',
           desc: 'Датчик скорости левый передний',
           cause: 'Загрязнение датчика, обрыв проводки',
-          fix: 'Чистка датчика, проверка зазора' },
+          fix: 'Чистка датчика, проверка зазора',
+        },
       ];
       return false;
     }
@@ -146,16 +159,17 @@
     function getFiltered() {
       let items = DTC_DB;
       if (activeSystem !== 'all') {
-        items = items.filter(d => d.system === activeSystem);
+        items = items.filter((d) => d.system === activeSystem);
       }
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
-        items = items.filter(d =>
-          d.code.toLowerCase().includes(q) ||
-          d.desc.toLowerCase().includes(q) ||
-          d.cause.toLowerCase().includes(q) ||
-          d.fix.toLowerCase().includes(q) ||
-          d.cat.toLowerCase().includes(q)
+        items = items.filter(
+          (d) =>
+            d.code.toLowerCase().includes(q) ||
+            d.desc.toLowerCase().includes(q) ||
+            d.cause.toLowerCase().includes(q) ||
+            d.fix.toLowerCase().includes(q) ||
+            d.cat.toLowerCase().includes(q),
         );
       }
       return items;
@@ -165,7 +179,7 @@
     function countBySystem() {
       const counts = { all: DTC_DB.length };
       for (const key in SYSTEM_LABELS) {
-        counts[key] = DTC_DB.filter(d => d.system === key).length;
+        counts[key] = DTC_DB.filter((d) => d.system === key).length;
       }
       return counts;
     }
@@ -177,14 +191,14 @@
         const icon = SYSTEM_ICONS[sys] || '';
         return `<button class="dtc-tab${activeSystem === sys ? ' active' : ''}" data-system="${esc(sys)}">${icon} ${esc(label)} <span class="dtc-count">${counts[sys] ?? 0}</span></button>`;
       };
-      let html = [renderTab('all', 'Все')];
+      const html = [renderTab('all', 'Все')];
       for (const [key, label] of Object.entries(SYSTEM_LABELS)) {
         html.push(renderTab(key, label));
       }
       tabsEl.innerHTML = html.join('');
 
-      tabsEl.querySelectorAll('.dtc-tab').forEach(btn => {
-        btn.addEventListener('click', function() {
+      tabsEl.querySelectorAll('.dtc-tab').forEach((btn) => {
+        btn.addEventListener('click', function () {
           activeSystem = this.dataset.system;
           renderTabs();
           renderResults();
@@ -196,7 +210,8 @@
     function renderResults() {
       const items = getFiltered();
       if (items.length === 0) {
-        resultsEl.innerHTML = '<div class="dtc-empty">По вашему запросу ничего не найдено. Попробуйте другой код или ключевое слово.</div>';
+        resultsEl.innerHTML =
+          '<div class="dtc-empty">По вашему запросу ничего не найдено. Попробуйте другой код или ключевое слово.</div>';
         return;
       }
 
@@ -204,7 +219,14 @@
       for (const d of items) {
         const sysLabel = SYSTEM_LABELS[d.system] || d.system;
         html += '<div class="dtc-item" data-code="' + esc(d.code) + '">';
-        html += '  <div class="dtc-item-code">' + esc(d.code) + ' <span class="sys-badge ' + esc(d.system) + '">' + esc(sysLabel) + '</span></div>';
+        html +=
+          '  <div class="dtc-item-code">' +
+          esc(d.code) +
+          ' <span class="sys-badge ' +
+          esc(d.system) +
+          '">' +
+          esc(sysLabel) +
+          '</span></div>';
         html += '  <div class="dtc-item-cat">' + esc(d.cat) + '</div>';
         html += '  <div class="dtc-item-desc">' + esc(d.desc) + '</div>';
         html += '  <div class="dtc-item-detail">';
@@ -218,12 +240,14 @@
       resultsEl.innerHTML = html;
 
       // Клик по элементу — разворачиваем детали
-      resultsEl.querySelectorAll('.dtc-item').forEach(el => {
-        el.addEventListener('click', function(e) {
+      resultsEl.querySelectorAll('.dtc-item').forEach((el) => {
+        el.addEventListener('click', function (e) {
           const detail = this.querySelector('.dtc-item-detail');
           if (detail) {
             const wasOpen = detail.classList.contains('open');
-            resultsEl.querySelectorAll('.dtc-item-detail.open').forEach(d => d.classList.remove('open'));
+            resultsEl
+              .querySelectorAll('.dtc-item-detail.open')
+              .forEach((d) => d.classList.remove('open'));
             if (!wasOpen) {
               detail.classList.add('open');
             }
@@ -235,13 +259,13 @@
     // ─── Обработчики поиска ─────────────────────────────────────────
     // Дебаунс-таймер для поиска (200ms)
     let debounceTimer = null;
-    queryInput.addEventListener('input', function() {
+    queryInput.addEventListener('input', function () {
       searchQuery = this.value;
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(renderResults, 200);
     });
 
-    clearBtn.addEventListener('click', function() {
+    clearBtn.addEventListener('click', function () {
       queryInput.value = '';
       searchQuery = '';
       renderResults();

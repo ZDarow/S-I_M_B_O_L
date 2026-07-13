@@ -402,23 +402,32 @@
 
     </div>
 
-    <!-- Lazy loading для изображений (прогрессивное улучшение) -->
-    <script>
+    <!-- Главный модуль приложения (ES Module) -->
+    <script type="module">
+        import { initApp } from '{{ path_to_root }}theme/js/app.js';
+
         document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+
+            // Lazy loading для изображений без loading=lazy
             document.querySelectorAll('.content img:not([loading])').forEach(function(img) {
                 img.loading = 'lazy';
+                if (!img.hasAttribute('alt') && !img.hasAttribute('aria-label')) {
+                    img.setAttribute('alt', '');
+                }
             });
         });
-    </script>
 
-    <!-- PWA: Service Worker -->
-    <script>
+        // PWA: Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('{{ path_to_root }}theme/sw.js');
             });
         }
     </script>
+
+    <!-- ARIA live region для динамических объявлений -->
+    <div id="a11y-live-region" aria-live="polite" aria-atomic="true" class="a11y-sr-only"></div>
 
     </body>
 </html>

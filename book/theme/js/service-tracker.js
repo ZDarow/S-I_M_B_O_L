@@ -2,36 +2,104 @@
  * Интерактивный планировщик ТО для Renault Symbol
  * Рассчитывает предстоящие обслуживания, отслеживает выполненные
  */
-(function() {
+(function () {
   'use strict';
 
   // ─── Регламент ТО для Renault Symbol ──────────────────────────
   // Вложенный массив: [пробег, единица, операции...]
   const serviceSchedule = [
-    { km: 0, years: 0, label: '0 км — Подготовка к эксплуатации',
-      items: ['Проверка уровней всех жидкостей', 'Регулировка давления в шинах', 'Проверка световых приборов'],
-      critical: false },
-    { km: 15000, years: 1, label: '15 000 км / 1 год — ТО-1',
-      items: ['Моторное масло + масляный фильтр', 'Проверка ремня ГРМ', 'Проверка тормозных колодок', 'Проверка ШРУСов', 'Проверка выхлопной системы'],
-      critical: true },
-    { km: 30000, years: 2, label: '30 000 км / 2 года — ТО-2',
-      items: ['Всё из ТО-1', 'Свечи зажигания (замена)', 'Салонный фильтр', 'Воздушный фильтр', 'Смазка замков и петель', 'Проверка рулевых наконечников'],
-      critical: true },
-    { km: 40000, years: 2, label: '40 000 км / 2 года',
-      items: ['Тормозная жидкость DOT 4 (замена)', 'Проверка амортизаторов', 'Проверка сайлент-блоков'],
-      critical: true },
-    { km: 60000, years: 4, label: '60 000 км / 4 года — ТО-3',
-      items: ['Всё из ТО-2', 'Ремень ГРМ + натяжной ролик + помпа', 'Антифриз (замена)', 'Масло в МКПП', 'Топливный фильтр (дизель)', 'Проверка ремня генератора', 'Проверка тормозных дисков'],
-      critical: true },
-    { km: 90000, years: 6, label: '90 000 км / 6 лет',
+    {
+      km: 0,
+      years: 0,
+      label: '0 км — Подготовка к эксплуатации',
+      items: [
+        'Проверка уровней всех жидкостей',
+        'Регулировка давления в шинах',
+        'Проверка световых приборов',
+      ],
+      critical: false,
+    },
+    {
+      km: 15000,
+      years: 1,
+      label: '15 000 км / 1 год — ТО-1',
+      items: [
+        'Моторное масло + масляный фильтр',
+        'Проверка ремня ГРМ',
+        'Проверка тормозных колодок',
+        'Проверка ШРУСов',
+        'Проверка выхлопной системы',
+      ],
+      critical: true,
+    },
+    {
+      km: 30000,
+      years: 2,
+      label: '30 000 км / 2 года — ТО-2',
+      items: [
+        'Всё из ТО-1',
+        'Свечи зажигания (замена)',
+        'Салонный фильтр',
+        'Воздушный фильтр',
+        'Смазка замков и петель',
+        'Проверка рулевых наконечников',
+      ],
+      critical: true,
+    },
+    {
+      km: 40000,
+      years: 2,
+      label: '40 000 км / 2 года',
+      items: [
+        'Тормозная жидкость DOT 4 (замена)',
+        'Проверка амортизаторов',
+        'Проверка сайлент-блоков',
+      ],
+      critical: true,
+    },
+    {
+      km: 60000,
+      years: 4,
+      label: '60 000 км / 4 года — ТО-3',
+      items: [
+        'Всё из ТО-2',
+        'Ремень ГРМ + натяжной ролик + помпа',
+        'Антифриз (замена)',
+        'Масло в МКПП',
+        'Топливный фильтр (дизель)',
+        'Проверка ремня генератора',
+        'Проверка тормозных дисков',
+      ],
+      critical: true,
+    },
+    {
+      km: 90000,
+      years: 6,
+      label: '90 000 км / 6 лет',
       items: ['Ремень ГРМ (дизель K9K)', 'Проверка турбины (дизель)'],
-      critical: true },
-    { km: 120000, years: 8, label: '120 000 км — ТО-4',
-      items: ['Ремень ГРМ повторно + помпа', 'Топливный фильтр (бензин)', 'Передние амортизаторы', 'Сайлент-блоки рычагов', 'Рулевые наконечники', 'Проверка глушителя'],
-      critical: true },
-    { km: 150000, years: 10, label: '150 000+ км',
+      critical: true,
+    },
+    {
+      km: 120000,
+      years: 8,
+      label: '120 000 км — ТО-4',
+      items: [
+        'Ремень ГРМ повторно + помпа',
+        'Топливный фильтр (бензин)',
+        'Передние амортизаторы',
+        'Сайлент-блоки рычагов',
+        'Рулевые наконечники',
+        'Проверка глушителя',
+      ],
+      critical: true,
+    },
+    {
+      km: 150000,
+      years: 10,
+      label: '150 000+ км',
       items: ['Сцепление (комплект)', 'Задние амортизаторы', 'Ступичные подшипники'],
-      critical: false },
+      critical: false,
+    },
   ];
 
   const STORAGE_KEY = 'renault_symbol_service_history';
@@ -41,7 +109,9 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   }
 
   function saveHistory(history) {
@@ -118,7 +188,7 @@
     document.head.appendChild(style);
 
     const history = loadHistory();
-    const doneKmSet = new Set(history.map(h => h.km));
+    const doneKmSet = new Set(history.map((h) => h.km));
 
     // ─── Контейнер ───────────────────────────────────────────────
     const wrapper = document.createElement('div');
@@ -175,10 +245,13 @@
     }
     function saveState() {
       try {
-        localStorage.setItem('renault_service_state', JSON.stringify({
-          mileage: currentMileage,
-          lastService: lastServiceKm,
-        }));
+        localStorage.setItem(
+          'renault_service_state',
+          JSON.stringify({
+            mileage: currentMileage,
+            lastService: lastServiceKm,
+          }),
+        );
       } catch {}
     }
 
@@ -190,13 +263,13 @@
 
       // Статистика
       const totalDone = history.length;
-      const pendingDue = serviceSchedule.filter(s => {
-        if (doneKmSet.has(s.km)) return false;
+      const pendingDue = serviceSchedule.filter((s) => {
+        if (doneKmSet.has(s.km)) {return false;}
         const nextKm = Math.max(s.km, lastServiceKm + s.km);
         return nextKm <= currentMileage + 15000;
       });
-      const overdue = serviceSchedule.filter(s => {
-        if (doneKmSet.has(s.km)) return false;
+      const overdue = serviceSchedule.filter((s) => {
+        if (doneKmSet.has(s.km)) {return false;}
         const nextKm = Math.max(s.km, lastServiceKm + s.km);
         return nextKm <= currentMileage;
       });
@@ -214,12 +287,21 @@
         const nextKm = lastServiceKm > 0 ? lastServiceKm + s.km : s.km;
         const isDone = doneKmSet.has(s.km);
         let statusClass = 'pending';
-        let statusText = (nextKm - currentMileage > 15000) ? 'Ок' : 'Скоро';
-        if (isDone) { statusClass = 'done'; statusText = '✅ Выполнено'; }
-        else if (nextKm <= currentMileage) { statusClass = 'overdue'; statusText = '❗ Просрочено'; }
-        else if (nextKm - currentMileage <= 5000) { statusClass = 'due-soon'; statusText = '⚠️ Скоро'; }
+        let statusText = nextKm - currentMileage > 15000 ? 'Ок' : 'Скоро';
+        if (isDone) {
+          statusClass = 'done';
+          statusText = '✅ Выполнено';
+        } else if (nextKm <= currentMileage) {
+          statusClass = 'overdue';
+          statusText = '❗ Просрочено';
+        } else if (nextKm - currentMileage <= 5000) {
+          statusClass = 'due-soon';
+          statusText = '⚠️ Скоро';
+        }
 
-        const dueInfo = isDone ? '' : ` (через ${Math.max(0, nextKm - currentMileage).toLocaleString()} км)`;
+        const dueInfo = isDone
+          ? ''
+          : ` (через ${Math.max(0, nextKm - currentMileage).toLocaleString()} км)`;
 
         html += `<div class="sw-card ${statusClass}">
           <div class="sw-card-header ${statusClass}" data-target="sw-body-${s.km}">
@@ -228,13 +310,14 @@
             <span class="sw-card-status ${statusClass}">${statusText}</span>
           </div>
           <div class="sw-card-body" id="sw-body-${s.km}">
-            <ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>
+            <ul>${s.items.map((i) => `<li>${i}</li>`).join('')}</ul>
             <div style="margin-top:0.5em">
-              ${isDone
-                ? `<button class="sw-unmark-btn" data-km="${s.km}">Отменить выполнение</button>`
-                : `<button class="sw-mark-btn" data-km="${s.km}">✅ Отметить выполненным</button>`
+              ${
+                isDone
+                  ? `<button class="sw-unmark-btn" data-km="${s.km}">Отменить выполнение</button>`
+                  : `<button class="sw-mark-btn" data-km="${s.km}">✅ Отметить выполненным</button>`
               }
-              <span class="sw-history" style="margin-left:1em">${isDone ? 'Выполнено: ' + history.find(h => h.km === s.km)?.date || '' : ''}</span>
+              <span class="sw-history" style="margin-left:1em">${isDone ? 'Выполнено: ' + history.find((h) => h.km === s.km)?.date || '' : ''}</span>
             </div>
           </div>
         </div>`;
@@ -242,23 +325,24 @@
 
       // Кнопка очистки истории
       if (history.length > 0) {
-        html += '<p><span class="sw-clear-history" id="sw-clear-all">Очистить историю обслуживания</span></p>';
+        html +=
+          '<p><span class="sw-clear-history" id="sw-clear-all">Очистить историю обслуживания</span></p>';
       }
 
       upcomingDiv.innerHTML = html;
 
       // Клик по заголовку — раскрытие
-      wrapper.querySelectorAll('.sw-card-header').forEach(el => {
-        el.addEventListener('click', function(e) {
+      wrapper.querySelectorAll('.sw-card-header').forEach((el) => {
+        el.addEventListener('click', function (e) {
           e.stopPropagation();
           const target = document.getElementById(this.dataset.target);
-          if (target) target.classList.toggle('open');
+          if (target) {target.classList.toggle('open');}
         });
       });
 
       // Клик по кнопке отметки
-      wrapper.querySelectorAll('.sw-mark-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+      wrapper.querySelectorAll('.sw-mark-btn').forEach((btn) => {
+        btn.addEventListener('click', function (e) {
           e.stopPropagation();
           const km = parseInt(this.dataset.km);
           if (!doneKmSet.has(km)) {
@@ -270,11 +354,11 @@
         });
       });
 
-      wrapper.querySelectorAll('.sw-unmark-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+      wrapper.querySelectorAll('.sw-unmark-btn').forEach((btn) => {
+        btn.addEventListener('click', function (e) {
           e.stopPropagation();
           const km = parseInt(this.dataset.km);
-          const idx = history.findIndex(h => h.km === km);
+          const idx = history.findIndex((h) => h.km === km);
           if (idx !== -1) {
             history.splice(idx, 1);
             doneKmSet.delete(km);
@@ -286,7 +370,7 @@
 
       const clearAll = wrapper.querySelector('#sw-clear-all');
       if (clearAll) {
-        clearAll.addEventListener('click', function() {
+        clearAll.addEventListener('click', function () {
           // Кастомный confirm вместо нативного (стабильнее на мобильных)
           const doReset = window.confirm('Очистить всю историю обслуживания?');
           if (doReset) {
@@ -301,13 +385,17 @@
 
     // ─── Обработчики ──────────────────────────────────────────────
     calcBtn.addEventListener('click', calculate);
-    resetBtn.addEventListener('click', function() {
+    resetBtn.addEventListener('click', function () {
       mileageInput.value = '0';
       lastServiceInput.value = '0';
       calculate();
     });
-    mileageInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
-    lastServiceInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+    mileageInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {calculate();}
+    });
+    lastServiceInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {calculate();}
+    });
 
     // ─── Инициализация ────────────────────────────────────────────
     loadState();
@@ -327,8 +415,8 @@
           target.parentNode.insertBefore(container, target);
         } else {
           const h2 = content.querySelector('h2');
-          if (h2) h2.parentNode.insertBefore(container, h2);
-          else content.insertBefore(container, content.firstChild);
+          if (h2) {h2.parentNode.insertBefore(container, h2);}
+          else {content.insertBefore(container, content.firstChild);}
         }
       } else {
         container = document.createElement('div');

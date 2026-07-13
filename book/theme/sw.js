@@ -15,6 +15,17 @@ const PRECACHE_URLS = [
   '/css/print.css',
   '/js/dtc-search.js',
   '/js/service-tracker.js',
+  // Core-модули (ESM)
+  '/theme/js/app.js',
+  '/theme/js/core/state-manager.js',
+  '/theme/js/core/accessibility.js',
+  '/theme/js/core/renderer.js',
+  '/theme/js/core/performance.js',
+  '/theme/js/core/mobile.js',
+
+  // Рефакторенные виджеты
+  '/theme/js/widgets/dtc-search.js',
+  '/theme/js/widgets/service-tracker.js',
 ];
 
 const ASSET_EXTENSIONS = [

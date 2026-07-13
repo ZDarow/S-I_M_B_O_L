@@ -153,6 +153,22 @@ gh-pages: build
 test:
 	python3 -m pytest scripts/ -v $(PYTEST_ARGS)
 
+## Запустить unit-тесты JavaScript-модулей (vitest)
+test-js:
+	npx vitest run
+
+## Запустить JS-тесты в watch-режиме
+test-js-watch:
+	npx vitest
+
+## Линтинг JavaScript (ESLint)
+lint-js:
+	npx eslint book/theme/js/
+
+## Форматирование JavaScript (Prettier)
+fmt-js:
+	npx prettier --write 'book/theme/js/**/*.js'
+
 ## Собрать портативную версию (bundle)
 portable: build
 	python3 $(SCRIPT_DIR)/bundle_portable.py --no-build

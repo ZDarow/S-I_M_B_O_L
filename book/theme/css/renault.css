@@ -668,3 +668,128 @@ footer {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   ДОСТУПНОСТЬ — WCAG 2.1 AA
+   ══════════════════════════════════════════════════════════════════ */
+
+/* --- Skip-link (скрыт до фокуса) --- */
+.a11y-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 10000;
+  padding: 0.5em 1em;
+  background: var(--accent, #ff6b00);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 0 0 6px 0;
+  transition: top 0.2s;
+}
+.a11y-skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* --- Универсальный стиль фокуса --- */
+*:focus-visible {
+  outline: 3px solid var(--accent, #ff6b00);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Контейнер с фокусом (trap) --- */
+.a11y-focus-trap {
+  outline: none;
+}
+
+/* --- Screen-reader only --- */
+.a11y-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Уменьшение движения --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Минимальная контрастность 4.5:1 для текста --- */
+.content a {
+  color: var(--link, #1565c0);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.content a:hover {
+  color: var(--link-hover, #0d47a1);
+}
+
+/* --- Интерактивные элементы — клавиатурные индикаторы --- */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+details summary:focus-visible {
+  outline: 3px solid var(--accent, #ff6b00);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- ARIA live region невидим, но доступен скринридерам --- */
+[aria-live] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* --- Тёмная тема: ссылки с достаточной контрастностью --- */
+.coal a,
+.navy a {
+  color: #58a6ff;
+}
+.coal a:hover,
+.navy a:hover {
+  color: #79b8ff;
+}
+
+/* --- Поддержка prefers-contrast --- */
+@media (prefers-contrast: more) {
+  :root {
+    --fg-primary: #000;
+    --fg-muted: #333;
+    --border: #000;
+  }
+  .coal {
+    --fg-primary: #fff;
+    --fg-muted: #ccc;
+    --border: #fff;
+  }
+  .content a {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+

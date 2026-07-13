@@ -208,6 +208,57 @@
     "mdbook.buildDir": "book/book",
 
     // ═══════════════════════════════════════════════════════════════
+    //  Kilo Code: Web-интерфейс
+    // ═══════════════════════════════════════════════════════════════
+    // Размер шрифта в webview Kilo Code
+    "kilo-code.new.fontSize": 13,
+    // Язык интерфейса — русский
+    "kilo-code.new.language": "ru",
+    // Язык commit-сообщений — русский
+    "kilo-code.new.languageCommitMessage": "ru",
+    // Показывать временную шкалу задач
+    "kilo-code.new.showTaskTimeline": true,
+    // Звуковые уведомления о событиях сессии
+    "kilo-code.new.attention.enabled": true,
+    // Браузерная автоматизация (Playwright) — для веб-интерфейса
+    "kilo-code.new.browserAutomation.enabled": true,
+    // Не использовать системный Chrome (Kilo скачает свой Chromium)
+    "kilo-code.new.browserAutomation.useSystemChrome": false,
+    // Автодополнение в чате
+    "kilo-code.new.autocomplete.enableChatAutocomplete": true,
+    // Авто-одобрение разрешений (для скорости)
+    "kilo-code.new.autoApprove.enabled": true,
+    // Модель по умолчанию (kilo-auto/free — бесплатная)
+    "kilo-code.new.model.modelID": "kilo-auto/free",
+    // Провайдер по умолчанию
+    "kilo-code.new.model.providerID": "kilo",
+    // Стиль работы агента (human-in-the-loop / autonomous)
+    "kilo-code.new.agentWorkStyle": "human-in-the-loop",
+
+    // ═══════════════════════════════════════════════════════════════
+    //  Simple Browser / Live Preview (веб-интерфейс документации)
+    // ═══════════════════════════════════════════════════════════════
+    // Проект использует два веб-сервера:
+    //   - mdBook dev: порт 3000 (livereload, make serve)
+    //   - Python HTTP: порт 8080 (статическая сборка, make portable-serve)
+
+    // Simple Browser — встроенный браузер VS Code
+    "simpleBrowser.focusOnOpen": true,
+    "simpleBrowser.showUrlBar": true,
+    "simpleBrowser.nativeContextMenu": true,
+    // Доверенные локальные источники для автологина
+    "workbench.browser.trustedOrigins": [
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+        "https://github.com",
+        "https://*.github.com"
+    ],
+    // Разрешить всплывающие окна (для OAuth)
+    "workbench.browser.allowPopups": true,
+    // Куки разрешены
+    "workbench.browser.cookies": true,
+
+    // ═══════════════════════════════════════════════════════════════
     //  Терминал (кроссплатформенный)
     // ═══════════════════════════════════════════════════════════════
     "terminal.integrated.defaultProfile.linux": "bash",
