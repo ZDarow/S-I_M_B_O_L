@@ -57,9 +57,6 @@
         {{#if favicon_svg}}
         <link rel="icon" href="{{ resource "favicon.svg" }}">
         {{/if}}
-        {{#if favicon_png}}
-        <link rel="shortcut icon" href="{{ resource "favicon.png" }}">
-        {{/if}}
         <link rel="stylesheet" href="{{ resource "css/variables.css" }}">
         <link rel="stylesheet" href="{{ resource "css/general.css" }}">
         <link rel="stylesheet" href="{{ resource "css/chrome.css" }}">
@@ -362,7 +359,7 @@
                 crossorigin="anonymous"></script>
         <script src="{{ resource "book.js" }}"></script>
 
-        <!-- Custom JS scripts -->
+        <!-- Custom JS scripts (виджеты — условный рендер, без авто-вставки) -->
         {{#each additional_js}}
         <script src="{{ resource this}}"></script>
         {{/each}}
@@ -402,13 +399,9 @@
 
     </div>
 
-    <!-- Главный модуль приложения (ES Module) -->
-    <script type="module">
-        import { initApp } from '{{ path_to_root }}theme/js/app.js';
-
+    <!-- Ленивая загрузка изображений + PWA Service Worker -->
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            initApp();
-
             // Lazy loading для изображений без loading=lazy
             document.querySelectorAll('.content img:not([loading])').forEach(function(img) {
                 img.loading = 'lazy';
@@ -425,9 +418,6 @@
             });
         }
     </script>
-
-    <!-- ARIA live region для динамических объявлений -->
-    <div id="a11y-live-region" aria-live="polite" aria-atomic="true" class="a11y-sr-only"></div>
 
     </body>
 </html>

@@ -402,28 +402,12 @@
     calculate();
   }
 
-  // ─── Запуск ───────────────────────────────────────────────────
+  // ─── Условный запуск ─────────────────────────────────────────
+  // Виджет рендерится ТОЛЬКО если на странице есть контейнер #service-tracker
+  // (вручную размещённый в Markdown). Авто-вставка отсутствует.
   function init() {
-    let container = document.getElementById('service-tracker');
-    if (!container) {
-      const content = document.querySelector('.content, article, main');
-      if (content) {
-        container = document.createElement('div');
-        container.id = 'service-tracker';
-        const target = content.querySelector('#полная-таблица-то, table');
-        if (target) {
-          target.parentNode.insertBefore(container, target);
-        } else {
-          const h2 = content.querySelector('h2');
-          if (h2) {h2.parentNode.insertBefore(container, h2);}
-          else {content.insertBefore(container, content.firstChild);}
-        }
-      } else {
-        container = document.createElement('div');
-        container.id = 'service-tracker';
-        document.body.insertBefore(container, document.body.firstChild);
-      }
-    }
+    const container = document.getElementById('service-tracker');
+    if (!container) return;
     buildWidget(container);
   }
 

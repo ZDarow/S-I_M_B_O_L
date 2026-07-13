@@ -793,3 +793,201 @@ details summary:focus-visible {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN — отказ от фиксированной ширины 750px
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Убираем фиксированную ширину контента */
+.page-wrapper {
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+/* Основная область контента — адаптивная ширина */
+.content {
+  max-width: 100%;
+  padding: 1rem 1.5rem;
+}
+
+/* Сайдбар на узких экранах */
+.sidebar {
+  width: 280px;
+}
+
+@media (max-width: 1080px) {
+  .sidebar {
+    width: 260px;
+  }
+}
+
+/* Планшеты и узкие десктопы */
+@media (max-width: 768px) {
+  .content {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .content h1 {
+    font-size: 1.5rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+  }
+
+  .content h3 {
+    font-size: 1.1rem;
+  }
+
+  .menu-title {
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 50vw;
+  }
+
+  .left-buttons .icon-button,
+  .right-buttons a {
+    font-size: 0.85rem;
+  }
+
+  /* Таблицы: скролл на мобильных */
+  .content table {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .content table td,
+  .content table th {
+    padding: 3px 5px;
+  }
+}
+
+/* Телефоны */
+@media (max-width: 480px) {
+  .content {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .content h1 {
+    font-size: 1.3rem;
+    margin-top: 1.2rem;
+  }
+
+  .content h2 {
+    font-size: 1.15rem;
+    margin-top: 1.2rem;
+  }
+
+  .content h3 {
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+
+  .sidebar {
+    width: 85vw;
+  }
+
+  .menu-bar {
+    padding: 0 0.3rem;
+  }
+
+  .left-buttons {
+    gap: 0.2rem;
+  }
+
+  /* Уменьшаем поля у таблиц */
+  .content table td,
+  .content table th {
+    padding: 2px 4px;
+    font-size: 0.75rem;
+  }
+
+  /* Кнопки навигации компактнее */
+  .mobile-nav-chapters {
+    font-size: 1.5rem !important;
+  }
+
+  /* Admonition компактнее */
+  .admonition {
+    padding: 0.5rem 0.75rem;
+    margin: 0.75rem 0;
+  }
+
+  details {
+    padding: 0.3rem 0.75rem;
+  }
+}
+
+/* Большие экраны — комфортное чтение */
+@media (min-width: 1200px) {
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1600px) {
+  .content {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SVG / MERMAID — оптимизация рендеринга
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Mermaid SVG: адаптивная ширина, отключение анимаций при reduced motion */
+.content .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content .mermaid svg * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Плавное появление SVG после рендера */
+.content .mermaid svg {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.content .mermaid svg[data-rendered] {
+  opacity: 1;
+}
+
+/* Inline-изображения SVG */
+.content img[src$=".svg"] {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ПРОЧИЕ УЛУЧШЕНИЯ
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Предотвращение горизонтального скролла у кода */
+.content pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* Плавный скролл для всей страницы */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+

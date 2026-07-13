@@ -281,26 +281,12 @@
     });
   }
 
-  // ─── Автоматический запуск ──────────────────────────────────────
+  // ─── Условный запуск ─────────────────────────────────────────
+  // Виджет рендерится ТОЛЬКО если на странице есть контейнер #dtc-widget
+  // (вручную размещённый в Markdown). Авто-вставка отсутствует.
   function init() {
-    let container = document.getElementById('dtc-widget');
-    if (!container) {
-      const content = document.querySelector('.content, article, main');
-      if (content) {
-        container = document.createElement('div');
-        container.id = 'dtc-widget';
-        const firstH = content.querySelector('h1, h2');
-        if (firstH && firstH.parentNode === content) {
-          firstH.insertAdjacentElement('afterend', container);
-        } else {
-          content.insertBefore(container, content.firstChild);
-        }
-      } else {
-        container = document.createElement('div');
-        container.id = 'dtc-widget';
-        document.body.insertBefore(container, document.body.firstChild);
-      }
-    }
+    const container = document.getElementById('dtc-widget');
+    if (!container) return;
     buildWidget(container);
   }
 

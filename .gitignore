@@ -71,3 +71,6 @@ gh-pages/
 
 # CD-ROM data (Renault Symbol repair manual, not part of source)
 /Renault Symbol/
+
+# Playwright browser snapshots
+.playwright-mcp/

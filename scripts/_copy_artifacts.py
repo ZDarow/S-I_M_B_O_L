@@ -36,6 +36,12 @@ def copy_build_artifacts(html_dir: Path, project_root: Path | None = None) -> No
         out_theme_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(sw_src, out_theme_dir / "sw.js")
 
+    # --- PWA Manifest ---
+    manifest_src = theme_dir / "manifest.json"
+    if manifest_src.exists():
+        out_theme_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(manifest_src, out_theme_dir / "manifest.json")
+
     # --- 404 страница ---
     not_found_page = html_dir / "404.html"
     if not not_found_page.exists():
