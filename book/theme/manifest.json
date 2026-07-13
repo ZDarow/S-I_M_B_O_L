@@ -2,7 +2,7 @@
   "name": "Руководство по ремонту Renault Symbol",
   "short_name": "Renault Symbol",
   "description": "Технический справочник-руководство по ремонту и эксплуатации Renault Symbol (Thalia)",
-  "start_url": "/S-I_M_B_O_L/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1565c0",
@@ -10,7 +10,7 @@
   "lang": "ru",
   "icons": [
     {
-      "src": "/S-I_M_B_O_L/theme/favicon.svg",
+      "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
