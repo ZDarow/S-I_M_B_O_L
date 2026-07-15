@@ -1,6 +1,8 @@
 ---
 description: Show project statistics
 ---
+# Stats
+
 Run `make stats` to see:
 - Number of source .md files
 - Mermaid diagram count
@@ -8,4 +10,4 @@ Run `make stats` to see:
 - HTML page count
 - PDF page count and size
 
-#stats #project
+# stats #project

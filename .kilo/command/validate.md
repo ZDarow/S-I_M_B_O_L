@@ -1,6 +1,8 @@
 ---
 description: Validate build, lint, links, spelling
 ---
+# Validate
+
 Run `make validate` to run:
 1. Full mdbook build (HTML + PDF)
 2. Markdown linting (markdownlint)

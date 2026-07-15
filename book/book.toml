@@ -12,7 +12,7 @@ default-theme = "light"
 preferred-dark-theme = "coal"
 site-url = "https://zdarow.github.io/S-I_M_B_O_L/"
 additional-css = ["./theme/css/renault.css"]
-additional-js = ["./theme/js/dtc-search.js", "./theme/js/service-tracker.js"]
+additional-js = ["./theme/js/dtc-search.js", "./theme/js/service-tracker.js", "./theme/js/russian-search.js"]
 
 [output.html.search]
 enable = true

@@ -61,3 +61,12 @@ def copy_build_artifacts(html_dir: Path, project_root: Path | None = None) -> No
         for f in data_dir.iterdir():
             if f.is_file():
                 shutil.copy2(f, out_data_dir / f.name)
+
+    # --- Кастомный поиск: текстовый индекс для кириллицы ---
+    # Генерируется из built HTML, т.к. elasticlunr не поддерживает русский
+    try:
+        from scripts._build_search_data import build_search_data
+
+        build_search_data(html_dir)
+    except ImportError:
+        pass
