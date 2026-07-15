@@ -224,67 +224,72 @@ function renderDtcItem(props, onToggle) {
  * @param {string} state.query
  * @param {string} state.activeSystem
  * @param {string|null} state.openCode
+ * @param {boolean} state.collapsed
  * @param {(query: string) => void} onQueryChange
  * @param {() => void} onClear
  * @param {(sys: string) => void} onSystemChange
  * @param {(code: string) => void} onToggleCode
+ * @param {() => void} onToggleCollapse
  * @returns {DocumentFragment}
  */
-function renderWidget(state, onQueryChange, onClear, onSystemChange, onToggleCode) {
-  const { db, loading, query, activeSystem, openCode } = state;
+function renderWidget(state, onQueryChange, onClear, onSystemChange, onToggleCode, onToggleCollapse) {
+  const { db, loading, query, activeSystem, openCode, collapsed } = state;
   const filtered = loading ? [] : filterCodes(db, query, activeSystem);
   const counts = loading ? {} : countBySystem(db);
 
   return html`
-    <div class="dtc-widget" role="region" aria-label="Поиск DTC-кодов">
-      <div class="dtc-header">
+    <div class="dtc-widget${collapsed ? ' collapsed' : ''}" role="region" aria-label="Поиск DTC-кодов">
+      <div class="dtc-header" onclick=${onToggleCollapse} onkeydown=${(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleCollapse(); } }} role="button" tabindex="0" aria-expanded=${String(!collapsed)}>
         <h3>🔍 Поиск DTC-кодов</h3>
-        <p>Введите код неисправности (P0170) или ключевое слово</p>
+        <span class="dtc-toggle-icon">${collapsed ? '▶' : '▼'}</span>
       </div>
-      <div class="dtc-search-wrap">
-        <input
-          class="dtc-input"
-          type="text"
-          placeholder="Поиск по коду или описанию..."
-          value=${query}
-          autocomplete="off"
-          oninput=${(e) => onQueryChange(/** @type {HTMLInputElement} */ (e.target).value)}
-          onkeydown=${(e) => {
-            if (e.key === 'Escape') {
-              onClear();
-            }
-          }}
-          aria-label="Поиск DTC-кодов"
-        />
-        <button class="dtc-clear" onclick=${onClear} aria-label="Очистить поиск">✕</button>
-      </div>
+      <div class="dtc-body">
+        <p class="dtc-subtitle">Введите код неисправности (P0170) или ключевое слово</p>
+        <div class="dtc-search-wrap">
+          <input
+            class="dtc-input"
+            type="text"
+            placeholder="Поиск по коду или описанию..."
+            value=${query}
+            autocomplete="off"
+            oninput=${(e) => onQueryChange(/** @type {HTMLInputElement} */ (e.target).value)}
+            onkeydown=${(e) => {
+              if (e.key === 'Escape') {
+                onClear();
+              }
+            }}
+            aria-label="Поиск DTC-кодов"
+          />
+          <button class="dtc-clear" onclick=${onClear} aria-label="Очистить поиск">✕</button>
+        </div>
 
-      <div class="dtc-tabs" role="tablist" aria-label="Системы">
-        ${renderTab('all', 'Все', activeSystem, counts.all || 0, onSystemChange)}
-        ${Object.entries(SYSTEM_LABELS).map(([key, label]) =>
-          renderTab(key, label, activeSystem, counts[key] || 0, onSystemChange),
-        )}
-      </div>
+        <div class="dtc-tabs" role="tablist" aria-label="Системы">
+          ${renderTab('all', 'Все', activeSystem, counts.all || 0, onSystemChange)}
+          ${Object.entries(SYSTEM_LABELS).map(([key, label]) =>
+            renderTab(key, label, activeSystem, counts[key] || 0, onSystemChange),
+          )}
+        </div>
 
-      <div class="dtc-results" aria-live="polite" aria-atomic="true" role="list">
-        ${Show(
-          loading,
-          () => html`<div class="dtc-loading">Загрузка базы DTC-кодов…</div>`,
-          () =>
-            Show(
-              filtered.length === 0,
-              () => html`<div class="dtc-empty">По вашему запросу ничего не найдено.</div>`,
-              () => html`
-                ${filtered.map(
-                (d) => html`
-                  <div class="dtc-item-wrap" role="listitem">
-                    ${renderDtcItem({ ...d, open: openCode === d.code }, onToggleCode)}
-                  </div>
+        <div class="dtc-results" aria-live="polite" aria-atomic="true" role="list">
+          ${Show(
+            loading,
+            () => html`<div class="dtc-loading">Загрузка базы DTC-кодов…</div>`,
+            () =>
+              Show(
+                filtered.length === 0,
+                () => html`<div class="dtc-empty">По вашему запросу ничего не найдено.</div>`,
+                () => html`
+                  ${filtered.map(
+                  (d) => html`
+                    <div class="dtc-item-wrap" role="listitem">
+                      ${renderDtcItem({ ...d, open: openCode === d.code }, onToggleCode)}
+                    </div>
+                  `,
+                )}
                 `,
-              )}
-              `,
-            ),
-        )}
+              ),
+          )}
+        </div>
       </div>
     </div>
   `;
@@ -313,6 +318,7 @@ export function createDtcSearch(dataUrl) {
     query: '',
     activeSystem: 'all',
     openCode: /** @type {string|null} */ (null),
+    collapsed: true,
   };
 
   /** Обновить рендер. */
@@ -339,6 +345,10 @@ export function createDtcSearch(dataUrl) {
       },
       (code) => {
         state.openCode = state.openCode === code ? null : code;
+        update();
+      },
+      () => {
+        state.collapsed = !state.collapsed;
         update();
       },
     );

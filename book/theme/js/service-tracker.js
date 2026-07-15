@@ -127,9 +127,12 @@
     style.textContent = `
       .service-widget { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 1.5em 0; }
       .service-widget * { box-sizing: border-box; }
-      .service-widget .sw-header { background: linear-gradient(135deg, var(--accent, #ff6b00), var(--widget-header-bg, #e65100)); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px 8px 0 0; }
-      .service-widget .sw-header h3 { margin: 0 0 0.3em; font-size: 1.2em; color: var(--widget-header-text, #fff); }
-      .service-widget .sw-header p { margin: 0; opacity: 0.9; font-size: 0.9em; }
+      .service-widget .sw-header { background: linear-gradient(135deg, var(--accent, #ff6b00), var(--widget-header-bg, #e65100)); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px 8px 0 0; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; user-select: none; }
+      .service-widget .sw-header:hover { filter: brightness(1.1); }
+      .service-widget .sw-header h3 { margin: 0; font-size: 1.2em; color: var(--widget-header-text, #fff); }
+      .service-widget .sw-toggle-icon { font-size: 0.85em; opacity: 0.7; margin-left: 0.5em; line-height: 1.4; flex-shrink: 0; color: var(--widget-header-text, #fff); }
+      .service-widget .sw-subtitle { margin: 0 0 0.5em; opacity: 0.9; font-size: 0.9em; }
+      .service-widget.collapsed .sw-body { display: none; }
       .service-widget .sw-body { padding: 1em; border: 1px solid #ddd; border-top: 0; border-radius: 0 0 8px 8px; }
       .service-widget .sw-row { display: flex; flex-wrap: wrap; gap: 1em; margin-bottom: 1em; }
       .service-widget .sw-field { flex: 1; min-width: 140px; }
@@ -173,6 +176,7 @@
       .service-widget .sw-clear-history:hover { color: #d32f2f; }
       @media (prefers-color-scheme: dark) {
         .service-widget .sw-body { border-color: #444; background: #1a1a1a; }
+        .service-widget .sw-header:hover { filter: brightness(1.2); }
         .service-widget .sw-field input { background: var(--widget-input-bg, #333); color: var(--widget-input-text, #eee); border-color: var(--widget-input-border, #555); }
         .service-widget .sw-field label { color: #aaa; }
         .service-widget .sw-upcoming h4 { color: #ccc; }
@@ -192,13 +196,14 @@
 
     // ─── Контейнер ───────────────────────────────────────────────
     const wrapper = document.createElement('div');
-    wrapper.className = 'service-widget';
+    wrapper.className = 'service-widget collapsed';
     wrapper.innerHTML = `
-      <div class="sw-header">
+      <div class="sw-header" role="button" tabindex="0" aria-expanded="false">
         <h3>📅 Планировщик обслуживания</h3>
-        <p>Введите пробег — и увидите предстоящее ТО. Отмечайте выполненные работы.</p>
+        <span class="sw-toggle-icon">▶</span>
       </div>
       <div class="sw-body">
+        <p class="sw-subtitle">Введите пробег — и увидите предстоящее ТО. Отмечайте выполненные работы.</p>
         <div class="sw-row">
           <div class="sw-field">
             <label>🔢 Текущий пробег (км)</label>
@@ -219,12 +224,30 @@
     `;
     container.appendChild(wrapper);
 
+    const headerEl = wrapper.querySelector('.sw-header');
     const mileageInput = wrapper.querySelector('#sw-mileage');
     const lastServiceInput = wrapper.querySelector('#sw-last-service');
     const calcBtn = wrapper.querySelector('#sw-calc');
     const resetBtn = wrapper.querySelector('#sw-reset');
     const statDiv = wrapper.querySelector('#sw-stat');
     const upcomingDiv = wrapper.querySelector('#sw-upcoming');
+
+    let isCollapsed = true;
+
+    /** Переключить сворачивание виджета. */
+    function toggleCollapse() {
+      isCollapsed = !isCollapsed;
+      wrapper.classList.toggle('collapsed', isCollapsed);
+      headerEl.querySelector('.sw-toggle-icon').textContent = isCollapsed ? '▶' : '▼';
+      headerEl.setAttribute('aria-expanded', String(!isCollapsed));
+    }
+    headerEl.addEventListener('click', toggleCollapse);
+    headerEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleCollapse();
+      }
+    });
 
     // ─── Состояние ──────────────────────────────────────────────
     let currentMileage = 0;

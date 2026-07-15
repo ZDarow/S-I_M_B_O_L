@@ -3,6 +3,32 @@
    Лицензия: MIT (как и основной проект)
    ============================================================== */
 
+/* --- Минимизация/сворачивание DTC-виджета --- */
+.dtc-widget.collapsed .dtc-body {
+  display: none;
+}
+.dtc-widget .dtc-header {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.dtc-widget .dtc-header h3 {
+  margin: 0;
+}
+.dtc-widget .dtc-toggle-icon {
+  font-size: 0.9em;
+  opacity: 0.7;
+  margin-left: 0.5em;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.dtc-widget .dtc-subtitle {
+  margin: 0 0 0.5em;
+  opacity: 0.9;
+  font-size: 0.9em;
+}
+
 /* --- Цветовая схема Renault --- */
 :root {
   --renault-orange: #ff6b00;

@@ -80,14 +80,18 @@
   function buildWidget(container) {
     // Контейнер
     const wrapper = document.createElement('div');
-    wrapper.className = 'dtc-widget';
+    wrapper.className = 'dtc-widget collapsed';
     wrapper.innerHTML = `
       <style>
         .dtc-widget { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 1.5em 0; }
         .dtc-widget * { box-sizing: border-box; }
-        .dtc-widget .dtc-header { background: var(--widget-header-bg, #e65100); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px 8px 0 0; }
-        .dtc-widget .dtc-header h3 { margin: 0 0 0.3em; font-size: 1.2em; color: var(--widget-header-text, #fff); }
-        .dtc-widget .dtc-header p { margin: 0; opacity: 0.9; font-size: 0.9em; }
+        .dtc-widget .dtc-header { background: var(--widget-header-bg, #e65100); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; user-select: none; }
+        .dtc-widget .dtc-header h3 { margin: 0; font-size: 1.2em; color: var(--widget-header-text, #fff); }
+        .dtc-widget .dtc-header:hover { filter: brightness(1.1); }
+        .dtc-widget .dtc-body { overflow: hidden; transition: max-height 0.25s ease; }
+        .dtc-widget.collapsed .dtc-body { display: none; }
+        .dtc-widget .dtc-toggle-icon { font-size: 0.85em; opacity: 0.7; margin-left: 0.5em; line-height: 1.4; flex-shrink: 0; }
+        .dtc-widget .dtc-subtitle { margin: 0; padding: 0.6em 1.2em 0; font-size: 0.85em; color: var(--fg-secondary, #555); }
         .dtc-widget .dtc-search-wrap { display: flex; gap: 0.5em; padding: 0.8em; background: var(--widget-search-bg, #f5f5f5); }
         .dtc-widget .dtc-input { flex: 1; padding: 0.7em 1em; border: 2px solid var(--widget-input-border, #ddd); border-radius: 6px; font-size: 1em; transition: border-color 0.2s; background: var(--widget-input-bg, #fff); color: var(--widget-input-text, #1a1a2e); }
         .dtc-widget .dtc-input:focus { border-color: var(--accent, #ff6b00); outline: 2px solid var(--accent, #ff6b00); outline-offset: 2px; }
@@ -132,28 +136,53 @@
           .dtc-widget .dtc-item-detail { background: var(--widget-detail-bg, #2a2a2a); }
           .dtc-widget .dtc-empty { color: var(--widget-empty-color, #aaa); }
           .dtc-widget .dtc-loading { color: var(--widget-loading-color, #aaa); }
+          .dtc-widget .dtc-header:hover { filter: brightness(1.2); }
         }
       </style>
-      <div class="dtc-header">
+      <div class="dtc-header" role="button" tabindex="0" aria-expanded="false">
         <h3>🔍 Поиск DTC-кодов</h3>
-        <p>Введите код неисправности (P0170) или ключевое слово (лямбда, ABS, пропуски)</p>
+        <span class="dtc-toggle-icon">▶</span>
       </div>
-      <div class="dtc-search-wrap">
-        <input class="dtc-input" type="text" id="dtc-query" placeholder="Поиск по коду или описанию..." autocomplete="off">
-        <button class="dtc-clear" id="dtc-clear-btn">✕</button>
+      <div class="dtc-body">
+        <p class="dtc-subtitle">Введите код неисправности (P0170) или ключевое слово (лямбда, ABS, пропуски)</p>
+        <div class="dtc-search-wrap">
+          <input class="dtc-input" type="text" id="dtc-query" placeholder="Поиск по коду или описанию..." autocomplete="off">
+          <button class="dtc-clear" id="dtc-clear-btn">✕</button>
+        </div>
+        <div class="dtc-tabs" id="dtc-tabs"></div>
+        <div class="dtc-results" id="dtc-results" aria-live="polite" aria-atomic="true"></div>
       </div>
-      <div class="dtc-tabs" id="dtc-tabs"></div>
-      <div class="dtc-results" id="dtc-results" aria-live="polite" aria-atomic="true"></div>
     `;
     container.appendChild(wrapper);
 
+    const headerEl = wrapper.querySelector('.dtc-header');
+    const bodyEl = wrapper.querySelector('.dtc-body');
     const queryInput = wrapper.querySelector('#dtc-query');
     const clearBtn = wrapper.querySelector('#dtc-clear-btn');
     const tabsEl = wrapper.querySelector('#dtc-tabs');
     const resultsEl = wrapper.querySelector('#dtc-results');
 
+    let isCollapsed = true;
     let activeSystem = 'all';
     let searchQuery = '';
+
+    /** Переключить сворачивание виджета. */
+    function toggleCollapse() {
+      isCollapsed = !isCollapsed;
+      wrapper.classList.toggle('collapsed', isCollapsed);
+      headerEl.querySelector('.dtc-toggle-icon').textContent = isCollapsed ? '▶' : '▼';
+      headerEl.setAttribute('aria-expanded', String(!isCollapsed));
+      if (!isCollapsed) {
+        queryInput.focus();
+      }
+    }
+    headerEl.addEventListener('click', toggleCollapse);
+    headerEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleCollapse();
+      }
+    });
 
     // ─── Фильтрация ────────────────────────────────────────────────
     function getFiltered() {
