@@ -7,12 +7,15 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint": "npx eslint book/theme/js/ --fix",
     "format": "npx prettier --write book/theme/js/"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "@mermaid-js/mermaid-cli": "^11.15.0",
+    "@playwright/test": "^1.61.1",
     "eslint": "^9.0.0",
     "globals": "^16.0.0",
     "jsdom": "^29.1.1",

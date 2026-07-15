@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "pikepdf>=8,<10",
+  "pikepdf>=8,<11",
 ]
 
 [project.optional-dependencies]

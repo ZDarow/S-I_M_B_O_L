@@ -16,7 +16,7 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Python deps (project + lint)
         run: |
@@ -75,7 +75,7 @@ jobs:
           fi
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: htmlcov/
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: quality
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install build tools
         run: |
@@ -120,7 +120,7 @@ jobs:
         run: pip3 install -e ".[test]"
 
       - name: Cache Mermaid SVGs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: book/src/img/mermaid
           key: mermaid-${{ hashFiles('book/src/**/*.md') }}
@@ -150,13 +150,31 @@ jobs:
           args: --include-fragments --no-progress --scheme=https --scheme=http './book/book/html/**/*.html'
           fail: true
 
+      - name: Install Playwright & run E2E tests
+        run: |
+          npm install
+          npx playwright install chromium --with-deps 2>&1 | tail -3
+          echo "Playwright installed"
+
+      - name: E2E tests (against built site)
+        run: |
+          python3 -m http.server 3000 --directory book/book/html &
+          SERVER_PID=$!
+          sleep 2
+          npx playwright test --project=chromium --reporter=line 2>&1 || EXIT_CODE=$?
+          kill $SERVER_PID 2>/dev/null
+          exit ${EXIT_CODE:-0}
+        env:
+          E2E_BASE_URL: http://localhost:3000
+
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: book/book/html
+          include-hidden-files: true
 
       - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reno-symbol-pdf
           path: book/book/pdf/output.pdf
@@ -174,4 +192,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
