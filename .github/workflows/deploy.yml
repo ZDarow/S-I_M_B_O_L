@@ -137,8 +137,9 @@ jobs:
       - name: Post-process PDF
         run: python3 scripts/pdf-a4.py
 
-      - name: Post-process (sitemap, 404)
+      - name: Post-process (copy artifacts, sitemap, 404)
         run: |
+          python3 -c "from scripts._copy_artifacts import copy_build_artifacts; from pathlib import Path; copy_build_artifacts(Path('book/book/html'), Path('.'))"
           python3 scripts/sitemap.py --source book/book/html --url https://zdarow.github.io/S-I_M_B_O_L
           cp scripts/404.html book/book/html/404.html
           [ -f book/book/pdf/output.pdf ] && cp book/book/pdf/output.pdf book/book/html/reno-symbol.pdf || echo "⚠️ PDF not found, skipping copy"
