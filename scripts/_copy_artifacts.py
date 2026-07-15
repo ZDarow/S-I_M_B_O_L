@@ -36,6 +36,17 @@ def copy_build_artifacts(html_dir: Path, project_root: Path | None = None) -> No
         out_theme_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(sw_src, out_theme_dir / "sw.js")
 
+    # --- PWA Manifest + Favicon ---
+    manifest_src = theme_dir / "manifest.json"
+    if manifest_src.exists():
+        out_theme_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(manifest_src, out_theme_dir / "manifest.json")
+
+    favicon_src = theme_dir / "favicon.svg"
+    if favicon_src.exists():
+        out_theme_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(favicon_src, out_theme_dir / "favicon.svg")
+
     # --- 404 страница ---
     not_found_page = html_dir / "404.html"
     if not not_found_page.exists():
@@ -50,3 +61,12 @@ def copy_build_artifacts(html_dir: Path, project_root: Path | None = None) -> No
         for f in data_dir.iterdir():
             if f.is_file():
                 shutil.copy2(f, out_data_dir / f.name)
+
+    # --- Кастомный поиск: текстовый индекс для кириллицы ---
+    # Генерируется из built HTML, т.к. elasticlunr не поддерживает русский
+    try:
+        from scripts._build_search_data import build_search_data
+
+        build_search_data(html_dir)
+    except ImportError:
+        pass

@@ -57,9 +57,6 @@
         {{#if favicon_svg}}
         <link rel="icon" href="{{ resource "favicon.svg" }}">
         {{/if}}
-        {{#if favicon_png}}
-        <link rel="shortcut icon" href="{{ resource "favicon.png" }}">
-        {{/if}}
         <link rel="stylesheet" href="{{ resource "css/variables.css" }}">
         <link rel="stylesheet" href="{{ resource "css/general.css" }}">
         <link rel="stylesheet" href="{{ resource "css/chrome.css" }}">
@@ -357,12 +354,13 @@
 
         <script src="{{ resource "clipboard.min.js" }}"></script>
         <script src="{{ resource "highlight.js" }}"></script>
+        <script>hljs.configure({ ignoreUnrecognized: true });</script>
         <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"
                 integrity="sha384-T/0lMUdJpd2S1ZHtRiofG3htU3xPCrFVeAQ1UUE2TJwlEJSV5NUwn30kP28n238E"
                 crossorigin="anonymous"></script>
         <script src="{{ resource "book.js" }}"></script>
 
-        <!-- Custom JS scripts -->
+        <!-- Custom JS scripts (виджеты — условный рендер, без авто-вставки) -->
         {{#each additional_js}}
         <script src="{{ resource this}}"></script>
         {{/each}}
@@ -402,17 +400,19 @@
 
     </div>
 
-    <!-- Lazy loading для изображений (прогрессивное улучшение) -->
+    <!-- Ленивая загрузка изображений + PWA Service Worker -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Lazy loading для изображений без loading=lazy
             document.querySelectorAll('.content img:not([loading])').forEach(function(img) {
                 img.loading = 'lazy';
+                if (!img.hasAttribute('alt') && !img.hasAttribute('aria-label')) {
+                    img.setAttribute('alt', '');
+                }
             });
         });
-    </script>
 
-    <!-- PWA: Service Worker -->
-    <script>
+        // PWA: Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('{{ path_to_root }}theme/sw.js');

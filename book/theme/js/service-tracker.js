@@ -2,36 +2,104 @@
  * Интерактивный планировщик ТО для Renault Symbol
  * Рассчитывает предстоящие обслуживания, отслеживает выполненные
  */
-(function() {
+(function () {
   'use strict';
 
   // ─── Регламент ТО для Renault Symbol ──────────────────────────
   // Вложенный массив: [пробег, единица, операции...]
   const serviceSchedule = [
-    { km: 0, years: 0, label: '0 км — Подготовка к эксплуатации',
-      items: ['Проверка уровней всех жидкостей', 'Регулировка давления в шинах', 'Проверка световых приборов'],
-      critical: false },
-    { km: 15000, years: 1, label: '15 000 км / 1 год — ТО-1',
-      items: ['Моторное масло + масляный фильтр', 'Проверка ремня ГРМ', 'Проверка тормозных колодок', 'Проверка ШРУСов', 'Проверка выхлопной системы'],
-      critical: true },
-    { km: 30000, years: 2, label: '30 000 км / 2 года — ТО-2',
-      items: ['Всё из ТО-1', 'Свечи зажигания (замена)', 'Салонный фильтр', 'Воздушный фильтр', 'Смазка замков и петель', 'Проверка рулевых наконечников'],
-      critical: true },
-    { km: 40000, years: 2, label: '40 000 км / 2 года',
-      items: ['Тормозная жидкость DOT 4 (замена)', 'Проверка амортизаторов', 'Проверка сайлент-блоков'],
-      critical: true },
-    { km: 60000, years: 4, label: '60 000 км / 4 года — ТО-3',
-      items: ['Всё из ТО-2', 'Ремень ГРМ + натяжной ролик + помпа', 'Антифриз (замена)', 'Масло в МКПП', 'Топливный фильтр (дизель)', 'Проверка ремня генератора', 'Проверка тормозных дисков'],
-      critical: true },
-    { km: 90000, years: 6, label: '90 000 км / 6 лет',
+    {
+      km: 0,
+      years: 0,
+      label: '0 км — Подготовка к эксплуатации',
+      items: [
+        'Проверка уровней всех жидкостей',
+        'Регулировка давления в шинах',
+        'Проверка световых приборов',
+      ],
+      critical: false,
+    },
+    {
+      km: 15000,
+      years: 1,
+      label: '15 000 км / 1 год — ТО-1',
+      items: [
+        'Моторное масло + масляный фильтр',
+        'Проверка ремня ГРМ',
+        'Проверка тормозных колодок',
+        'Проверка ШРУСов',
+        'Проверка выхлопной системы',
+      ],
+      critical: true,
+    },
+    {
+      km: 30000,
+      years: 2,
+      label: '30 000 км / 2 года — ТО-2',
+      items: [
+        'Всё из ТО-1',
+        'Свечи зажигания (замена)',
+        'Салонный фильтр',
+        'Воздушный фильтр',
+        'Смазка замков и петель',
+        'Проверка рулевых наконечников',
+      ],
+      critical: true,
+    },
+    {
+      km: 40000,
+      years: 2,
+      label: '40 000 км / 2 года',
+      items: [
+        'Тормозная жидкость DOT 4 (замена)',
+        'Проверка амортизаторов',
+        'Проверка сайлент-блоков',
+      ],
+      critical: true,
+    },
+    {
+      km: 60000,
+      years: 4,
+      label: '60 000 км / 4 года — ТО-3',
+      items: [
+        'Всё из ТО-2',
+        'Ремень ГРМ + натяжной ролик + помпа',
+        'Антифриз (замена)',
+        'Масло в МКПП',
+        'Топливный фильтр (дизель)',
+        'Проверка ремня генератора',
+        'Проверка тормозных дисков',
+      ],
+      critical: true,
+    },
+    {
+      km: 90000,
+      years: 6,
+      label: '90 000 км / 6 лет',
       items: ['Ремень ГРМ (дизель K9K)', 'Проверка турбины (дизель)'],
-      critical: true },
-    { km: 120000, years: 8, label: '120 000 км — ТО-4',
-      items: ['Ремень ГРМ повторно + помпа', 'Топливный фильтр (бензин)', 'Передние амортизаторы', 'Сайлент-блоки рычагов', 'Рулевые наконечники', 'Проверка глушителя'],
-      critical: true },
-    { km: 150000, years: 10, label: '150 000+ км',
+      critical: true,
+    },
+    {
+      km: 120000,
+      years: 8,
+      label: '120 000 км — ТО-4',
+      items: [
+        'Ремень ГРМ повторно + помпа',
+        'Топливный фильтр (бензин)',
+        'Передние амортизаторы',
+        'Сайлент-блоки рычагов',
+        'Рулевые наконечники',
+        'Проверка глушителя',
+      ],
+      critical: true,
+    },
+    {
+      km: 150000,
+      years: 10,
+      label: '150 000+ км',
       items: ['Сцепление (комплект)', 'Задние амортизаторы', 'Ступичные подшипники'],
-      critical: false },
+      critical: false,
+    },
   ];
 
   const STORAGE_KEY = 'renault_symbol_service_history';
@@ -41,7 +109,9 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   }
 
   function saveHistory(history) {
@@ -57,9 +127,12 @@
     style.textContent = `
       .service-widget { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 1.5em 0; }
       .service-widget * { box-sizing: border-box; }
-      .service-widget .sw-header { background: linear-gradient(135deg, var(--accent, #ff6b00), var(--widget-header-bg, #e65100)); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px 8px 0 0; }
-      .service-widget .sw-header h3 { margin: 0 0 0.3em; font-size: 1.2em; color: var(--widget-header-text, #fff); }
-      .service-widget .sw-header p { margin: 0; opacity: 0.9; font-size: 0.9em; }
+      .service-widget .sw-header { background: linear-gradient(135deg, var(--accent, #ff6b00), var(--widget-header-bg, #e65100)); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px 8px 0 0; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; user-select: none; }
+      .service-widget .sw-header:hover { filter: brightness(1.1); }
+      .service-widget .sw-header h3 { margin: 0; font-size: 1.2em; color: var(--widget-header-text, #fff); }
+      .service-widget .sw-toggle-icon { font-size: 0.85em; opacity: 0.7; margin-left: 0.5em; line-height: 1.4; flex-shrink: 0; color: var(--widget-header-text, #fff); }
+      .service-widget .sw-subtitle { margin: 0 0 0.5em; opacity: 0.9; font-size: 0.9em; }
+      .service-widget.collapsed .sw-body { display: none; }
       .service-widget .sw-body { padding: 1em; border: 1px solid #ddd; border-top: 0; border-radius: 0 0 8px 8px; }
       .service-widget .sw-row { display: flex; flex-wrap: wrap; gap: 1em; margin-bottom: 1em; }
       .service-widget .sw-field { flex: 1; min-width: 140px; }
@@ -103,6 +176,7 @@
       .service-widget .sw-clear-history:hover { color: #d32f2f; }
       @media (prefers-color-scheme: dark) {
         .service-widget .sw-body { border-color: #444; background: #1a1a1a; }
+        .service-widget .sw-header:hover { filter: brightness(1.2); }
         .service-widget .sw-field input { background: var(--widget-input-bg, #333); color: var(--widget-input-text, #eee); border-color: var(--widget-input-border, #555); }
         .service-widget .sw-field label { color: #aaa; }
         .service-widget .sw-upcoming h4 { color: #ccc; }
@@ -118,17 +192,18 @@
     document.head.appendChild(style);
 
     const history = loadHistory();
-    const doneKmSet = new Set(history.map(h => h.km));
+    const doneKmSet = new Set(history.map((h) => h.km));
 
     // ─── Контейнер ───────────────────────────────────────────────
     const wrapper = document.createElement('div');
-    wrapper.className = 'service-widget';
+    wrapper.className = 'service-widget collapsed';
     wrapper.innerHTML = `
-      <div class="sw-header">
+      <div class="sw-header" role="button" tabindex="0" aria-expanded="false">
         <h3>📅 Планировщик обслуживания</h3>
-        <p>Введите пробег — и увидите предстоящее ТО. Отмечайте выполненные работы.</p>
+        <span class="sw-toggle-icon">▶</span>
       </div>
       <div class="sw-body">
+        <p class="sw-subtitle">Введите пробег — и увидите предстоящее ТО. Отмечайте выполненные работы.</p>
         <div class="sw-row">
           <div class="sw-field">
             <label>🔢 Текущий пробег (км)</label>
@@ -149,12 +224,30 @@
     `;
     container.appendChild(wrapper);
 
+    const headerEl = wrapper.querySelector('.sw-header');
     const mileageInput = wrapper.querySelector('#sw-mileage');
     const lastServiceInput = wrapper.querySelector('#sw-last-service');
     const calcBtn = wrapper.querySelector('#sw-calc');
     const resetBtn = wrapper.querySelector('#sw-reset');
     const statDiv = wrapper.querySelector('#sw-stat');
     const upcomingDiv = wrapper.querySelector('#sw-upcoming');
+
+    let isCollapsed = true;
+
+    /** Переключить сворачивание виджета. */
+    function toggleCollapse() {
+      isCollapsed = !isCollapsed;
+      wrapper.classList.toggle('collapsed', isCollapsed);
+      headerEl.querySelector('.sw-toggle-icon').textContent = isCollapsed ? '▶' : '▼';
+      headerEl.setAttribute('aria-expanded', String(!isCollapsed));
+    }
+    headerEl.addEventListener('click', toggleCollapse);
+    headerEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleCollapse();
+      }
+    });
 
     // ─── Состояние ──────────────────────────────────────────────
     let currentMileage = 0;
@@ -175,10 +268,13 @@
     }
     function saveState() {
       try {
-        localStorage.setItem('renault_service_state', JSON.stringify({
-          mileage: currentMileage,
-          lastService: lastServiceKm,
-        }));
+        localStorage.setItem(
+          'renault_service_state',
+          JSON.stringify({
+            mileage: currentMileage,
+            lastService: lastServiceKm,
+          }),
+        );
       } catch {}
     }
 
@@ -190,13 +286,13 @@
 
       // Статистика
       const totalDone = history.length;
-      const pendingDue = serviceSchedule.filter(s => {
-        if (doneKmSet.has(s.km)) return false;
+      const pendingDue = serviceSchedule.filter((s) => {
+        if (doneKmSet.has(s.km)) {return false;}
         const nextKm = Math.max(s.km, lastServiceKm + s.km);
         return nextKm <= currentMileage + 15000;
       });
-      const overdue = serviceSchedule.filter(s => {
-        if (doneKmSet.has(s.km)) return false;
+      const overdue = serviceSchedule.filter((s) => {
+        if (doneKmSet.has(s.km)) {return false;}
         const nextKm = Math.max(s.km, lastServiceKm + s.km);
         return nextKm <= currentMileage;
       });
@@ -214,12 +310,21 @@
         const nextKm = lastServiceKm > 0 ? lastServiceKm + s.km : s.km;
         const isDone = doneKmSet.has(s.km);
         let statusClass = 'pending';
-        let statusText = (nextKm - currentMileage > 15000) ? 'Ок' : 'Скоро';
-        if (isDone) { statusClass = 'done'; statusText = '✅ Выполнено'; }
-        else if (nextKm <= currentMileage) { statusClass = 'overdue'; statusText = '❗ Просрочено'; }
-        else if (nextKm - currentMileage <= 5000) { statusClass = 'due-soon'; statusText = '⚠️ Скоро'; }
+        let statusText = nextKm - currentMileage > 15000 ? 'Ок' : 'Скоро';
+        if (isDone) {
+          statusClass = 'done';
+          statusText = '✅ Выполнено';
+        } else if (nextKm <= currentMileage) {
+          statusClass = 'overdue';
+          statusText = '❗ Просрочено';
+        } else if (nextKm - currentMileage <= 5000) {
+          statusClass = 'due-soon';
+          statusText = '⚠️ Скоро';
+        }
 
-        const dueInfo = isDone ? '' : ` (через ${Math.max(0, nextKm - currentMileage).toLocaleString()} км)`;
+        const dueInfo = isDone
+          ? ''
+          : ` (через ${Math.max(0, nextKm - currentMileage).toLocaleString()} км)`;
 
         html += `<div class="sw-card ${statusClass}">
           <div class="sw-card-header ${statusClass}" data-target="sw-body-${s.km}">
@@ -228,13 +333,14 @@
             <span class="sw-card-status ${statusClass}">${statusText}</span>
           </div>
           <div class="sw-card-body" id="sw-body-${s.km}">
-            <ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>
+            <ul>${s.items.map((i) => `<li>${i}</li>`).join('')}</ul>
             <div style="margin-top:0.5em">
-              ${isDone
-                ? `<button class="sw-unmark-btn" data-km="${s.km}">Отменить выполнение</button>`
-                : `<button class="sw-mark-btn" data-km="${s.km}">✅ Отметить выполненным</button>`
+              ${
+                isDone
+                  ? `<button class="sw-unmark-btn" data-km="${s.km}">Отменить выполнение</button>`
+                  : `<button class="sw-mark-btn" data-km="${s.km}">✅ Отметить выполненным</button>`
               }
-              <span class="sw-history" style="margin-left:1em">${isDone ? 'Выполнено: ' + history.find(h => h.km === s.km)?.date || '' : ''}</span>
+              <span class="sw-history" style="margin-left:1em">${isDone ? 'Выполнено: ' + history.find((h) => h.km === s.km)?.date || '' : ''}</span>
             </div>
           </div>
         </div>`;
@@ -242,23 +348,24 @@
 
       // Кнопка очистки истории
       if (history.length > 0) {
-        html += '<p><span class="sw-clear-history" id="sw-clear-all">Очистить историю обслуживания</span></p>';
+        html +=
+          '<p><span class="sw-clear-history" id="sw-clear-all">Очистить историю обслуживания</span></p>';
       }
 
       upcomingDiv.innerHTML = html;
 
       // Клик по заголовку — раскрытие
-      wrapper.querySelectorAll('.sw-card-header').forEach(el => {
-        el.addEventListener('click', function(e) {
+      wrapper.querySelectorAll('.sw-card-header').forEach((el) => {
+        el.addEventListener('click', function (e) {
           e.stopPropagation();
           const target = document.getElementById(this.dataset.target);
-          if (target) target.classList.toggle('open');
+          if (target) {target.classList.toggle('open');}
         });
       });
 
       // Клик по кнопке отметки
-      wrapper.querySelectorAll('.sw-mark-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+      wrapper.querySelectorAll('.sw-mark-btn').forEach((btn) => {
+        btn.addEventListener('click', function (e) {
           e.stopPropagation();
           const km = parseInt(this.dataset.km);
           if (!doneKmSet.has(km)) {
@@ -270,11 +377,11 @@
         });
       });
 
-      wrapper.querySelectorAll('.sw-unmark-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+      wrapper.querySelectorAll('.sw-unmark-btn').forEach((btn) => {
+        btn.addEventListener('click', function (e) {
           e.stopPropagation();
           const km = parseInt(this.dataset.km);
-          const idx = history.findIndex(h => h.km === km);
+          const idx = history.findIndex((h) => h.km === km);
           if (idx !== -1) {
             history.splice(idx, 1);
             doneKmSet.delete(km);
@@ -286,7 +393,7 @@
 
       const clearAll = wrapper.querySelector('#sw-clear-all');
       if (clearAll) {
-        clearAll.addEventListener('click', function() {
+        clearAll.addEventListener('click', function () {
           // Кастомный confirm вместо нативного (стабильнее на мобильных)
           const doReset = window.confirm('Очистить всю историю обслуживания?');
           if (doReset) {
@@ -301,41 +408,29 @@
 
     // ─── Обработчики ──────────────────────────────────────────────
     calcBtn.addEventListener('click', calculate);
-    resetBtn.addEventListener('click', function() {
+    resetBtn.addEventListener('click', function () {
       mileageInput.value = '0';
       lastServiceInput.value = '0';
       calculate();
     });
-    mileageInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
-    lastServiceInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') calculate(); });
+    mileageInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {calculate();}
+    });
+    lastServiceInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {calculate();}
+    });
 
     // ─── Инициализация ────────────────────────────────────────────
     loadState();
     calculate();
   }
 
-  // ─── Запуск ───────────────────────────────────────────────────
+  // ─── Условный запуск ─────────────────────────────────────────
+  // Виджет рендерится ТОЛЬКО если на странице есть контейнер #service-tracker
+  // (вручную размещённый в Markdown). Авто-вставка отсутствует.
   function init() {
-    let container = document.getElementById('service-tracker');
-    if (!container) {
-      const content = document.querySelector('.content, article, main');
-      if (content) {
-        container = document.createElement('div');
-        container.id = 'service-tracker';
-        const target = content.querySelector('#полная-таблица-то, table');
-        if (target) {
-          target.parentNode.insertBefore(container, target);
-        } else {
-          const h2 = content.querySelector('h2');
-          if (h2) h2.parentNode.insertBefore(container, h2);
-          else content.insertBefore(container, content.firstChild);
-        }
-      } else {
-        container = document.createElement('div');
-        container.id = 'service-tracker';
-        document.body.insertBefore(container, document.body.firstChild);
-      }
-    }
+    const container = document.getElementById('service-tracker');
+    if (!container) return;
     buildWidget(container);
   }
 

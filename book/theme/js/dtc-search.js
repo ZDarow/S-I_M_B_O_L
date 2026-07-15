@@ -3,7 +3,7 @@
  * Данные загружаются из data/dtc-codes.json
  * Полностью автономный виджет, не требует внешних зависимостей
  */
-(function() {
+(function () {
   'use strict';
 
   // ─── Экранирование HTML (защита от XSS) ───────────────────────
@@ -33,31 +33,44 @@
 
   // ─── Загрузка данных ──────────────────────────────────────────
   /** URL для загрузки JSON с DTC-кодами (относительный) */
-  const DATA_URL = (typeof path_to_root !== 'undefined' ? path_to_root : '') + 'data/dtc-codes.json';
+  const DATA_URL =
+    (typeof path_to_root !== 'undefined' ? path_to_root : '') + 'data/dtc-codes.json';
 
   /** Загрузить базу DTC-кодов из JSON */
   async function loadDtcData() {
     try {
       const response = await fetch(DATA_URL);
-      if (!response.ok) throw new Error('HTTP ' + response.status);
+      if (!response.ok) {throw new Error('HTTP ' + response.status);}
       DTC_DB = await response.json();
       return true;
     } catch (err) {
       console.warn('DTC: Не удалось загрузить ' + DATA_URL, err);
       // Fallback: встроенный минимум
       DTC_DB = [
-        { code: 'P0170', system: 'engine', cat: 'Топливо/воздух',
+        {
+          code: 'P0170',
+          system: 'engine',
+          cat: 'Топливо/воздух',
           desc: 'Коррекция смеси — выход за пределы',
           cause: 'Подсос воздуха, неисправность лямбда-зонда',
-          fix: 'Диагностика топливной системы' },
-        { code: 'P0300', system: 'engine', cat: 'Зажигание',
+          fix: 'Диагностика топливной системы',
+        },
+        {
+          code: 'P0300',
+          system: 'engine',
+          cat: 'Зажигание',
           desc: 'Случайные / множественные пропуски зажигания',
           cause: 'Свечи, катушка, компрессия',
-          fix: 'Комплексная диагностика' },
-        { code: 'C0001', system: 'abs', cat: 'ABS',
+          fix: 'Комплексная диагностика',
+        },
+        {
+          code: 'C0001',
+          system: 'abs',
+          cat: 'ABS',
           desc: 'Датчик скорости левый передний',
           cause: 'Загрязнение датчика, обрыв проводки',
-          fix: 'Чистка датчика, проверка зазора' },
+          fix: 'Чистка датчика, проверка зазора',
+        },
       ];
       return false;
     }
@@ -67,14 +80,18 @@
   function buildWidget(container) {
     // Контейнер
     const wrapper = document.createElement('div');
-    wrapper.className = 'dtc-widget';
+    wrapper.className = 'dtc-widget collapsed';
     wrapper.innerHTML = `
       <style>
         .dtc-widget { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 1.5em 0; }
         .dtc-widget * { box-sizing: border-box; }
-        .dtc-widget .dtc-header { background: var(--widget-header-bg, #e65100); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px 8px 0 0; }
-        .dtc-widget .dtc-header h3 { margin: 0 0 0.3em; font-size: 1.2em; color: var(--widget-header-text, #fff); }
-        .dtc-widget .dtc-header p { margin: 0; opacity: 0.9; font-size: 0.9em; }
+        .dtc-widget .dtc-header { background: var(--widget-header-bg, #e65100); color: var(--widget-header-text, #fff); padding: 1em 1.2em; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; user-select: none; }
+        .dtc-widget .dtc-header h3 { margin: 0; font-size: 1.2em; color: var(--widget-header-text, #fff); }
+        .dtc-widget .dtc-header:hover { filter: brightness(1.1); }
+        .dtc-widget .dtc-body { overflow: hidden; transition: max-height 0.25s ease; }
+        .dtc-widget.collapsed .dtc-body { display: none; }
+        .dtc-widget .dtc-toggle-icon { font-size: 0.85em; opacity: 0.7; margin-left: 0.5em; line-height: 1.4; flex-shrink: 0; }
+        .dtc-widget .dtc-subtitle { margin: 0; padding: 0.6em 1.2em 0; font-size: 0.85em; color: var(--fg-secondary, #555); }
         .dtc-widget .dtc-search-wrap { display: flex; gap: 0.5em; padding: 0.8em; background: var(--widget-search-bg, #f5f5f5); }
         .dtc-widget .dtc-input { flex: 1; padding: 0.7em 1em; border: 2px solid var(--widget-input-border, #ddd); border-radius: 6px; font-size: 1em; transition: border-color 0.2s; background: var(--widget-input-bg, #fff); color: var(--widget-input-text, #1a1a2e); }
         .dtc-widget .dtc-input:focus { border-color: var(--accent, #ff6b00); outline: 2px solid var(--accent, #ff6b00); outline-offset: 2px; }
@@ -119,43 +136,69 @@
           .dtc-widget .dtc-item-detail { background: var(--widget-detail-bg, #2a2a2a); }
           .dtc-widget .dtc-empty { color: var(--widget-empty-color, #aaa); }
           .dtc-widget .dtc-loading { color: var(--widget-loading-color, #aaa); }
+          .dtc-widget .dtc-header:hover { filter: brightness(1.2); }
         }
       </style>
-      <div class="dtc-header">
+      <div class="dtc-header" role="button" tabindex="0" aria-expanded="false">
         <h3>🔍 Поиск DTC-кодов</h3>
-        <p>Введите код неисправности (P0170) или ключевое слово (лямбда, ABS, пропуски)</p>
+        <span class="dtc-toggle-icon">▶</span>
       </div>
-      <div class="dtc-search-wrap">
-        <input class="dtc-input" type="text" id="dtc-query" placeholder="Поиск по коду или описанию..." autocomplete="off">
-        <button class="dtc-clear" id="dtc-clear-btn">✕</button>
+      <div class="dtc-body">
+        <p class="dtc-subtitle">Введите код неисправности (P0170) или ключевое слово (лямбда, ABS, пропуски)</p>
+        <div class="dtc-search-wrap">
+          <input class="dtc-input" type="text" id="dtc-query" placeholder="Поиск по коду или описанию..." autocomplete="off">
+          <button class="dtc-clear" id="dtc-clear-btn">✕</button>
+        </div>
+        <div class="dtc-tabs" id="dtc-tabs"></div>
+        <div class="dtc-results" id="dtc-results" aria-live="polite" aria-atomic="true"></div>
       </div>
-      <div class="dtc-tabs" id="dtc-tabs"></div>
-      <div class="dtc-results" id="dtc-results" aria-live="polite" aria-atomic="true"></div>
     `;
     container.appendChild(wrapper);
 
+    const headerEl = wrapper.querySelector('.dtc-header');
+    const bodyEl = wrapper.querySelector('.dtc-body');
     const queryInput = wrapper.querySelector('#dtc-query');
     const clearBtn = wrapper.querySelector('#dtc-clear-btn');
     const tabsEl = wrapper.querySelector('#dtc-tabs');
     const resultsEl = wrapper.querySelector('#dtc-results');
 
+    let isCollapsed = true;
     let activeSystem = 'all';
     let searchQuery = '';
+
+    /** Переключить сворачивание виджета. */
+    function toggleCollapse() {
+      isCollapsed = !isCollapsed;
+      wrapper.classList.toggle('collapsed', isCollapsed);
+      headerEl.querySelector('.dtc-toggle-icon').textContent = isCollapsed ? '▶' : '▼';
+      headerEl.setAttribute('aria-expanded', String(!isCollapsed));
+      if (!isCollapsed) {
+        queryInput.focus();
+      }
+    }
+    headerEl.addEventListener('click', toggleCollapse);
+    headerEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleCollapse();
+      }
+    });
 
     // ─── Фильтрация ────────────────────────────────────────────────
     function getFiltered() {
       let items = DTC_DB;
       if (activeSystem !== 'all') {
-        items = items.filter(d => d.system === activeSystem);
+        items = items.filter((d) => d.system === activeSystem);
       }
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
-        items = items.filter(d =>
-          d.code.toLowerCase().includes(q) ||
-          d.desc.toLowerCase().includes(q) ||
-          d.cause.toLowerCase().includes(q) ||
-          d.fix.toLowerCase().includes(q) ||
-          d.cat.toLowerCase().includes(q)
+        items = items.filter(
+          (d) =>
+            d.code.toLowerCase().includes(q) ||
+            d.desc.toLowerCase().includes(q) ||
+            d.cause.toLowerCase().includes(q) ||
+            d.fix.toLowerCase().includes(q) ||
+            d.cat.toLowerCase().includes(q),
         );
       }
       return items;
@@ -165,7 +208,7 @@
     function countBySystem() {
       const counts = { all: DTC_DB.length };
       for (const key in SYSTEM_LABELS) {
-        counts[key] = DTC_DB.filter(d => d.system === key).length;
+        counts[key] = DTC_DB.filter((d) => d.system === key).length;
       }
       return counts;
     }
@@ -177,14 +220,14 @@
         const icon = SYSTEM_ICONS[sys] || '';
         return `<button class="dtc-tab${activeSystem === sys ? ' active' : ''}" data-system="${esc(sys)}">${icon} ${esc(label)} <span class="dtc-count">${counts[sys] ?? 0}</span></button>`;
       };
-      let html = [renderTab('all', 'Все')];
+      const html = [renderTab('all', 'Все')];
       for (const [key, label] of Object.entries(SYSTEM_LABELS)) {
         html.push(renderTab(key, label));
       }
       tabsEl.innerHTML = html.join('');
 
-      tabsEl.querySelectorAll('.dtc-tab').forEach(btn => {
-        btn.addEventListener('click', function() {
+      tabsEl.querySelectorAll('.dtc-tab').forEach((btn) => {
+        btn.addEventListener('click', function () {
           activeSystem = this.dataset.system;
           renderTabs();
           renderResults();
@@ -196,7 +239,8 @@
     function renderResults() {
       const items = getFiltered();
       if (items.length === 0) {
-        resultsEl.innerHTML = '<div class="dtc-empty">По вашему запросу ничего не найдено. Попробуйте другой код или ключевое слово.</div>';
+        resultsEl.innerHTML =
+          '<div class="dtc-empty">По вашему запросу ничего не найдено. Попробуйте другой код или ключевое слово.</div>';
         return;
       }
 
@@ -204,7 +248,14 @@
       for (const d of items) {
         const sysLabel = SYSTEM_LABELS[d.system] || d.system;
         html += '<div class="dtc-item" data-code="' + esc(d.code) + '">';
-        html += '  <div class="dtc-item-code">' + esc(d.code) + ' <span class="sys-badge ' + esc(d.system) + '">' + esc(sysLabel) + '</span></div>';
+        html +=
+          '  <div class="dtc-item-code">' +
+          esc(d.code) +
+          ' <span class="sys-badge ' +
+          esc(d.system) +
+          '">' +
+          esc(sysLabel) +
+          '</span></div>';
         html += '  <div class="dtc-item-cat">' + esc(d.cat) + '</div>';
         html += '  <div class="dtc-item-desc">' + esc(d.desc) + '</div>';
         html += '  <div class="dtc-item-detail">';
@@ -218,12 +269,14 @@
       resultsEl.innerHTML = html;
 
       // Клик по элементу — разворачиваем детали
-      resultsEl.querySelectorAll('.dtc-item').forEach(el => {
-        el.addEventListener('click', function(e) {
+      resultsEl.querySelectorAll('.dtc-item').forEach((el) => {
+        el.addEventListener('click', function (e) {
           const detail = this.querySelector('.dtc-item-detail');
           if (detail) {
             const wasOpen = detail.classList.contains('open');
-            resultsEl.querySelectorAll('.dtc-item-detail.open').forEach(d => d.classList.remove('open'));
+            resultsEl
+              .querySelectorAll('.dtc-item-detail.open')
+              .forEach((d) => d.classList.remove('open'));
             if (!wasOpen) {
               detail.classList.add('open');
             }
@@ -235,13 +288,13 @@
     // ─── Обработчики поиска ─────────────────────────────────────────
     // Дебаунс-таймер для поиска (200ms)
     let debounceTimer = null;
-    queryInput.addEventListener('input', function() {
+    queryInput.addEventListener('input', function () {
       searchQuery = this.value;
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(renderResults, 200);
     });
 
-    clearBtn.addEventListener('click', function() {
+    clearBtn.addEventListener('click', function () {
       queryInput.value = '';
       searchQuery = '';
       renderResults();
@@ -257,26 +310,12 @@
     });
   }
 
-  // ─── Автоматический запуск ──────────────────────────────────────
+  // ─── Условный запуск ─────────────────────────────────────────
+  // Виджет рендерится ТОЛЬКО если на странице есть контейнер #dtc-widget
+  // (вручную размещённый в Markdown). Авто-вставка отсутствует.
   function init() {
-    let container = document.getElementById('dtc-widget');
-    if (!container) {
-      const content = document.querySelector('.content, article, main');
-      if (content) {
-        container = document.createElement('div');
-        container.id = 'dtc-widget';
-        const firstH = content.querySelector('h1, h2');
-        if (firstH && firstH.parentNode === content) {
-          firstH.insertAdjacentElement('afterend', container);
-        } else {
-          content.insertBefore(container, content.firstChild);
-        }
-      } else {
-        container = document.createElement('div');
-        container.id = 'dtc-widget';
-        document.body.insertBefore(container, document.body.firstChild);
-      }
-    }
+    const container = document.getElementById('dtc-widget');
+    if (!container) return;
     buildWidget(container);
   }
 

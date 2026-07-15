@@ -78,14 +78,18 @@ class TestMermaidCore(unittest.TestCase):
 
     def test_find_mmdc_returns_none_on_empty_path(self) -> None:
         """find_mmdc() → None, когда mmdc нет"""
+        from pathlib import Path
+        from unittest.mock import patch
         from scripts.mermaid_core import find_mmdc
 
         # Сохраняем и подменяем PATH
         orig_path = os.environ.get("PATH", "")
         try:
             os.environ["PATH"] = "/dev/null"
-            result = find_mmdc()
-            self.assertIsNone(result)
+            # Мокаем Path.is_file, чтобы не находить mmdc в node_modules
+            with patch.object(Path, "is_file", return_value=False):
+                result = find_mmdc()
+                self.assertIsNone(result)
         finally:
             os.environ["PATH"] = orig_path
 

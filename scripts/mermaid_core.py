@@ -23,6 +23,8 @@ MERMAID_RE = re.compile(r"```mermaid\s*\n(.*?)```", re.DOTALL)
 MIN_SVG_SIZE = 50
 MMDC_TIMEOUT = 30
 MAX_RETRIES = 3
+# Путь к конфигу Mermaid (современная тема, скругления, отступы)
+CONFIG_FILE = Path(__file__).resolve().parent / "mermaid-config.json"
 
 
 def find_mmdc() -> str | None:
@@ -64,11 +66,15 @@ def render_svg(mermaid_source: str, output: Path) -> bool:
         tmp.write(mermaid_source)
         tmp_path = tmp.name
 
+    # Формируем команду mmdc с опциональным конфигом
+    cmd = [mmdc, "-i", tmp_path, "-o", str(output), "-b", "transparent", "-w", "1200"]
+    if CONFIG_FILE.is_file():
+        cmd.extend(["-c", str(CONFIG_FILE)])
+
     try:
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                r = subprocess.run(
-                    [mmdc, "-i", tmp_path, "-o", str(output), "-b", "transparent", "-w", "1200"],
+                r = subprocess.run(cmd,
                     capture_output=True,
                     text=True,
                     timeout=MMDC_TIMEOUT,

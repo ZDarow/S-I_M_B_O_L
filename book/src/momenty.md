@@ -58,9 +58,9 @@ flowchart LR
   result.id = 'tc-result';
   result.style.cssText = 'font-size:0.9em;opacity:0.85;';
   function convert() {
-    var val = parseFloat(document.getElementById('tc-input').value) || 0;
-    var unit = document.getElementById('tc-unit').value;
-    var r = document.getElementById('tc-result');
+    var val = parseFloat(input.value) || 0;
+    var unit = sel.value;
+    var r = result;
     if (unit === 'nm') {
       r.innerHTML = (val * 10.197).toFixed(1) + ' кгс·см &nbsp;|&nbsp; ' + (val * 0.738).toFixed(1) + ' lb·ft';
     } else if (unit === 'kgcm') {
@@ -71,11 +71,11 @@ flowchart LR
   }
   input.addEventListener('input', convert);
   sel.addEventListener('change', convert);
-  convert();
   div.appendChild(label);
   div.appendChild(input);
   div.appendChild(sel);
   div.appendChild(result);
+  convert();
   document.querySelector('.content').insertBefore(div, document.querySelector('.content').firstChild.nextSibling);
 })();
 </script>

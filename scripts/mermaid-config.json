@@ -1,0 +1,55 @@
+{
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff",
+    "primaryColor": "#1976D2",
+    "primaryBorderColor": "#1565C0",
+    "primaryTextColor": "#ffffff",
+    "secondaryColor": "#E3F2FD",
+    "secondaryBorderColor": "#90CAF9",
+    "secondaryTextColor": "#1565C0",
+    "tertiaryColor": "#F5F5F5",
+    "tertiaryBorderColor": "#CFD8DC",
+    "tertiaryTextColor": "#37474F",
+    "lineColor": "#546E7A",
+    "textColor": "#212121",
+    "mainBkg": "#ffffff",
+    "nodeBorder": "#90CAF9",
+    "clusterBkg": "#F8F9FA",
+    "clusterBorder": "#DEE2E6",
+    "clusterTitleColor": "#495057",
+    "titleColor": "#212121",
+    "edgeLabelBackground": "#ffffff",
+    "nodeFont": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "nodeFontSize": "13px",
+    "nodeFontWeight": "500",
+    "edgeLabelFont": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "edgeLabelFontSize": "11px",
+    "borderRadius": "10px"
+  },
+  "flowchart": {
+    "htmlLabels": true,
+    "curve": "basis",
+    "padding": 20,
+    "nodeSpacing": 60,
+    "rankSpacing": 80,
+    "subGraphTitleMargin": {
+      "top": 14,
+      "bottom": 6
+    },
+    "useMaxWidth": true
+  },
+  "gantt": {
+    "titleTopMargin": 16,
+    "barHeight": 28,
+    "barGap": 6,
+    "topPadding": 12,
+    "rightPadding": 24,
+    "leftPadding": 60,
+    "gridLineStartPadding": 36,
+    "fontSize": 12,
+    "sectionFontSize": 13,
+    "numberSectionStyles": 3,
+    "axisFormat": "%Y"
+  }
+}

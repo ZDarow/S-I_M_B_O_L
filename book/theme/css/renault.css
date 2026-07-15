@@ -3,6 +3,32 @@
    Лицензия: MIT (как и основной проект)
    ============================================================== */
 
+/* --- Минимизация/сворачивание DTC-виджета --- */
+.dtc-widget.collapsed .dtc-body {
+  display: none;
+}
+.dtc-widget .dtc-header {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.dtc-widget .dtc-header h3 {
+  margin: 0;
+}
+.dtc-widget .dtc-toggle-icon {
+  font-size: 0.9em;
+  opacity: 0.7;
+  margin-left: 0.5em;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.dtc-widget .dtc-subtitle {
+  margin: 0 0 0.5em;
+  opacity: 0.9;
+  font-size: 0.9em;
+}
+
 /* --- Цветовая схема Renault --- */
 :root {
   --renault-orange: #ff6b00;
@@ -665,6 +691,329 @@ footer {
   .content table td,
   .content table th {
     padding: 0.5rem 0.8rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ДОСТУПНОСТЬ — WCAG 2.1 AA
+   ══════════════════════════════════════════════════════════════════ */
+
+/* --- Skip-link (скрыт до фокуса) --- */
+.a11y-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 10000;
+  padding: 0.5em 1em;
+  background: var(--accent, #ff6b00);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 0 0 6px 0;
+  transition: top 0.2s;
+}
+.a11y-skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* --- Универсальный стиль фокуса --- */
+*:focus-visible {
+  outline: 3px solid var(--accent, #ff6b00);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Контейнер с фокусом (trap) --- */
+.a11y-focus-trap {
+  outline: none;
+}
+
+/* --- Screen-reader only --- */
+.a11y-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Уменьшение движения --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Минимальная контрастность 4.5:1 для текста --- */
+.content a {
+  color: var(--link, #1565c0);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.content a:hover {
+  color: var(--link-hover, #0d47a1);
+}
+
+/* --- Интерактивные элементы — клавиатурные индикаторы --- */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+details summary:focus-visible {
+  outline: 3px solid var(--accent, #ff6b00);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- ARIA live region невидим, но доступен скринридерам --- */
+[aria-live] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* --- Тёмная тема: ссылки с достаточной контрастностью --- */
+.coal a,
+.navy a {
+  color: #58a6ff;
+}
+.coal a:hover,
+.navy a:hover {
+  color: #79b8ff;
+}
+
+/* --- Поддержка prefers-contrast --- */
+@media (prefers-contrast: more) {
+  :root {
+    --fg-primary: #000;
+    --fg-muted: #333;
+    --border: #000;
+  }
+  .coal {
+    --fg-primary: #fff;
+    --fg-muted: #ccc;
+    --border: #fff;
+  }
+  .content a {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN — отказ от фиксированной ширины 750px
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Убираем фиксированную ширину контента */
+.page-wrapper {
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+/* Основная область контента — адаптивная ширина */
+.content {
+  max-width: 100%;
+  padding: 1rem 1.5rem;
+}
+
+/* Сайдбар на узких экранах */
+.sidebar {
+  width: 280px;
+}
+
+@media (max-width: 1080px) {
+  .sidebar {
+    width: 260px;
+  }
+}
+
+/* Планшеты и узкие десктопы */
+@media (max-width: 768px) {
+  .content {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .content h1 {
+    font-size: 1.5rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+  }
+
+  .content h3 {
+    font-size: 1.1rem;
+  }
+
+  .menu-title {
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 50vw;
+  }
+
+  .left-buttons .icon-button,
+  .right-buttons a {
+    font-size: 0.85rem;
+  }
+
+  /* Таблицы: скролл на мобильных */
+  .content table {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .content table td,
+  .content table th {
+    padding: 3px 5px;
+  }
+}
+
+/* Телефоны */
+@media (max-width: 480px) {
+  .content {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .content h1 {
+    font-size: 1.3rem;
+    margin-top: 1.2rem;
+  }
+
+  .content h2 {
+    font-size: 1.15rem;
+    margin-top: 1.2rem;
+  }
+
+  .content h3 {
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+
+  .sidebar {
+    width: 85vw;
+  }
+
+  .menu-bar {
+    padding: 0 0.3rem;
+  }
+
+  .left-buttons {
+    gap: 0.2rem;
+  }
+
+  /* Уменьшаем поля у таблиц */
+  .content table td,
+  .content table th {
+    padding: 2px 4px;
+    font-size: 0.75rem;
+  }
+
+  /* Кнопки навигации компактнее */
+  .mobile-nav-chapters {
+    font-size: 1.5rem !important;
+  }
+
+  /* Admonition компактнее */
+  .admonition {
+    padding: 0.5rem 0.75rem;
+    margin: 0.75rem 0;
+  }
+
+  details {
+    padding: 0.3rem 0.75rem;
+  }
+}
+
+/* Большие экраны — комфортное чтение */
+@media (min-width: 1200px) {
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1600px) {
+  .content {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SVG / MERMAID — оптимизация рендеринга
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Mermaid SVG: адаптивная ширина, отключение анимаций при reduced motion */
+.content .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content .mermaid svg * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Плавное появление SVG после рендера */
+.content .mermaid svg {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.content .mermaid svg[data-rendered] {
+  opacity: 1;
+}
+
+/* Inline-изображения SVG */
+.content img[src$=".svg"] {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ПРОЧИЕ УЛУЧШЕНИЯ
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Предотвращение горизонтального скролла у кода */
+.content pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* Плавный скролл для всей страницы */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 

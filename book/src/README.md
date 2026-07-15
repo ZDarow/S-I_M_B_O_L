@@ -51,6 +51,10 @@ flowchart TD
     style Ref fill:#e65100,color:#fff
 ```
 
+<div id="dtc-widget"></div>
+
+<div id="service-tracker"></div>
+
 ![Renault Symbol II (2008) — задний вид](./img/symbol-ii-rear.jpg)
 
 ---

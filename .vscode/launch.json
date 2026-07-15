@@ -413,10 +413,10 @@
         },
 
         // ═══════════════════════════════════════════════════════════
-        //  Браузер
+        //  Браузер (веб-интерфейсы проекта)
         // ═══════════════════════════════════════════════════════════
         {
-            "name": "Открыть localhost:8080",
+            "name": "Документация: порт 8080 (Python)",
             "type": "editor-browser",
             "request": "launch",
             "url": "http://localhost:8080",
@@ -424,6 +424,28 @@
             "presentation": {
                 "group": "browser",
                 "order": 1
+            }
+        },
+        {
+            "name": "Документация: порт 3000 (mdBook dev)",
+            "type": "editor-browser",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "presentation": {
+                "group": "browser",
+                "order": 2
+            }
+        },
+        {
+            "name": "GitHub Pages (production)",
+            "type": "editor-browser",
+            "request": "launch",
+            "url": "https://zdarow.github.io/S-I_M_B_O_L",
+            "webRoot": "${workspaceFolder}",
+            "presentation": {
+                "group": "browser",
+                "order": 3
             }
         }
     ],
@@ -460,7 +482,7 @@
             "name": "Сервер + Браузер",
             "configurations": [
                 "Serve: HTTP-сервер",
-                "Открыть localhost:8080"
+                "Документация: порт 8080 (Python)"
             ],
             "stopAll": true,
             "presentation": {
